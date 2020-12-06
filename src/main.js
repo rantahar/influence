@@ -1,6 +1,6 @@
 var w = 24*7 + 0
 var g = 1
-var f = 7
+var f = 6
 var house_sprite = 7*1+1
 
 var map_1 = [
@@ -99,6 +99,7 @@ class mapScene extends Phaser.Scene {
     
         // Add at town at 1,1
         this.add_city(1,1)
+        this.add_city(5,5)
     
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -129,8 +130,9 @@ class mapScene extends Phaser.Scene {
     }
 
     add_city(x, y){
-        this.city_layer.putTileAt(house_sprite, 1, 1);
-        tile_array[1][1].city = 1;
+        console.log("Add city", x, y);
+        this.city_layer.putTileAt(house_sprite, x, y);
+        tile_array[x][y].city = 1;
         cities.push({ 'x':x, 'y':y, 'level': 1 });
         this.draw_boundaries();
     }
