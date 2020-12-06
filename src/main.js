@@ -1,7 +1,7 @@
 var w = 24*7 + 0
 var g = 1
 var f = 6
-var house_sprite = 7*1+1
+var city_sprites = [7,8,9,15,15,15,15,15]
 
 var map_1 = [
     [w,w,w,w,w,w,w,w,w],
@@ -25,6 +25,9 @@ var city_layer;
 var turn_counter = 1;
 
 
+// Create arrays indexed by x and y for each property of a tile
+var tile_array = [];
+
 
 //Players
 var players = {
@@ -45,11 +48,49 @@ class City {
         this.x = x;
         this.y = y;
         this.level = level;
+        this.food = 0;
     }
 
     // Calculate the culture production of the city
     culture(){
-        return 30*this.level;
+        return 10*this.level;
+    }
+
+    // Update the city
+    update(map_scene){
+        var x = this.x;
+        var y = this.y;
+        // Gather resources
+        this.gather(x,y);
+        this.gather(x,y+1);
+        this.gather(x,y-1);
+        this.gather(x+1,y);
+        this.gather(x-1,y);
+
+        // Consume
+        var food_consumption = Math.pow(2,this.level-1);
+        this.food -= food_consumption;
+
+        var food_limit = 5*food_consumption;
+        if(this.food > food_limit){
+            this.level += 1;
+            this.food -= food_limit;
+            map_scene.update_city_sprite(x,y,this.level);
+        }
+        if(this.food < 0){
+            this.level -= 1;
+            this.food = 0;
+            map_scene.update_city_sprite(x,y,this.level);
+        }
+    }
+
+    gather(x,y){
+        if(tile_array[x][y].owner == 
+            tile_array[x][y].owner){
+            if(map_1[x][y] == g){
+                this.food += 1;
+            }
+        }
     }
 }
 
@@ -69,9 +110,6 @@ class Tile {
 
 
 // Create arrays indexed by x and y for each property of a tile
-// Updating culture requires a full copy, so structure of arrays
-// is better.
-var tile_array = [];
 for (var x = 0; x < map_size_x; x++) {
     tile_array[x] = [];
     for (var y = 0; y < map_size_y; y++) {
@@ -140,7 +178,7 @@ class mapScene extends Phaser.Scene {
         this.city_layer = this.map.createBlankDynamicLayer("cities", tiles);
         this.city_layer.setScale(2);
     
-        // Add at town at 1,1
+        // Add at towns
         tile_array[2][2].owner = 'blue';
         this.add_city(2,2, 'blue');
         tile_array[5][6].owner = 'green';
@@ -176,11 +214,16 @@ class mapScene extends Phaser.Scene {
 
     add_city(x, y){
         console.log("Add city", x, y);
-        this.city_layer.putTileAt(house_sprite, x, y);
+        this.city_layer.putTileAt(city_sprites[0], x, y);
         var city = new City(x, y, 1);
         tile_array[x][y].city = city;
         cities.push( city );
         this.draw_boundaries();
+    }
+
+    update_city_sprite(x,y,level){
+        var city_sprite = city_sprites[level-1];
+        this.city_layer.putTileAt(city_sprite, x, y);
     }
 
     draw_boundaries(){
@@ -246,7 +289,7 @@ function tile_click(map_scene) {
 
 
 function next_turn(ui_scene){
-    var map_scene = ui_scene.map_scene
+    var map_scene = ui_scene.mapScene;
     var new_culture_array = [];
     for (var x = 1; x < map_size_x-1; x++) {
         new_culture_array[x] = [];
@@ -283,6 +326,10 @@ function next_turn(ui_scene){
         for (var y = 1; y < map_size_y-1; y++) {
             tile_array[x][y].owner = decide_tile_owner(x,y);
         }
+    }
+
+    for(city_key in cities){
+        cities[city_key].update(map_scene);
     }
 
     turn_counter += 1;
