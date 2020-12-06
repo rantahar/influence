@@ -49,7 +49,7 @@ class City {
     }
 
     culture(){
-        return 5*this.level;
+        return 10*this.level;
     }
 }
 
@@ -58,13 +58,16 @@ var cities = [];
 
 
 
-// Need an array representing the state of each tile
-// (or put in the map scene)
-var tile_array = [];
+// Create arrays indexed by x and y for each property of a tile
+// Updating culture requires a full copy, so structure of arrays
+// is better.
+var culture_array = [];
+var city_array = [];
 for (var x = 0; x < map_size_x; x++) {
-    tile_array[x] = [];
+    culture_array[x] = [];
+    city_array[x] = [];
     for (var y = 0; y < map_size_y; y++) {
-        tile_array[x][y] = {'culture': 0};
+        culture_array[x][y] = 0;
     }
 }
 
@@ -166,7 +169,7 @@ class mapScene extends Phaser.Scene {
         console.log("Add city", x, y, owner);
         this.city_layer.putTileAt(house_sprite, x, y);
         var city = new City(owner, x, y, 1);
-        tile_array[x][y].city = city;
+        city_array[x][y] = city;
         cities.push( city );
         this.draw_boundaries();
     }
@@ -184,8 +187,8 @@ class mapScene extends Phaser.Scene {
         // Check every tile. There must be a better way?
         for (var x = 1; x < map_size_x-1; x++) {
             for (var y = 1; y < map_size_y-1; y++) {
-                if( tile_array[x][y].culture >= 1 &&
-                    tile_array[x+1][y].culture  < 1 ){
+                if( culture_array[x][y] >= 1 &&
+                    culture_array[x+1][y]  < 1 ){
                     var marker = this.add.graphics({ 
                         lineStyle: { width: 5, color: 0xffffff, alpha: 0.4 }
                     });
@@ -195,8 +198,8 @@ class mapScene extends Phaser.Scene {
                     marker.strokePath();
                     this.boundary_markers.push(marker);
                 }
-                if( tile_array[x][y].culture >= 1 &&
-                    tile_array[x-1][y].culture  < 1 ){
+                if( culture_array[x][y] >= 1 &&
+                    culture_array[x-1][y]  < 1 ){
                     var marker = this.add.graphics({ 
                         lineStyle: { width: 5, color: 0xffffff, alpha: 0.4 }
                     });
@@ -206,8 +209,8 @@ class mapScene extends Phaser.Scene {
                     marker.strokePath();
                     this.boundary_markers.push(marker);
                 }
-                if( tile_array[x][y].culture >= 1 &&
-                    tile_array[x][y+1].culture  < 1 ){
+                if( culture_array[x][y] >= 1 &&
+                    culture_array[x][y+1]  < 1 ){
                     var marker = this.add.graphics({ 
                         lineStyle: { width: 5, color: 0xffffff, alpha: 0.4 }
                     });
@@ -217,8 +220,8 @@ class mapScene extends Phaser.Scene {
                     marker.strokePath();
                     this.boundary_markers.push(marker);
                 }
-                if( tile_array[x][y].culture >= 1 &&
-                    tile_array[x][y-1].culture  < 1 ){
+                if( culture_array[x][y] >= 1 &&
+                    culture_array[x][y-1]  < 1 ){
                     var marker = this.add.graphics({ 
                         lineStyle: { width: 5, color: 0xffffff, alpha: 0.4 }
                     });
@@ -255,7 +258,8 @@ function tile_click(map_scene) {
     var y = map_scene.map.worldToTileY(worldPoint.y);
 
     console.log(x,y);
-    console.log(tile_array[x][y]);
+    console.log(city_array[x][y]);
+    console.log(culture_array[x][y]);
 }
 
 
@@ -263,33 +267,37 @@ function next_turn(ui_scene){
     var map_scene = ui_scene.map_scene
     console.log(map_scene);
 
-    var new_tile_array = [];
-
+    var new_culture_array = [];
     for (var x = 1; x < map_size_x-1; x++) {
-        new_tile_array[x] = [];
+        new_culture_array[x] = [];
         for (var y = 1; y < map_size_y-1; y++) {
-            new_tile_array[x][y] = {};
+            new_culture_array[x][y] = 0;
 
             // Calculate culture
-            let c=0;
-            if(tile_array[x][y].city){
-                c += tile_array[x][y].city.culture();
-                console.log(c);
+            for(player in players){
+                let c=0;
+                if(city_array[x][y]){
+                    var city = city_array[x][y];
+                    if(city.owner = player){
+                        c = city.culture();
+                    }
+                } else {
+                    c += 0.25*culture_array[x-1][y];
+                    c += 0.25*culture_array[x+1][y];
+                    c += 0.25*culture_array[x][y+1];
+                    c += 0.25*culture_array[x][y-1];
+                    if( c < 1 ) {
+                        c = 0;
+                    }
+                }
+                new_culture_array[x][y] = c;
             }
-            c += 0.25*tile_array[x-1][y].culture;
-            c += 0.25*tile_array[x+1][y].culture;
-            c += 0.25*tile_array[x][y+1].culture;
-            c += 0.25*tile_array[x][y-1].culture;
-            if( c < 1 ) {
-                c = 0;
-            }
-            new_tile_array[x][y].culture = c;
         }
     }
 
     for (var x = 1; x < map_size_x-1; x++) {
         for (var y = 1; y < map_size_y-1; y++) {
-            tile_array[x][y].culture = new_tile_array[x][y].culture;
+            culture_array[x][y] = new_culture_array[x][y];
         }
     }
 
