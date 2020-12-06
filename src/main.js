@@ -1,18 +1,22 @@
-var w = 24*7 + 0
-var g = 1
-var f = 6
+
+// Define the map. This should be moved to json files.
+var map_sprites = {
+    'w': {'map': 24*7},
+    'g': {'map': 1},
+    'f': {'map': 1, 'sprite': 6}
+}
 var city_sprites = [7,8,9,15,15,15,15,15]
 
 var map_1 = [
-    [w,w,w,w,w,w,w,w,w],
-    [w,w,w,w,w,w,w,w,w],
-    [w,w,g,g,g,g,g,w,w],
-    [w,w,g,g,g,g,g,w,w],
-    [w,w,g,g,g,g,g,w,w],
-    [w,w,g,g,g,g,g,w,w],
-    [w,w,g,g,g,g,g,w,w],
-    [w,w,w,w,w,w,w,w,w],
-    [w,w,w,w,w,w,w,w,w]
+    ['w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w'],
+    ['w','w','g','g','g','g','g','w','w'],
+    ['w','w','g','f','g','g','g','w','w'],
+    ['w','w','g','g','g','g','g','w','w'],
+    ['w','w','g','g','g','g','g','w','w'],
+    ['w','w','g','g','g','g','g','w','w'],
+    ['w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w']
 ]
 
 var map_size_y = map_1.length;
@@ -87,7 +91,7 @@ class City {
     gather(x,y){
         if(tile_array[x][y].owner == 
             tile_array[x][y].owner){
-            if(map_1[x][y] == g){
+            if(map_1[x][y] == 'g'){
                 this.food += 1;
             }
         }
@@ -168,15 +172,17 @@ class mapScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#ffffff");
 
         // create board
-        this.map = this.make.tilemap({ data: map_1, tileWidth: 16, tileHeight: 16});
+        this.map = this.make.tilemap({ tileWidth: 16, tileHeight: 16});
         tiles = this.map.addTilesetImage('tiles');
-        this.layer = this.map.createDynamicLayer(0, tiles, 0, 0);
-        this.layer.setScale(2);
-        this.layer.setInteractive();
-        this.layer.on('pointerdown',()=>{tile_click(this);} );
+        this.ground_layer = this.map.createBlankDynamicLayer('ground', tiles);
+        this.ground_layer.setScale(3);
+        this.ground_layer.setInteractive();
+        this.ground_layer.on('pointerdown',()=>{tile_click(this);} );
     
         this.city_layer = this.map.createBlankDynamicLayer("cities", tiles);
-        this.city_layer.setScale(2);
+        this.city_layer.setScale(3);
+
+        this.draw_map();
     
         // Add at towns
         tile_array[2][2].owner = 'blue';
@@ -209,6 +215,18 @@ class mapScene extends Phaser.Scene {
         else if (this.cursors.down.isDown)
         {
             this.cameras.main.y -= 4;
+        }
+    }
+
+    draw_map(x, y){
+        for (var x = 1; x < map_size_x-1; x++) {
+            for (var y = 1; y < map_size_y-1; y++) {
+                var key = map_1[x][y];
+                this.ground_layer.putTileAt(map_sprites[key].map, x, y);
+                if(map_sprites[key].sprite) {
+                    this.city_layer.putTileAt(map_sprites[key].sprite, x, y);
+                }
+            }
         }
     }
 
@@ -246,8 +264,8 @@ class mapScene extends Phaser.Scene {
     }
 
     check_and_draw_border(x,y,xnb,ynb,xf,yf,xt,yt){
-        var width = 2*this.map.tileWidth;
-        var height = 2*this.map.tileHeight;
+        var width =  3*this.map.tileWidth;
+        var height = 3*this.map.tileHeight;
         if( tile_array[x][y].owner != 'unowned' &&
             tile_array[x][y].owner != tile_array[xnb][ynb].owner )
         {
