@@ -27,26 +27,47 @@ var turn_counter = 1;
 
 
 //Players
-green_player = {
-    color: "green",
-    color: "green"
+var players = {
+    'green': {
+        color: "green"
+    },
+    'red': {
+        color: "red"
+    },
+    'blue': {
+        color: "blue"
+    }
 }
 
+// City class
+class City {
+    constructor(owner, x, y, level) {
+        this.owner = owner;
+        this.x = x;
+        this.y = y;
+        this.level = level;
+    }
 
-
-
-// Need an array representing the state of each tile
-// (or put in game.tiles. ...
-var tile_array = [];
-for (var x = 0; x < map_size_x; x++) {
-    tile_array[x] = [];
-    for (var y = 0; y < map_size_y; y++) {
-        tile_array[x][y] = {'culture': 0, 'city': 0};
+    culture(){
+        return 5*this.level;
     }
 }
 
 // Keep track of existing cities
 var cities = [];
+
+
+
+// Need an array representing the state of each tile
+// (or put in the map scene)
+var tile_array = [];
+for (var x = 0; x < map_size_x; x++) {
+    tile_array[x] = [];
+    for (var y = 0; y < map_size_y; y++) {
+        tile_array[x][y] = {'culture': 0};
+    }
+}
+
 
 
 
@@ -110,8 +131,8 @@ class mapScene extends Phaser.Scene {
         this.city_layer.setScale(2);
     
         // Add at town at 1,1
-        this.add_city(2,2)
-        this.add_city(6,6)
+        this.add_city(2,2, 'blue');
+        this.add_city(6,6, 'green');
     
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -141,11 +162,12 @@ class mapScene extends Phaser.Scene {
         }
     }
 
-    add_city(x, y){
-        console.log("Add city", x, y);
+    add_city(x, y, owner){
+        console.log("Add city", x, y, owner);
         this.city_layer.putTileAt(house_sprite, x, y);
-        tile_array[x][y].city = 1;
-        cities.push({ 'x':x, 'y':y, 'level': 1 });
+        var city = new City(owner, x, y, 1);
+        tile_array[x][y].city = city;
+        cities.push( city );
         this.draw_boundaries();
     }
 
@@ -249,7 +271,11 @@ function next_turn(ui_scene){
             new_tile_array[x][y] = {};
 
             // Calculate culture
-            let c = 5*tile_array[x][y].city;
+            let c=0;
+            if(tile_array[x][y].city){
+                c += tile_array[x][y].city.culture();
+                console.log(c);
+            }
             c += 0.25*tile_array[x-1][y].culture;
             c += 0.25*tile_array[x+1][y].culture;
             c += 0.25*tile_array[x][y+1].culture;
