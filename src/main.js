@@ -57,6 +57,7 @@ class City {
 var cities = [];
 
 
+// Information about each tile
 class Tile {
     constructor(x, y) {
         this.x = x;
