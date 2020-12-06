@@ -4,13 +4,15 @@ var f = 6
 var house_sprite = 7*1+1
 
 var map_1 = [
-    [w,w,w,w,w,w,w],
-    [w,g,g,g,g,g,w],
-    [w,g,g,g,g,g,w],
-    [w,g,g,g,g,g,w],
-    [w,g,g,g,g,g,w],
-    [w,g,g,g,g,g,w],
-    [w,w,w,w,w,w,w]
+    [w,w,w,w,w,w,w,w,w],
+    [w,w,w,w,w,w,w,w,w],
+    [w,w,g,g,g,g,g,w,w],
+    [w,w,g,g,g,g,g,w,w],
+    [w,w,g,g,g,g,g,w,w],
+    [w,w,g,g,g,g,g,w,w],
+    [w,w,g,g,g,g,g,w,w],
+    [w,w,w,w,w,w,w,w,w],
+    [w,w,w,w,w,w,w,w,w]
 ]
 
 var map_size_y = map_1.length;
@@ -21,6 +23,16 @@ var layer;
 var city_layer;
 
 var turn_counter = 1;
+
+
+
+//Players
+green_player = {
+    color: "green",
+    color: "green"
+}
+
+
 
 
 // Need an array representing the state of each tile
@@ -98,8 +110,8 @@ class mapScene extends Phaser.Scene {
         this.city_layer.setScale(2);
     
         // Add at town at 1,1
-        this.add_city(1,1)
-        this.add_city(5,5)
+        this.add_city(2,2)
+        this.add_city(6,6)
     
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -144,7 +156,6 @@ class mapScene extends Phaser.Scene {
 
         // Remove old boundaries
         this.boundary_markers.forEach(function(marker, i){
-            console.log(marker, i);
             marker.destroy();
         });
 
