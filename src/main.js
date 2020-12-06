@@ -29,7 +29,7 @@ var turn_counter = 1;
 //Players
 var players = {
     'green': {
-        color: 0x00ff00
+        color: 0x00aa00
     },
     'red': {
         color: 0xff0000
@@ -41,13 +41,13 @@ var players = {
 
 // City class
 class City {
-    constructor(owner, x, y, level) {
-        this.owner = owner;
+    constructor(x, y, level) {
         this.x = x;
         this.y = y;
         this.level = level;
     }
 
+    // Calculate the culture production of the city
     culture(){
         return 30*this.level;
     }
@@ -75,7 +75,7 @@ var tile_array = [];
 for (var x = 0; x < map_size_x; x++) {
     tile_array[x] = [];
     for (var y = 0; y < map_size_y; y++) {
-        tile_array[x][y] = new Tile;
+        tile_array[x][y] = new Tile(x,y);
     }
 }
 
@@ -93,7 +93,6 @@ class UIScene extends Phaser.Scene {
     preload() {}
 
     create() {
-        console.log('UI');
         this.mapScene = this.scene.get('mapScene');
 		// End turn button
         this.turnCount = this.add.text(10, 10, 'Turn '+turn_counter, { fill: '#008' });
@@ -142,7 +141,9 @@ class mapScene extends Phaser.Scene {
         this.city_layer.setScale(2);
     
         // Add at town at 1,1
+        tile_array[2][2].owner = 'blue';
         this.add_city(2,2, 'blue');
+        tile_array[5][6].owner = 'green';
         this.add_city(5,6, 'green');
     
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -173,10 +174,10 @@ class mapScene extends Phaser.Scene {
         }
     }
 
-    add_city(x, y, owner){
-        console.log("Add city", x, y, owner);
+    add_city(x, y){
+        console.log("Add city", x, y);
         this.city_layer.putTileAt(house_sprite, x, y);
-        var city = new City(owner, x, y, 1);
+        var city = new City(x, y, 1);
         tile_array[x][y].city = city;
         cities.push( city );
         this.draw_boundaries();
@@ -193,23 +194,21 @@ class mapScene extends Phaser.Scene {
         // Check every tile. There must be a better way?
         for (var x = 1; x < map_size_x-1; x++) {
             for (var y = 1; y < map_size_y-1; y++) {
-                for(var player in players){
-                    this.check_and_draw_border(player,x,y,x+1,y,x+1,y+1,x+1,y);
-                    this.check_and_draw_border(player,x,y,x-1,y,x,y+1,x,y);
-                    this.check_and_draw_border(player,x,y,x,y+1,x+1,y+1,x,y+1);
-                    this.check_and_draw_border(player,x,y,x,y-1,x+1,y,x,y);
-                }
+                this.check_and_draw_border(x,y,x+1,y,x+1,y+1,x+1,y);
+                this.check_and_draw_border(x,y,x-1,y,x,y+1,x,y);
+                this.check_and_draw_border(x,y,x,y+1,x+1,y+1,x,y+1);
+                this.check_and_draw_border(x,y,x,y-1,x+1,y,x,y);
             }
         }
     }
 
-    check_and_draw_border(player_key,x,y,xnb,ynb,xf,yf,xt,yt){
+    check_and_draw_border(x,y,xnb,ynb,xf,yf,xt,yt){
         var width = 2*this.map.tileWidth;
         var height = 2*this.map.tileHeight;
-        var player = players[player_key];
-        if( tile_array[x][y].owner == player_key &&
-            tile_array[xnb][ynb].owner != player_key)
+        if( tile_array[x][y].owner != 'unowned' &&
+            tile_array[x][y].owner != tile_array[xnb][ynb].owner )
         {
+            var player = players[tile_array[x][y].owner];
             var marker = this.add.graphics({ 
                 lineStyle: { width: 5, color: player.color, alpha: 0.4 }
             });
@@ -242,15 +241,12 @@ function tile_click(map_scene) {
     var x = map_scene.map.worldToTileX(worldPoint.x);
     var y = map_scene.map.worldToTileY(worldPoint.y);
 
-    console.log(x,y);
     console.log(tile_array[x][y]);
 }
 
 
 function next_turn(ui_scene){
     var map_scene = ui_scene.map_scene
-    console.log(map_scene);
-
     var new_culture_array = [];
     for (var x = 1; x < map_size_x-1; x++) {
         new_culture_array[x] = [];
@@ -261,9 +257,8 @@ function next_turn(ui_scene){
             for(player in players){
                 let c=0;
                 if(tile_array[x][y].city){
-                    var city = tile_array[x][y].city;
-                    if(city.owner == player){
-                        c = city.culture();
+                    if(tile_array[x][y].owner == player){
+                        c = tile_array[x][y].city.culture();
                     }
                 } else {
                     c += 0.25*get_player_culture(player,x-1,y);
