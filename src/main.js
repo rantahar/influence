@@ -1,7 +1,7 @@
-var w = 1
-var g = 7
-var f = 16
-var house_sprite = 7*4+2
+var w = 24*7 + 0
+var g = 1
+var f = 7
+var house_sprite = 7*1+1
 
 var map_1 = [
     [w,w,w,w,w,w,w],
@@ -79,7 +79,7 @@ class mapScene extends Phaser.Scene {
     }
 
     preload (){
-        this.load.image('tiles', 'assets/1sttileset.png');
+        this.load.image('tiles', "assets/Toens_Medieval_Strategy_Sprite_Pack/tileset.png");
     }
 
     create (){
