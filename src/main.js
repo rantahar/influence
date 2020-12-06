@@ -57,20 +57,24 @@ class City {
 var cities = [];
 
 
+class Tile {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.owner = 'unowned';
+        this.culture = {};
+    }
+}
+
 
 // Create arrays indexed by x and y for each property of a tile
 // Updating culture requires a full copy, so structure of arrays
 // is better.
-var culture_array = [];
-var city_array = [];
-var owner_array = [];
+var tile_array = [];
 for (var x = 0; x < map_size_x; x++) {
-    culture_array[x] = [];
-    city_array[x] = [];
-    owner_array[x] = [];
+    tile_array[x] = [];
     for (var y = 0; y < map_size_y; y++) {
-        culture_array[x][y] = {};
-        owner_array[x][y] = 'unowned';
+        tile_array[x][y] = new Tile;
     }
 }
 
@@ -172,7 +176,7 @@ class mapScene extends Phaser.Scene {
         console.log("Add city", x, y, owner);
         this.city_layer.putTileAt(house_sprite, x, y);
         var city = new City(owner, x, y, 1);
-        city_array[x][y] = city;
+        tile_array[x][y].city = city;
         cities.push( city );
         this.draw_boundaries();
     }
@@ -202,8 +206,8 @@ class mapScene extends Phaser.Scene {
         var width = 2*this.map.tileWidth;
         var height = 2*this.map.tileHeight;
         var player = players[player_key];
-        if( owner_array[x][y] == player_key &&
-            owner_array[xnb][ynb] != player_key)
+        if( tile_array[x][y].owner == player_key &&
+            tile_array[xnb][ynb].owner != player_key)
         {
             var marker = this.add.graphics({ 
                 lineStyle: { width: 5, color: player.color, alpha: 0.4 }
@@ -238,9 +242,7 @@ function tile_click(map_scene) {
     var y = map_scene.map.worldToTileY(worldPoint.y);
 
     console.log(x,y);
-    console.log(city_array[x][y]);
-    console.log(culture_array[x][y]);
-    console.log(owner_array[x][y]);
+    console.log(tile_array[x][y]);
 }
 
 
@@ -257,8 +259,8 @@ function next_turn(ui_scene){
             // Calculate culture
             for(player in players){
                 let c=0;
-                if(city_array[x][y]){
-                    var city = city_array[x][y];
+                if(tile_array[x][y].city){
+                    var city = tile_array[x][y].city;
                     if(city.owner == player){
                         c = city.culture();
                     }
@@ -277,13 +279,13 @@ function next_turn(ui_scene){
 
     for (var x = 1; x < map_size_x-1; x++) {
         for (var y = 1; y < map_size_y-1; y++) {
-            culture_array[x][y] = new_culture_array[x][y];
+            tile_array[x][y].culture = new_culture_array[x][y];
         }
     }
 
     for (var x = 1; x < map_size_x-1; x++) {
         for (var y = 1; y < map_size_y-1; y++) {
-            owner_array[x][y] = decide_tile_owner(x,y);
+            tile_array[x][y].owner = decide_tile_owner(x,y);
         }
     }
 
@@ -294,14 +296,14 @@ function next_turn(ui_scene){
 
 
 function get_player_culture(player, x, y){
-    if(culture_array[x][y][player]){
-        return culture_array[x][y][player];
+    if(tile_array[x][y].culture[player]){
+        return tile_array[x][y].culture[player];
     }
     return 0;
 }
 
 function decide_tile_owner(x,y){
-    var owner = owner_array[x][y];
+    var owner = tile_array[x][y].owner;
     var owner_culture = get_player_culture(owner,x,y);
     var new_owner = owner;
     for(player_key in players){
