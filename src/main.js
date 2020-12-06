@@ -29,13 +29,13 @@ var turn_counter = 1;
 //Players
 var players = {
     'green': {
-        color: "green"
+        color: 0x00ff00
     },
     'red': {
-        color: "red"
+        color: 0xff0000
     },
     'blue': {
-        color: "blue"
+        color: 0x0000ff
     }
 }
 
@@ -49,7 +49,7 @@ class City {
     }
 
     culture(){
-        return 10*this.level;
+        return 30*this.level;
     }
 }
 
@@ -63,11 +63,14 @@ var cities = [];
 // is better.
 var culture_array = [];
 var city_array = [];
+var owner_array = [];
 for (var x = 0; x < map_size_x; x++) {
     culture_array[x] = [];
     city_array[x] = [];
+    owner_array[x] = [];
     for (var y = 0; y < map_size_y; y++) {
-        culture_array[x][y] = 0;
+        culture_array[x][y] = {};
+        owner_array[x][y] = 'unowned';
     }
 }
 
@@ -135,7 +138,7 @@ class mapScene extends Phaser.Scene {
     
         // Add at town at 1,1
         this.add_city(2,2, 'blue');
-        this.add_city(6,6, 'green');
+        this.add_city(5,6, 'green');
     
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -175,10 +178,8 @@ class mapScene extends Phaser.Scene {
     }
 
     draw_boundaries(){
-        // Factor of 2 from this.layer.setScale(2);
         var width = 2*this.map.tileWidth;
         var height = 2*this.map.tileHeight;
-
         // Remove old boundaries
         this.boundary_markers.forEach(function(marker, i){
             marker.destroy();
@@ -187,51 +188,31 @@ class mapScene extends Phaser.Scene {
         // Check every tile. There must be a better way?
         for (var x = 1; x < map_size_x-1; x++) {
             for (var y = 1; y < map_size_y-1; y++) {
-                if( culture_array[x][y] >= 1 &&
-                    culture_array[x+1][y]  < 1 ){
-                    var marker = this.add.graphics({ 
-                        lineStyle: { width: 5, color: 0xffffff, alpha: 0.4 }
-                    });
-                    marker.beginPath();
-                    marker.moveTo((x+1)*width, (y+1)*height); // start line
-                    marker.lineTo((x+1)*width, y*height);
-                    marker.strokePath();
-                    this.boundary_markers.push(marker);
-                }
-                if( culture_array[x][y] >= 1 &&
-                    culture_array[x-1][y]  < 1 ){
-                    var marker = this.add.graphics({ 
-                        lineStyle: { width: 5, color: 0xffffff, alpha: 0.4 }
-                    });
-                    marker.beginPath();
-                    marker.moveTo(x*width, (y+1)*height);
-                    marker.lineTo(x*width, y*height);
-                    marker.strokePath();
-                    this.boundary_markers.push(marker);
-                }
-                if( culture_array[x][y] >= 1 &&
-                    culture_array[x][y+1]  < 1 ){
-                    var marker = this.add.graphics({ 
-                        lineStyle: { width: 5, color: 0xffffff, alpha: 0.4 }
-                    });
-                    marker.beginPath();
-                    marker.moveTo((x+1)*width, (y+1)*height);
-                    marker.lineTo(x*width, (y+1)*height);
-                    marker.strokePath();
-                    this.boundary_markers.push(marker);
-                }
-                if( culture_array[x][y] >= 1 &&
-                    culture_array[x][y-1]  < 1 ){
-                    var marker = this.add.graphics({ 
-                        lineStyle: { width: 5, color: 0xffffff, alpha: 0.4 }
-                    });
-                    marker.beginPath();
-                    marker.moveTo((x+1)*width, y*height);
-                    marker.lineTo(x*width, y*height);
-                    marker.strokePath();
-                    this.boundary_markers.push(marker);
+                for(var player in players){
+                    this.check_and_draw_border(player,x,y,x+1,y,x+1,y+1,x+1,y);
+                    this.check_and_draw_border(player,x,y,x-1,y,x,y+1,x,y);
+                    this.check_and_draw_border(player,x,y,x,y+1,x+1,y+1,x,y+1);
+                    this.check_and_draw_border(player,x,y,x,y-1,x+1,y,x,y);
                 }
             }
+        }
+    }
+
+    check_and_draw_border(player_key,x,y,xnb,ynb,xf,yf,xt,yt){
+        var width = 2*this.map.tileWidth;
+        var height = 2*this.map.tileHeight;
+        var player = players[player_key];
+        if( owner_array[x][y] == player_key &&
+            owner_array[xnb][ynb] != player_key)
+        {
+            var marker = this.add.graphics({ 
+                lineStyle: { width: 5, color: player.color, alpha: 0.4 }
+            });
+            marker.beginPath();
+            marker.moveTo(xf*width, yf*height);
+            marker.lineTo(xt*width, yt*height);
+            marker.strokePath();
+            this.boundary_markers.push(marker);
         }
     }
 
@@ -242,7 +223,7 @@ class mapScene extends Phaser.Scene {
 var config = {
     type: Phaser.AUTO,
     parent: "Container",
-    width: 800,
+    width: 600,
     height: 600,
     scene: [mapScene, UIScene]
 };
@@ -252,7 +233,6 @@ var game = new Phaser.Game(config);
 
 
 function tile_click(map_scene) {
-    console.log(map_scene);
     var worldPoint = map_scene.input.activePointer.positionToCamera(map_scene.cameras.main);
     var x = map_scene.map.worldToTileX(worldPoint.x);
     var y = map_scene.map.worldToTileY(worldPoint.y);
@@ -260,6 +240,7 @@ function tile_click(map_scene) {
     console.log(x,y);
     console.log(city_array[x][y]);
     console.log(culture_array[x][y]);
+    console.log(owner_array[x][y]);
 }
 
 
@@ -271,26 +252,25 @@ function next_turn(ui_scene){
     for (var x = 1; x < map_size_x-1; x++) {
         new_culture_array[x] = [];
         for (var y = 1; y < map_size_y-1; y++) {
-            new_culture_array[x][y] = 0;
+            new_culture_array[x][y] = {};
 
             // Calculate culture
             for(player in players){
                 let c=0;
                 if(city_array[x][y]){
                     var city = city_array[x][y];
-                    if(city.owner = player){
+                    if(city.owner == player){
                         c = city.culture();
                     }
                 } else {
-                    c += 0.25*culture_array[x-1][y];
-                    c += 0.25*culture_array[x+1][y];
-                    c += 0.25*culture_array[x][y+1];
-                    c += 0.25*culture_array[x][y-1];
-                    if( c < 1 ) {
-                        c = 0;
-                    }
+                    c += 0.25*get_player_culture(player,x-1,y);
+                    c += 0.25*get_player_culture(player,x+1,y);
+                    c += 0.25*get_player_culture(player,x,y-1);
+                    c += 0.25*get_player_culture(player,x,y+1);
                 }
-                new_culture_array[x][y] = c;
+                if(c>=1){
+                    new_culture_array[x][y][player] = c;
+                }
             }
         }
     }
@@ -301,8 +281,40 @@ function next_turn(ui_scene){
         }
     }
 
+    for (var x = 1; x < map_size_x-1; x++) {
+        for (var y = 1; y < map_size_y-1; y++) {
+            owner_array[x][y] = decide_tile_owner(x,y);
+        }
+    }
+
     turn_counter += 1;
     ui_scene.turnCount.setText('Turn '+turn_counter);
+}
+
+
+
+function get_player_culture(player, x, y){
+    if(culture_array[x][y][player]){
+        return culture_array[x][y][player];
+    }
+    return 0;
+}
+
+function decide_tile_owner(x,y){
+    var owner = owner_array[x][y];
+    var owner_culture = get_player_culture(owner,x,y);
+    var new_owner = owner;
+    for(player_key in players){
+        var player_culture = get_player_culture(player_key,x,y);
+        if( player_culture == owner_culture ) {
+            // Tie goes to the original owner
+            new_owner = owner;
+        } else if( player_culture > owner_culture ){
+            new_owner = player_key;
+            owner_culture = player_culture;
+        }
+    }
+    return new_owner;
 }
 
 
