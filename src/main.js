@@ -124,33 +124,6 @@ for (var x = 0; x < map_size_x; x++) {
 
 
 
-class UIScene extends Phaser.Scene {
-    constructor() {
-        super('UIScene');
-        this.turnCount;
-        this.endTurnButton;
-        this.mapScene;
-    }
-    
-    preload() {}
-
-    create() {
-        this.mapScene = this.scene.get('mapScene');
-		// End turn button
-        this.turnCount = this.add.text(10, 10, 'Turn '+turn_counter, { fill: '#008' });
-        this.endTurnButton = this.add.text(10, 30, 'Next Turn', { fill: '#008' });
-        this.endTurnButton.setInteractive();
-        this.endTurnButton.on('pointerdown', ()=>{
-            next_turn(this);
-            this.mapScene.draw_boundaries();
-        } );
-    }
-
-    update(){}
-}
-
-
-
 
 class mapScene extends Phaser.Scene {
     constructor() {
@@ -169,7 +142,7 @@ class mapScene extends Phaser.Scene {
 
     create (){
         this.cameras.main.setBounds( -100, -100, 200, 200);
-        this.cameras.main.setBackgroundColor("#ffffff");
+        //this.cameras.main.setBackgroundColor("#ffffff");
 
         // create board
         this.map = this.make.tilemap({ tileWidth: 16, tileHeight: 16});
@@ -193,6 +166,8 @@ class mapScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.scene.launch('UIScene');
+        this.scene.launch('RexUIPanel');
+        
     }
     
     update (time, delta){
@@ -290,11 +265,21 @@ var config = {
     parent: "Container",
     width: 600,
     height: 600,
-    scene: [mapScene, UIScene]
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+    scene: [mapScene]
 };
 
 var game = new Phaser.Game(config);
 
+
+$( "#next_turn_button" ).click(function() {
+    mapscene = game.scene.scenes[0];
+    next_turn(mapscene);
+    game.scene.scenes[0].draw_boundaries()
+});
 
 
 function tile_click(map_scene) {
@@ -306,8 +291,7 @@ function tile_click(map_scene) {
 }
 
 
-function next_turn(ui_scene){
-    var map_scene = ui_scene.mapScene;
+function next_turn(map_scene){
     var new_culture_array = [];
     for (var x = 1; x < map_size_x-1; x++) {
         new_culture_array[x] = [];
@@ -351,7 +335,8 @@ function next_turn(ui_scene){
     }
 
     turn_counter += 1;
-    ui_scene.turnCount.setText('Turn '+turn_counter);
+    $("#turn_number_text").text('Turn '+turn_counter);
+    //ui_scene.turnCount.setText('Turn '+turn_counter);
 }
 
 
