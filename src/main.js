@@ -54,6 +54,7 @@ var players = {
     }
 }
 
+
 // City class
 class City {
     constructor(x, y, level) {
@@ -99,7 +100,7 @@ class City {
     gather(x,y){
         if(tile_array[x][y].owner == 
             tile_array[x][y].owner){
-            if(map_1[x][y] == 'g'){
+            if(tile_array[x][y].land == 'g'){
                 this.food += 1;
             }
         }
@@ -112,11 +113,12 @@ var cities = [];
 
 // Information about each tile
 class Tile {
-    constructor(x, y) {
+    constructor(x, y, land) {
         this.x = x;
         this.y = y;
         this.owner = 'unowned';
         this.culture = {};
+        this.land = land;
     }
 }
 
@@ -125,7 +127,7 @@ class Tile {
 for (var x = 0; x < map_size_x; x++) {
     tile_array[x] = [];
     for (var y = 0; y < map_size_y; y++) {
-        tile_array[x][y] = new Tile(x,y);
+        tile_array[x][y] = new Tile(x, y, map_1[y][x]);
     }
 }
 
@@ -202,9 +204,9 @@ class mapScene extends Phaser.Scene {
     }
 
     draw_map(x, y){
-        for (var x = 1; x < map_size_x-1; x++) {
-            for (var y = 1; y < map_size_y-1; y++) {
-                var key = map_1[x][y];
+        for (var x = 0; x < map_size_x; x++) {
+            for (var y = 0; y < map_size_y; y++) {
+                var key = tile_array[x][y].land;
                 this.ground_layer.putTileAt(map_sprites[key].map, x, y);
                 if(map_sprites[key].sprite) {
                     this.city_layer.putTileAt(map_sprites[key].sprite, x, y);
@@ -295,8 +297,35 @@ function tile_click(map_scene) {
     var worldPoint = map_scene.input.activePointer.positionToCamera(map_scene.cameras.main);
     var x = map_scene.map.worldToTileX(worldPoint.x);
     var y = map_scene.map.worldToTileY(worldPoint.y);
+    var tile = tile_array[x][y];
+
+    $("#info-page").empty();
+
+    // Describe the tile
+    $("#info-page").append("<p>x: "+x+", y "+y+"</p>");
+    $("#info-page").append("<p>"+map_descriptions[tile.land]+"</p>");
+    // If there is an owner, show owner and culture
+    if(tile.owner != "unowned"){
+        var p = $("<p></p>").text("owner: ");
+        var text = $("<span></span>").text(tile.owner).css('color', players[tile.owner].color);
+        p.append(text);
+        $("#info-page").append(p);
+        var p = $("<p></p>").text("Culture: ");
+        var text = $("<span></span>").text(" "+tile.culture[tile.owner].toFixed(2))
+        .css('color', players[tile.owner].color);
+        p.append(text);
+        for(var key in tile.culture){
+            if(key != tile.owner){
+                var text = $("<span></span>").text(" "+tile.culture[key].toFixed(2))
+                .css('color', players[key].color);
+                p.append(text);
+            }
+        }
+    }
+    $("#info-page").append(p);
 
     console.log(tile_array[x][y]);
+    
 }
 
 
@@ -344,8 +373,7 @@ function next_turn(map_scene){
     }
 
     turn_counter += 1;
-    $("#turn_number_text").text('Turn '+turn_counter);
-    //ui_scene.turnCount.setText('Turn '+turn_counter);
+    $("#turn_number_text").text('Year '+turn_counter);
 }
 
 
