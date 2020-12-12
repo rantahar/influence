@@ -26,6 +26,7 @@ var map_1 = [
     ['w','w','w','w','w','w','w','w','w']
 ]
 
+
 var map_size_y = map_1.length;
 var map_size_x = map_1[0].length;
 
@@ -43,13 +44,13 @@ var tile_array = [];
 //Players
 var players = {
     'green': {
-        color: 0x00aa00
+        color: "#00AA00"
     },
     'red': {
-        color: 0xff0000
+        color: "#FF0000"
     },
     'blue': {
-        color: 0x0000ff
+        color: "#0000FF"
     }
 }
 
@@ -252,8 +253,9 @@ class mapScene extends Phaser.Scene {
             tile_array[x][y].owner != tile_array[xnb][ynb].owner )
         {
             var player = players[tile_array[x][y].owner];
+            var color = Phaser.Display.Color.HexStringToColor(player.color);
             var marker = this.add.graphics({ 
-                lineStyle: { width: 5, color: player.color, alpha: 0.4 }
+                lineStyle: { width: 5, color: color.color, alpha: 0.4 }
             });
             marker.beginPath();
             marker.moveTo(xf*width, yf*height);
