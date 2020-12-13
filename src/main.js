@@ -60,12 +60,69 @@ var players = {
 
 
 function sum_neighbours(x,y,f){
+    var msx = map_size_x; var msy = map_size_y;
     var sum = f(x,y);
-    sum += f(x+1,y);
-    sum += f(x,y+1);
-    sum += f(x-1,y);
-    sum += f(x,y-1);
+    sum += f((x+1)%msx,y) + f(x,(y+1)%msy);
+    sum += f((x-1+msx)%msx,y) + f(x,(y-1+msy)%msy);
     return sum;
+}
+
+function sum_nb2(x,y,f){
+    var msx = map_size_x; var msy = map_size_y;
+    var sum = f(x,y);
+    sum += f((x+1)%msx,y) + f(x,(y+1)%msy);
+    sum += f((x-1+msx)%msx,y) + f(x,(y-1+msy)%msy);
+
+    sum += f((x+1)%msx,(y+1)%msy) + f((x+1)%msx,(y-1)%msy);
+    sum += f((x-1+msx)%msx,(y+1)%msy) + f((x-1+msx)%msx,(y-1+msy)%msy);
+
+    sum += f((x+2)%msx,y) + f(x,(y+2)%msy);
+    sum += f((x-2+msy)%msx,y) + f(x,(y-2+msy)%msy);
+    return sum;
+}
+
+function for_neighbours(x,y,f){
+    var msx = map_size_x; var msy = map_size_y;
+    f(x,y);
+    f((x+1)%msx,y); f(x,(y+1)%msy);
+    f((x-1+msx)%msx,y); f(x,(y-1+msy)%msy);
+
+}
+
+
+
+
+function is_city_allowed(x,y){
+    // check for neighbouring cities
+    var nb_cities = sum_nb2(x,y,function(x,y){
+        if(tile_array[x][y].city || tile_array[x][y].building=='city'){
+            return 1;
+        } else {
+            return 0;
+        }
+    });
+    if(nb_cities == 0 && tile_array[x][y].is_empty() ){
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function city_food_production(x,y,owner){
+    var food = sum_neighbours(x,y,function(x,y){
+        if(tile_array[x][y].owner == owner &&
+          tile_array[x][y].city == undefined &&
+          tile_array[x][y].building == undefined){
+            if(tile_array[x][y].land == 'g'){
+                return 1;
+            }
+            if(tile_array[x][y].land == 'w'){
+                return 1;
+            }
+        }
+        return 0;
+    });
+    return food;
 }
 
 
@@ -90,6 +147,11 @@ class City {
         return tile_array[this.x][this.y].owner;
     }
 
+    // The amount of food produced per turn
+    food_production(){
+        return city_food_production(this.x,this.y,this.owner());
+    }
+
     // The amount of food consumed each turn
     // Food is consumed after it is gathered
     food_consumption() {
@@ -99,7 +161,7 @@ class City {
     // city grows when the city has this much food
     food_limit() {
         //return Math.pow(2,this.level-1);
-        return 5*this.level;
+        return 10*this.level;
     }
 
     // Update the city
@@ -107,11 +169,7 @@ class City {
         var x = this.x;
         var y = this.y;
         // Gather resources
-        this.gather(x,y);
-        this.gather(x,y+1);
-        this.gather(x,y-1);
-        this.gather(x+1,y);
-        this.gather(x-1,y);
+        this.food += this.food_production();
 
         // Consume
         this.food -= this.food_consumption();
@@ -119,7 +177,6 @@ class City {
 
         // Check buildings
         if(this.building != undefined){
-            console.log(this.building);
             if(this.building.food > this.food){
                 this.building.food -= this.food;
                 this.food = 0;
@@ -137,7 +194,7 @@ class City {
             map_scene.update_city_sprite(x,y,this.level);
         }
         // Or if the city shrinks
-        if(this.food < 0){
+        if(this.food < 0 && this.level > 1){
             this.level -= 1;
             this.food = 0;
             map_scene.update_city_sprite(x,y,this.level);
@@ -145,10 +202,10 @@ class City {
     }
 
     gather(x,y){
-        if(tile_array[x][y].owner == this.owner()){
-            if(tile_array[x][y].land == 'g'){
-                this.food += 1;
-            }
+        if(tile_array[x][y].owner == this.owner() &&
+           tile_array[x][y].city == undefined &&
+           tile_array[x][y].land == 'g'){
+            this.food += 1;
         }
     }
 
@@ -164,8 +221,8 @@ class City {
 
     // Start building a new city
     build_city(x, y){
-        if(tile_array[x][y].city == undefined &&
-           tile_array[x][y].is_empty()){
+        // check for neighbouring cities
+        if(is_city_allowed(x,y)){
             var mapscene = game.scene.scenes[0];
             mapscene.add_building_sprite(x, y);
             tile_array[x][y].building = 'city';
@@ -255,9 +312,9 @@ class mapScene extends Phaser.Scene {
         tile_array[2][2].owner = 'blue';
         tile_array[2][2].culture = {'blue': 5};
         this.add_city(2,2, 'blue');
-        tile_array[5][6].owner = 'green';
-        this.add_city(5,6, 'green');
-        tile_array[5][6].culture = {'green': 5};
+        tile_array[6][6].owner = 'green';
+        this.add_city(6,6, 'green');
+        tile_array[6][6].culture = {'green': 5};
     
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -302,7 +359,6 @@ class mapScene extends Phaser.Scene {
     }
 
     add_city(x, y){
-        console.log("Add city", x, y);
         this.city_layer.putTileAt(city_sprites[0], x, y);
         var city = new City(x, y, 1);
         tile_array[x][y].city = city;
@@ -393,9 +449,7 @@ function tile_click(map_scene) {
 
     // Show city if there is one
     if(tile.city){
-        console.log(tile.city);
         var div = tile.city.describe()
-        console.log(div);
         $("#info-page").append(div);
     }
 
@@ -424,7 +478,7 @@ function tile_click(map_scene) {
     $("#info-page").append(p);
 
 
-    //console.log(tile_array[x][y]);
+    console.log(tile_array[x][y]);
 }
 
 
