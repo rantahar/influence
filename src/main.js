@@ -13,6 +13,7 @@ var map_descriptions = {
 }
 
 var city_sprites = [7,8,9,15,15,15,15,15]
+var building_cite_sprite = 5*7+3
 
 var map_1 = [
     ['w','w','w','w','w','w','w','w','w'],
@@ -46,8 +47,14 @@ var players = {
     'green': {
         color: "#00AA00",
         take_turn: function(){
-            if(tile_array[4][4].owner == 'green'){
-                create_city(4,4,'green');
+            for(key in cities){
+                var city = cities[key];
+                if(city.owner() == 'green'){
+                    console.log(city);
+                    if(tile_array[4][4].owner == 'green'){
+                        city.build_city(4,4,'green');
+                    }
+                }
             }
         }
     },
@@ -79,6 +86,10 @@ class City {
         return 10*this.level;
     }
 
+    owner(){
+        return tile_array[this.x][this.y].owner;
+    }
+
     // The amount of food consumed each turn
     // Food is consumed after it is gathered
     food_consumption() {
@@ -105,10 +116,24 @@ class City {
         // Consume
         this.food -= this.food_consumption();
 
+
+        // Check buildings
+        if(this.building != undefined){
+            console.log(this.building);
+            if(this.building.food > this.food){
+                this.building.food -= this.food;
+                this.food = 0;
+            } else {
+                this.food -= this.building.food;
+                this.building_done();
+            }
+        }
+
+
         // Check if the city grows
-        if(this.food > this.food_consumption()){
+        if(this.food > this.food_limit()){
+            this.food -= this.food_limit();
             this.level += 1;
-            this.food -= this.food_consumption();
             map_scene.update_city_sprite(x,y,this.level);
         }
         // Or if the city shrinks
@@ -137,6 +162,26 @@ class City {
         html += "</div>";
         return html;
     }
+
+    // Start building a new city
+    build_city(x, y){
+        if(tile_array[x][y].city == undefined &&
+           tile_array[x][y].is_empty()){
+            console.log("Building at ", x, y);
+            var mapscene = game.scene.scenes[0];
+            mapscene.add_building_sprite(x, y);
+            tile_array[x][y].building = 'city';
+            this.building = {'food': 10, 'type': 'city', 'x': x, 'y': y};
+        }
+    }
+
+    building_done(){
+        if(this.building.type == 'city'){
+            var mapscene = game.scene.scenes[0];
+            mapscene.add_city(this.building.x,this.building.y,this.owner());
+        }
+        this.building = undefined;
+    }
 }
 
 // Keep track of existing cities
@@ -151,6 +196,15 @@ class Tile {
         this.owner = 'unowned';
         this.culture = {};
         this.land = land;
+    }
+
+    is_empty(){
+        if(this.city == undefined && this.building == undefined &&
+           this.land != 'forest' && this.land != 'water'){
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
@@ -263,6 +317,10 @@ class mapScene extends Phaser.Scene {
         this.city_layer.putTileAt(city_sprite, x, y);
     }
 
+    add_building_sprite(x,y){
+        this.city_layer.putTileAt(building_cite_sprite, x, y);
+    }
+
     draw_boundaries(){
         var width = 2*this.map.tileWidth;
         var height = 2*this.map.tileHeight;
@@ -344,7 +402,7 @@ function tile_click(map_scene) {
     }
 
     // Describe the tile
-    $("#info-page").append("<p>x="+x+", y="+y+"</p>");
+    $("#info-page").append("<p><b>Tile:</b> x="+x+", y="+y+"</p>");
     $("#info-page").append("<p>"+map_descriptions[tile.land]+"</p>");
 
     // If there is an owner, show owner and culture
@@ -451,12 +509,5 @@ function decide_tile_owner(x,y){
 }
 
 
-// Create a city for player
-function create_city(x, y, player){
-    if(tile_array[x][y].city == undefined){
-        mapscene = game.scene.scenes[0];
-        mapscene.add_city(x, y, player);
-    }
-}
 
 
