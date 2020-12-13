@@ -439,10 +439,8 @@ function next_turn(map_scene){
             // Calculate culture
             for(player in players){
                 let c=0;
-                if(tile_array[x][y].city){
-                    if(tile_array[x][y].owner == player){
-                        c = tile_array[x][y].city.culture();
-                    }
+                if(tile_array[x][y].city && tile_array[x][y].owner == player){
+                    c = tile_array[x][y].city.culture();
                 } else {
                     c += 0.25*get_player_culture(player,x-1,y);
                     c += 0.25*get_player_culture(player,x+1,y);
