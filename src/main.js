@@ -45,16 +45,12 @@ var tile_array = [];
 //Players
 var players = {
     'green': green_player,
+    'blue': blue_player,
     'red': {
         color: "#FF0000",
         take_turn: function(){
         }
     },
-    'blue': {
-        color: "#0000FF",
-        take_turn: function(){
-        }
-    }
 }
 
 
