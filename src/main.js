@@ -62,11 +62,24 @@ class City {
         this.y = y;
         this.level = level;
         this.food = 0;
+        this.name = "Aztola";
     }
 
     // Calculate the culture production of the city
     culture(){
         return 10*this.level;
+    }
+
+    // The amount of food consumed each turn
+    // Food is consumed after it is gathered
+    food_consumption() {
+        return this.level;
+    }
+
+    // city grows when the city has this much food
+    food_limit() {
+        //return Math.pow(2,this.level-1);
+        return 5*this.level;
     }
 
     // Update the city
@@ -81,15 +94,15 @@ class City {
         this.gather(x-1,y);
 
         // Consume
-        var food_consumption = Math.pow(2,this.level-1);
-        this.food -= food_consumption;
+        this.food -= this.food_consumption();
 
-        var food_limit = 5*food_consumption;
-        if(this.food > food_limit){
+        // Check if the city grows
+        if(this.food > this.food_consumption()){
             this.level += 1;
-            this.food -= food_limit;
+            this.food -= this.food_consumption();
             map_scene.update_city_sprite(x,y,this.level);
         }
+        // Or if the city shrinks
         if(this.food < 0){
             this.level -= 1;
             this.food = 0;
@@ -104,6 +117,16 @@ class City {
                 this.food += 1;
             }
         }
+    }
+
+    // Describe the city in html
+    describe(){
+        var html = "<div>";
+        html += "<h4>"+this.name+"</h4>";
+        html += "<p>Level: "+this.level+"</p>";
+        html += "<p>Food: "+this.food+"</p>";
+        html += "</div>";
+        return html;
     }
 }
 
@@ -169,9 +192,11 @@ class mapScene extends Phaser.Scene {
     
         // Add at towns
         tile_array[2][2].owner = 'blue';
+        tile_array[2][2].culture = {'blue': 5};
         this.add_city(2,2, 'blue');
         tile_array[5][6].owner = 'green';
         this.add_city(5,6, 'green');
+        tile_array[5][6].culture = {'green': 5};
     
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -270,7 +295,6 @@ class mapScene extends Phaser.Scene {
 }
 
 
-
 var config = {
     type: Phaser.AUTO,
     parent: "Container",
@@ -284,6 +308,7 @@ var config = {
 };
 
 var game = new Phaser.Game(config);
+
 
 
 $( "#next_turn_button" ).click(function() {
@@ -301,9 +326,18 @@ function tile_click(map_scene) {
 
     $("#info-page").empty();
 
+    // Show city if there is one
+    if(tile.city){
+        console.log(tile.city);
+        var div = tile.city.describe()
+        console.log(div);
+        $("#info-page").append(div);
+    }
+
     // Describe the tile
-    $("#info-page").append("<p>x: "+x+", y "+y+"</p>");
+    $("#info-page").append("<p>x="+x+", y="+y+"</p>");
     $("#info-page").append("<p>"+map_descriptions[tile.land]+"</p>");
+
     // If there is an owner, show owner and culture
     if(tile.owner != "unowned"){
         var p = $("<p></p>").text("owner: ");
@@ -324,8 +358,8 @@ function tile_click(map_scene) {
     }
     $("#info-page").append(p);
 
-    console.log(tile_array[x][y]);
-    
+
+    //console.log(tile_array[x][y]);
 }
 
 
