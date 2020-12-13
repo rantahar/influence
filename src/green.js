@@ -9,7 +9,7 @@ var green_player = {
         for (var x = 1; x < map_size_x-1; x++) {
             for (var y = 1; y < map_size_y-1; y++) {
                 // Green likes to build on the edges, where culture is minimal
-                if(is_city_allowed(x,y)){
+                if(is_city_allowed(x,y) && tile_array[x][y].owner == 'green'){
                     var tile = tile_array[x][y]
                     var utility = -tile.culture.green;
                     
@@ -43,7 +43,7 @@ var green_player = {
             if(city.owner() == 'green'){
                 if( city.food > 8 ){
                     if(best_x != undefined && best_y != undefined){
-                        console.log("Green city at "+x+","+y+" builds a city at "+x+","+y);
+                        console.log("Green city at "+city.x+","+city.y+" builds a city at "+best_x+","+best_y);
                         city.build_city(best_x,best_y,'green');
                     }
                 }

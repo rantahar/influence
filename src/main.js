@@ -17,13 +17,13 @@ var building_cite_sprite = 5*7+3
 
 var map_1 = [
     ['w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w'],
-    ['w','w','g','g','g','g','g','w','w'],
-    ['w','w','g','f','g','f','g','w','w'],
-    ['w','w','g','f','g','f','g','w','w'],
-    ['w','w','g','f','g','f','g','w','w'],
-    ['w','w','g','g','g','g','g','w','w'],
-    ['w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','g','g','g','w','w'],
+    ['w','g','g','g','g','g','g','g','w'],
+    ['w','g','g','f','g','f','g','g','w'],
+    ['w','g','g','f','g','f','g','g','w'],
+    ['w','g','g','f','g','f','g','g','w'],
+    ['w','g','g','g','g','g','g','g','w'],
+    ['w','w','g','g','g','g','g','g','w'],
     ['w','w','w','w','w','w','w','w','w']
 ]
 
@@ -216,9 +216,9 @@ class City {
     }
 
     // Start building a new city
-    build_city(x, y){
+    build_city(x, y, owner){
         // check for neighbouring cities
-        if(is_city_allowed(x,y)){
+        if(is_city_allowed(x,y) && tile_array[x][y].owner == owner){
             var mapscene = game.scene.scenes[0];
             mapscene.add_building_sprite(x, y);
             tile_array[x][y].building = 'city';

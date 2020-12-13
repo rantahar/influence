@@ -9,7 +9,7 @@ var blue_player = {
         for (var x = 1; x < map_size_x-1; x++) {
             for (var y = 1; y < map_size_y-1; y++) {
                 // Blue Builds as close as possible
-                if(is_city_allowed(x,y)){
+                if(is_city_allowed(x,y) && tile_array[x][y].owner == 'blue'){
                     var tile = tile_array[x][y]
                     var utility = tile.culture.blue;
                     
@@ -43,7 +43,7 @@ var blue_player = {
             if(city.owner() == 'blue'){
                 if( city.food > 8 ){
                     if(best_x != undefined && best_y != undefined){
-                        console.log("Blue city at "+x+","+y+" builds a city at "+x+","+y);
+                        console.log("Green city at "+city.x+","+city.y+" builds a city at "+best_x+","+best_y);
                         city.build_city(best_x,best_y,'blue');
                     }
                 }
