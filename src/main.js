@@ -44,13 +44,22 @@ var tile_array = [];
 //Players
 var players = {
     'green': {
-        color: "#00AA00"
+        color: "#00AA00",
+        take_turn: function(){
+            if(tile_array[4][4].owner == 'green'){
+                create_city(4,4,'green');
+            }
+        }
     },
     'red': {
-        color: "#FF0000"
+        color: "#FF0000",
+        take_turn: function(){
+        }
     },
     'blue': {
-        color: "#0000FF"
+        color: "#0000FF",
+        take_turn: function(){
+        }
     }
 }
 
@@ -314,7 +323,7 @@ var game = new Phaser.Game(config);
 $( "#next_turn_button" ).click(function() {
     mapscene = game.scene.scenes[0];
     next_turn(mapscene);
-    game.scene.scenes[0].draw_boundaries()
+    mapscene.draw_boundaries()
 });
 
 
@@ -364,6 +373,7 @@ function tile_click(map_scene) {
 
 
 function next_turn(map_scene){
+    
     var new_culture_array = [];
     for (var x = 1; x < map_size_x-1; x++) {
         new_culture_array[x] = [];
@@ -408,6 +418,10 @@ function next_turn(map_scene){
 
     turn_counter += 1;
     $("#turn_number_text").text('Year '+turn_counter);
+
+    for(player in players){
+        players[player].take_turn();
+    }
 }
 
 
@@ -434,6 +448,15 @@ function decide_tile_owner(x,y){
         }
     }
     return new_owner;
+}
+
+
+// Create a city for player
+function create_city(x, y, player){
+    if(tile_array[x][y].city == undefined){
+        mapscene = game.scene.scenes[0];
+        mapscene.add_city(x, y, player);
+    }
 }
 
 
