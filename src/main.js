@@ -44,20 +44,7 @@ var tile_array = [];
 
 //Players
 var players = {
-    'green': {
-        color: "#00AA00",
-        take_turn: function(){
-            for(key in cities){
-                var city = cities[key];
-                if(city.owner() == 'green'){
-                    console.log(city);
-                    if(tile_array[4][4].owner == 'green'){
-                        city.build_city(4,4,'green');
-                    }
-                }
-            }
-        }
-    },
+    'green': green_player,
     'red': {
         color: "#FF0000",
         take_turn: function(){
@@ -69,6 +56,19 @@ var players = {
         }
     }
 }
+
+
+
+function sum_neighbours(x,y,f){
+    var sum = f(x,y);
+    sum += f(x+1,y);
+    sum += f(x,y+1);
+    sum += f(x-1,y);
+    sum += f(x,y-1);
+    return sum;
+}
+
+
 
 
 // City class
@@ -145,8 +145,7 @@ class City {
     }
 
     gather(x,y){
-        if(tile_array[x][y].owner == 
-            tile_array[x][y].owner){
+        if(tile_array[x][y].owner == this.owner()){
             if(tile_array[x][y].land == 'g'){
                 this.food += 1;
             }
@@ -167,7 +166,6 @@ class City {
     build_city(x, y){
         if(tile_array[x][y].city == undefined &&
            tile_array[x][y].is_empty()){
-            console.log("Building at ", x, y);
             var mapscene = game.scene.scenes[0];
             mapscene.add_building_sprite(x, y);
             tile_array[x][y].building = 'city';
@@ -200,7 +198,7 @@ class Tile {
 
     is_empty(){
         if(this.city == undefined && this.building == undefined &&
-           this.land != 'forest' && this.land != 'water'){
+           this.land != 'f' && this.land != 'w'){
             return true;
         } else {
             return false;
