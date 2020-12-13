@@ -490,13 +490,12 @@ function next_turn(map_scene){
             for(player in players){
                 let c=0;
                 if(tile_array[x][y].city && tile_array[x][y].owner == player){
-                    c = tile_array[x][y].city.culture();
-                } else {
-                    c += 0.25*get_player_culture(player,x-1,y);
-                    c += 0.25*get_player_culture(player,x+1,y);
-                    c += 0.25*get_player_culture(player,x,y-1);
-                    c += 0.25*get_player_culture(player,x,y+1);
+                    c += tile_array[x][y].city.culture();
                 }
+                c += 0.25*get_player_culture(player,x-1,y);
+                c += 0.25*get_player_culture(player,x+1,y);
+                c += 0.25*get_player_culture(player,x,y-1);
+                c += 0.25*get_player_culture(player,x,y+1);
                 if(c>=1){
                     new_culture_array[x][y][player] = c;
                 }

@@ -41,7 +41,7 @@ var blue_player = {
         for(key in cities){
             var city = cities[key];
             if(city.owner() == 'blue'){
-                if( city.food > 8 ){
+                if( city.level > 1 && city.food > 3 ){
                     if(best_x != undefined && best_y != undefined){
                         console.log("Green city at "+city.x+","+city.y+" builds a city at "+best_x+","+best_y);
                         city.build_city(best_x,best_y,'blue');
