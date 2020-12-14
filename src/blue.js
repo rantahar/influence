@@ -47,6 +47,23 @@ var blue_player = {
                         city.build_city(best_x,best_y,'blue');
                     }
                 }
+                if(city.wood >= 5){
+                    console.log("Blue can build a road.");
+                    var road_locations = [];
+                    for (var x = 0; x < map_size_x; x++) {
+                        for (var y = 0; y < map_size_y; y++) {
+                            if(can_build_road(x,y,city)){
+                                console.log(x,y);
+                                road_locations.push([x,y]);
+                            }
+                        }
+                    }
+                    console.log(road_locations.length)
+                    if(road_locations.length > 0){
+                        var n = Math.floor(Math.random() * road_locations.length);
+                        city.build_road(road_locations[n][0],road_locations[n][1]);
+                    }
+                }
             }
         }
     }
