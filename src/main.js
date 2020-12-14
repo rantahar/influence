@@ -74,15 +74,6 @@ var players = {
 }
 
 
-
-function sum_neighbours(x,y,f){
-    var msx = map_size_x; var msy = map_size_y;
-    var sum = f(x,y);
-    sum += f((x+1)%msx,y) + f(x,(y+1)%msy);
-    sum += f((x-1+msx)%msx,y) + f(x,(y-1+msy)%msy);
-    return sum;
-}
-
 function sum_nb2(x,y,f){
     var msx = map_size_x; var msy = map_size_y;
     var sum = f(x,y);
@@ -153,7 +144,7 @@ function max_tiles(tiles,f){
 
 function is_city_allowed(x,y){
     // check for neighbouring cities
-    var nb_cities = sum_neighbours(x,y,function(x,y){
+    var nb_cities = sum_tiles(neigbour_tiles(x,y),function(x,y){
         if(tile_array[x][y].harvested_by != undefined){
             return 1;
         } else {
