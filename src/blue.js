@@ -3,9 +3,9 @@ var blue_player = {
     color: "#0000FF",
     take_turn: function(){
         // Check all tiles to find the best places to build
-        var best_utility = -1000;
-        var best_x;
-        var best_y;
+        var city_utility = -1000;
+        var city_x;
+        var city_y;
         for (var x = 0; x < map_size_x; x++) {
             for (var y = 0; y < map_size_y; y++) {
                 // Blue Builds as close as possible
@@ -26,42 +26,60 @@ var blue_player = {
                     utility += 2*food;
                     
                     
-                    if(utility > best_utility){
-                        best_x = x;
-                        best_y = y;
-                        best_utility = utility;
+                    if(utility > city_utility){
+                        city_x = x;
+                        city_y = y;
+                        city_utility = utility;
                     }
                 }
             }
         }
 
-        console.log("Blue: best place for a city is at "+best_x+","+best_y);
+        console.log("Blue: best place for a city is at "+city_x+","+city_y);
+
 
         // Check if there is anything useful to do in cities
         for(key in cities){
             var city = cities[key];
             if(city.owner() == 'blue'){
-                if( city.level > 1 && city.food > 3 ){
-                    if(best_x != undefined && best_y != undefined){
-                        console.log("Green city at "+city.x+","+city.y+" builds a city at "+best_x+","+best_y);
-                        city.build_city(best_x,best_y,'blue');
+                if(city_x != undefined && city_y != undefined){
+                    var utility = city_utility - 10 + city.level + city.food;
+                    if( utility > 0 ){
+                        console.log("Green city at "+city.x+","+city.y+" builds a city at "+city_x+","+city_y);
+                        city.build_city(city_x,city_y,'blue');
                     }
                 }
+
                 if(city.wood >= 5){
-                    console.log("Blue can build a road.");
-                    var road_locations = [];
+                    var road_utility = -1000;
+                    var road_x;
+                    var road_y;
                     for (var x = 0; x < map_size_x; x++) {
                         for (var y = 0; y < map_size_y; y++) {
                             if(can_build_road(x,y,city)){
-                                console.log(x,y);
-                                road_locations.push([x,y]);
+                                var utility = sum_tiles(neighbour_tiles(x,y),function(x,y){
+                                    var util = 0;
+                                    if( is_city_allowed(x,y) ){
+                                        util -= 1;
+                                    }
+                                    if(tile_array[x][y].owner == 'blue' &&
+                                       tile_array[x][y].land == 'g' &&
+                                       tile_array[x][y].city == undefined ){
+                                        util += 1;
+                                    }
+                                    return util;
+                                });
+
+                                if(utility > road_utility){
+                                    road_x = x;
+                                    road_y = y;
+                                    road_utility = utility;
+                                }
                             }
                         }
                     }
-                    console.log(road_locations.length)
-                    if(road_locations.length > 0){
-                        var n = Math.floor(Math.random() * road_locations.length);
-                        city.build_road(road_locations[n][0],road_locations[n][1]);
+                    if(road_utility > 0){
+                        city.build_road(road_x,road_y);
                     }
                 }
             }
