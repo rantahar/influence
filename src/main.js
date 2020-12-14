@@ -91,7 +91,7 @@ function neighbour_square_tiles(x,y){
             ]
 }
 
-function neigbour_tiles(x,y){
+function neighbour_tiles(x,y){
     var msx = map_size_x; var msy = map_size_y;
     return [[(x+1)%msx,y],[x,(y+1)%msy],
             [(x-1+msx)%msx,y],[x,(y-1+msy)%msy]
@@ -130,7 +130,7 @@ function max_tiles(tiles,f){
 
 function is_city_allowed(x,y){
     // check for neighbouring cities
-    var nb_cities = sum_tiles(neigbour_tiles(x,y),function(x,y){
+    var nb_cities = sum_tiles(neighbour_tiles(x,y),function(x,y){
         if(tile_array[x][y].harvested_by != undefined){
             return 1;
         } else {
@@ -146,7 +146,7 @@ function is_city_allowed(x,y){
 
 function can_build_road(x,y,city){
     if( tile_array[x][y].is_empty() ){
-        var nb_matches = sum_tiles(neigbour_tiles(x,y),function(x,y){
+        var nb_matches = sum_tiles(neighbour_tiles(x,y),function(x,y){
             if(tile_array[x][y].road == city.number){
                 return 1;
             } else {
@@ -310,7 +310,7 @@ class City {
             if(can_build_road(x,y,this)){
                 var mapscene = game.scene.scenes[0];
                 mapscene.add_road(x,y);
-                this.add_tiles(neigbour_tiles(x,y));
+                this.add_tiles(neighbour_tiles(x,y));
                 this.wood -= 5;
                 tile_array[x][y].road = this.number;
             }
@@ -605,7 +605,7 @@ function next_turn(map_scene){
                 if(tile_array[x][y].city && tile_array[x][y].owner == player){
                     c += tile_array[x][y].city.culture();
                 }
-                var nb_tiles = neigbour_tiles(x,y); 
+                var nb_tiles = neighbour_tiles(x,y); 
                 let dc = max_tiles(nb_tiles, function(x,y){
                     return get_player_culture(player,x,y);
                 });
