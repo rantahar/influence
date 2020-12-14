@@ -74,20 +74,6 @@ var players = {
 }
 
 
-function sum_nb2(x,y,f){
-    var msx = map_size_x; var msy = map_size_y;
-    var sum = f(x,y);
-    sum += f((x+1)%msx,y) + f(x,(y+1)%msy);
-    sum += f((x-1+msx)%msx,y) + f(x,(y-1+msy)%msy);
-
-    sum += f((x+1)%msx,(y+1)%msy) + f((x+1)%msx,(y-1+msy)%msy);
-    sum += f((x-1+msx)%msx,(y+1)%msy) + f((x-1+msx)%msx,(y-1+msy)%msy);
-
-    sum += f((x+2)%msx,y) + f(x,(y+2)%msy);
-    sum += f((x-2+msx)%msx,y) + f(x,(y-2+msy)%msy);
-    return sum;
-}
-
 function for_neighbours(x,y,f){
     var msx = map_size_x; var msy = map_size_y;
     f(x,y);

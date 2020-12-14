@@ -14,7 +14,7 @@ var blue_player = {
                     var utility = tile.culture.blue;
                     
                     // Amount of food should count more
-                    var food = sum_neighbours(x,y,function(a,b){
+                    var food = sum_tiles(neighbour_tiles(x,y),function(a,b){
                         var food = 0;
                         if(tile_array[a][b].owner == 'blue' &&
                         tile_array[a][b].land == 'g' &&
