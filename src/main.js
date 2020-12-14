@@ -69,7 +69,7 @@ function sum_nb2(x,y,f){
     sum += f((x+1)%msx,y) + f(x,(y+1)%msy);
     sum += f((x-1+msx)%msx,y) + f(x,(y-1+msy)%msy);
 
-    sum += f((x+1)%msx,(y+1)%msy) + f((x+1)%msx,(y-1)%msy);
+    sum += f((x+1)%msx,(y+1)%msy) + f((x+1)%msx,(y-1+msy)%msy);
     sum += f((x-1+msx)%msx,(y+1)%msy) + f((x-1+msx)%msx,(y-1+msy)%msy);
 
     sum += f((x+2)%msx,y) + f(x,(y+2)%msy);
@@ -82,7 +82,6 @@ function for_neighbours(x,y,f){
     f(x,y);
     f((x+1)%msx,y); f(x,(y+1)%msy);
     f((x-1+msx)%msx,y); f(x,(y-1+msy)%msy);
-
 }
 
 
@@ -371,21 +370,22 @@ class mapScene extends Phaser.Scene {
         this.city_layer.putTileAt(building_cite_sprite, x, y);
     }
 
+    
     draw_boundaries(){
-        var width = 2*this.map.tileWidth;
-        var height = 2*this.map.tileHeight;
         // Remove old boundaries
         this.boundary_markers.forEach(function(marker, i){
             marker.destroy();
         });
 
-        // Check every tile. There must be a better way?
-        for (var x = 1; x < map_size_x-1; x++) {
-            for (var y = 1; y < map_size_y-1; y++) {
-                this.check_and_draw_border(x,y,x+1,y,x+1,y+1,x+1,y);
-                this.check_and_draw_border(x,y,x-1,y,x,y+1,x,y);
-                this.check_and_draw_border(x,y,x,y+1,x+1,y+1,x,y+1);
-                this.check_and_draw_border(x,y,x,y-1,x+1,y,x,y);
+        for (var x = 0; x < map_size_x; x++) {
+            for (var y = 0; y < map_size_y; y++) {
+                var msx = map_size_x; var msy = map_size_y;
+                var xp = (x+1)%msx; var yp = (y+1)%msy;
+                var xm = (x-1+msx)%msx; var ym = (y-1+msy)%msy;
+                this.check_and_draw_border(x,y,xp,y,x+1,y+1,x+1,y);
+                this.check_and_draw_border(x,y,xm,y,x,y+1,x,y);
+                this.check_and_draw_border(x,y,x,yp,x+1,y+1,x,y+1);
+                this.check_and_draw_border(x,y,x,ym,x+1,y,x,y);
             }
         }
     }
@@ -481,9 +481,9 @@ function tile_click(map_scene) {
 function next_turn(map_scene){
     
     var new_culture_array = [];
-    for (var x = 1; x < map_size_x-1; x++) {
+    for (var x = 0; x < map_size_x; x++) {
         new_culture_array[x] = [];
-        for (var y = 1; y < map_size_y-1; y++) {
+        for (var y = 0; y < map_size_y; y++) {
             new_culture_array[x][y] = {};
 
             // Calculate culture
@@ -492,10 +492,11 @@ function next_turn(map_scene){
                 if(tile_array[x][y].city && tile_array[x][y].owner == player){
                     c += tile_array[x][y].city.culture();
                 }
-                c += 0.25*get_player_culture(player,x-1,y);
-                c += 0.25*get_player_culture(player,x+1,y);
-                c += 0.25*get_player_culture(player,x,y-1);
-                c += 0.25*get_player_culture(player,x,y+1);
+                var msx = map_size_x; var msy = map_size_y;
+                c += 0.25*get_player_culture(player,(x-1+msx)%msx,y);
+                c += 0.25*get_player_culture(player,(x+1)%msx,y);
+                c += 0.25*get_player_culture(player,x,(y-1+msy)%msy);
+                c += 0.25*get_player_culture(player,x,(y+1)%msy);
                 if(c>=1){
                     new_culture_array[x][y][player] = c;
                 }
@@ -503,14 +504,14 @@ function next_turn(map_scene){
         }
     }
 
-    for (var x = 1; x < map_size_x-1; x++) {
-        for (var y = 1; y < map_size_y-1; y++) {
+    for (var x = 0; x < map_size_x; x++) {
+        for (var y = 0; y < map_size_y; y++) {
             tile_array[x][y].culture = new_culture_array[x][y];
         }
     }
 
-    for (var x = 1; x < map_size_x-1; x++) {
-        for (var y = 1; y < map_size_y-1; y++) {
+    for (var x = 0; x < map_size_x; x++) {
+        for (var y = 0; y < map_size_y; y++) {
             tile_array[x][y].owner = decide_tile_owner(x,y);
         }
     }

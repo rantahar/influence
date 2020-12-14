@@ -6,8 +6,8 @@ var blue_player = {
         var best_utility = -1000;
         var best_x;
         var best_y;
-        for (var x = 1; x < map_size_x-1; x++) {
-            for (var y = 1; y < map_size_y-1; y++) {
+        for (var x = 0; x < map_size_x; x++) {
+            for (var y = 0; y < map_size_y; y++) {
                 // Blue Builds as close as possible
                 if(is_city_allowed(x,y) && tile_array[x][y].owner == 'blue'){
                     var tile = tile_array[x][y]
