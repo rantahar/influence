@@ -13,14 +13,15 @@ var map_descriptions = {
 }
 
 var city_sprites = [7,8,9,14,15,15,15,15,15]
-var road_sprites = [10*7+1]
 var building_cite_sprite = 5*7+3
+
+var road_sprites = [2,71,77,70,71,71,72,66,77,84,77,63,86,65,64,78]
 
 var map_1 = [
     ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
     ['w','w','w','g','g','g','g','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','g','g','g','g','g','g','w','w','w','w','w','w','w','w','w'],
-    ['w','g','g','f','f','g','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','w','g','f','g','g','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','f','g','g','g','w','w','w','w','w','w','w','w','w'],
     ['w','g','g','g','g','g','f','g','w','w','w','w','w','w','w','w','w'],
     ['w','g','f','g','g','g','g','w','w','w','w','w','w','w','w','w','w'],
     ['w','g','f','g','f','g','g','w','w','w','w','w','w','w','w','w','w'],
@@ -66,11 +67,12 @@ var players = {
 }
 
 
-function for_neighbours(x,y,f){
+
+function neighbour_tiles(x,y){
     var msx = map_size_x; var msy = map_size_y;
-    f(x,y);
-    f((x+1)%msx,y); f(x,(y+1)%msy);
-    f((x-1+msx)%msx,y); f(x,(y-1+msy)%msy);
+    return [[(x+1)%msx,y],[x,(y+1)%msy],
+            [(x-1+msx)%msx,y],[x,(y-1+msy)%msy]
+           ]
 }
 
 function neighbour_square_tiles(x,y){
@@ -83,13 +85,16 @@ function neighbour_square_tiles(x,y){
             ]
 }
 
-function neighbour_tiles(x,y){
+function neighbour_2_tiles(x,y){
     var msx = map_size_x; var msy = map_size_y;
     return [[(x+1)%msx,y],[x,(y+1)%msy],
-            [(x-1+msx)%msx,y],[x,(y-1+msy)%msy]
-           ]
+            [(x-1+msx)%msx,y],[x,(y-1+msy)%msy],
+            [(x+1)%msx,(y+1)%msy],[(x-1+msx)%msx,(y+1)%msy],
+            [(x+1)%msx,(y-1+msy)%msy],[(x-1+msx)%msx,(y-1+msy)%msy],
+            [(x+2)%msx,y],[x,(y+2)%msy],
+            [(x-2+msx)%msx,y],[x,(y-2+msy)%msy]
+         ]
 }
-
 
 function for_tiles(tiles,f){
     var sum = 0;
@@ -122,34 +127,34 @@ function max_tiles(tiles,f){
 
 function is_city_allowed(x,y){
     // check for neighbouring cities
-    var nb_cities = sum_tiles(neighbour_tiles(x,y),function(x,y){
-        if(tile_array[x][y].harvested_by != undefined){
-            return 1;
-        } else {
-            return 0;
-        }
-    });
-    if(nb_cities == 0 && tile_array[x][y].is_empty() ){
-        return true;
-    } else {
+    if( !(tile_array[x][y].is_empty()) ){
         return false;
     }
+    var allowed = true;
+    for_tiles(neighbour_2_tiles(x,y),function(x,y){
+        if(tile_array[x][y].city != undefined ||
+           tile_array[x][y].building != undefined){
+            allowed = false;
+        }
+    });
+    return allowed;
 }
 
-function can_build_road(x,y,city){
-    if( tile_array[x][y].is_empty() ){
-        var nb_matches = sum_tiles(neighbour_tiles(x,y),function(x,y){
-            if(tile_array[x][y].road == city.number){
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-        if(nb_matches > 0){
-            return true;
-        }
+function can_build_road(x,y){
+    if( tile_array[x][y].city != undefined || tile_array[x][y].road != undefined){
+        return false;
     }
-    return false;
+    if( !( tile_array[x][y].land == 'g' || tile_array[x][y].land == 'f') ){
+        return false;
+    }
+    var allowed = false;
+    for_tiles(neighbour_tiles(x,y),function(x,y){
+        if(tile_array[x][y].road != undefined ||
+           tile_array[x][y].city != undefined ){
+            return allowed = true;
+        }
+    });
+    return allowed;
 }
 
 
@@ -172,6 +177,7 @@ function tile_wood_production(x,y){
 
 
 
+
 // City class
 class City {
     constructor(x, y, level) {
@@ -180,17 +186,14 @@ class City {
         this.number = cities.length;
         this.level = level;
         this.food = 0;
-        this.wood = 0;
         this.name = "Aztola";
-        for_tiles(neighbour_square_tiles(x,y), function(x,y){
-            tile_array[x][y].harvested_by = cities.length;
-        });
-        tile_array[x][y].road = cities.length;
+        tile_array[x][y].culture[this.owner()] = this.culture();
+        tile_array[x][y].road = true;
     }
 
     // Calculate the culture production of the city
     culture(){
-        return 3 + this.level;
+        return 50*this.level;
     }
 
     owner(){
@@ -199,7 +202,26 @@ class City {
 
     // The amount of food produced per turn
     food_production(){
-        return city_food_production(this.x,this.y,this);
+        var city = this;
+        var food = 0;
+        for_tiles(neighbour_square_tiles(this.x,this.y), function(x,y){
+            if(tile_array[x][y].owner == city.owner()){
+                food += tile_food_production(x,y);
+            }
+        });
+        return food;
+    }
+
+    // The amount of wood produced per turn
+    wood_production(){
+        var city = this;
+        var wood = 0;
+        for_tiles(neighbour_square_tiles(this.x,this.y), function(x,y){
+            if(tile_array[x][y].owner == city.owner()){
+                wood += tile_wood_production(x,y);
+            }
+        });
+        return wood;
     }
 
     // The amount of food consumed each turn
@@ -211,7 +233,7 @@ class City {
     // city grows when the city has this much food
     food_limit() {
         //return Math.pow(2,this.level-1);
-        return 15*this.level;
+        return 20*this.level*this.level;
     }
 
     // Update the city
@@ -219,20 +241,28 @@ class City {
         var x = this.x;
         var y = this.y;
 
+        // Gather food
+        var food = this.food_production();
+
         // Consume
         this.food -= this.food_consumption();
 
         // Check buildings
         if(this.building != undefined){
-            if(this.building.food > this.food){
-                this.building.food -= this.food;
-                this.food = 0;
+            var done = true;
+            if(this.building.food > food){
+                this.building.food -= food;
+                food = 0;
+                done = false;
             } else {
-                this.food -= this.building.food;
+                food -= this.building.food;
+            }
+            if(done){
                 this.building_done();
             }
         }
 
+        this.food += food;
 
         // Check if the city grows
         if(this.food > this.food_limit()){
@@ -246,15 +276,11 @@ class City {
             this.food = 0;
             map_scene.update_city_sprite(x,y,this.level);
         }
+
+        // Gather other resources
+        players[this.owner()].wood += this.wood_production();
     }
 
-    gather(x,y){
-        if(tile_array[x][y].owner == this.owner() &&
-           tile_array[x][y].city == undefined &&
-           tile_array[x][y].land == 'g'){
-            this.food += 1;
-        }
-    }
 
     // Describe the city in html
     describe(){
@@ -262,7 +288,6 @@ class City {
         html += "<h4>"+this.name+"</h4>";
         html += "<p>Level: "+this.level+"</p>";
         html += "<p>Food: "+this.food+"</p>";
-        html += "<p>Wood: "+this.wood+"</p>";
         html += "</div>";
         return html;
     }
@@ -270,7 +295,7 @@ class City {
     // Start building a new city
     build_city(x, y){
         // check for neighbouring cities
-        if(is_city_allowed(x,y) && tile_array[x][y].owner == this.owner()){
+        if(this.building == undefined && is_city_allowed(x,y) && tile_array[x][y].owner == this.owner()){
             var mapscene = game.scene.scenes[0];
             mapscene.add_building_sprite(x, y);
             tile_array[x][y].building = 'city';
@@ -285,29 +310,6 @@ class City {
         }
         this.building = undefined;
     }
-
-    add_tiles(tiles){
-        var city = this;
-        for_tiles(tiles, function(x,y){
-            if(tile_array[x][y].harvested_by == undefined){
-                tile_array[x][y].harvested_by = city.number;
-            }
-        });
-    }
-
-    // Build a road
-    build_road(x, y){
-        // Check this is a neighbour tile
-        if(this.wood >= 5){
-            if(can_build_road(x,y,this)){
-                var mapscene = game.scene.scenes[0];
-                mapscene.add_road(x,y);
-                this.add_tiles(neighbour_tiles(x,y));
-                this.wood -= 5;
-                tile_array[x][y].road = this.number;
-            }
-        }
-    }
 }
 
 // Keep track of existing cities
@@ -319,7 +321,7 @@ class Tile {
     constructor(x, y, land) {
         this.x = x;
         this.y = y;
-        this.owner = 'unowned';
+        this.owner = undefined;
         this.culture = {};
         this.land = land;
     }
@@ -367,12 +369,16 @@ class mapScene extends Phaser.Scene {
         //this.cameras.main.setBackgroundColor("#ffffff");
 
         // create board
-        this.map = this.make.tilemap({ tileWidth: 16, tileHeight: 16, width: 2*map_size_x, height: 2*map_size_y});        var tiles = this.map.addTilesetImage('tiles');
+        this.map = this.make.tilemap({ tileWidth: 16, tileHeight: 16, width: 2*map_size_x, height: 2*map_size_y});
+        var tiles = this.map.addTilesetImage('tiles');
         this.ground_layer = this.map.createBlankDynamicLayer('ground', tiles);
         this.ground_layer.setScale(3);
         this.ground_layer.setInteractive();
         this.ground_layer.on('pointerdown',()=>{tile_click(this);} );
-    
+
+        this.road_layer = this.map.createBlankDynamicLayer("roads", tiles);
+        this.road_layer.setScale(1); // Roads are drawn on a smaller scale, looks nicer
+
         this.city_layer = this.map.createBlankDynamicLayer("cities", tiles);
         this.city_layer.setScale(3);
 
@@ -380,11 +386,9 @@ class mapScene extends Phaser.Scene {
     
         // Add at towns
         tile_array[2][2].owner = 'blue';
-        tile_array[2][2].culture = {'blue': 5};
-        this.add_city(2,2, 'blue');
-        tile_array[10][10].owner = 'green';
-        this.add_city(10,10, 'green');
-        tile_array[10][10].culture = {'green': 5};
+        this.add_city(2,2);
+        tile_array[6][7].owner = 'green';
+        this.add_city(6,7);
     
         this.cursors = this.input.keyboard.createCursorKeys();
         this.cameras.main.removeBounds();
@@ -433,19 +437,25 @@ class mapScene extends Phaser.Scene {
         }
     }
 
-    put_tile_at(layer,tile,x,y){
+    put_tile_at(layer,tile,x,y,scale=1){
         layer.putTileAt(tile, x, y);
-        layer.putTileAt(tile, x+map_size_x, y);
-        layer.putTileAt(tile, x, y+map_size_y);
-        layer.putTileAt(tile, x+map_size_x, y+map_size_y);
+        layer.putTileAt(tile, x+scale*map_size_x, y);
+        layer.putTileAt(tile, x, y+scale*map_size_y);
+        layer.putTileAt(tile, x+scale*map_size_x, y+scale*map_size_y);
     }
 
     add_city(x, y){
-        this.put_tile_at(this.city_layer, city_sprites[0], x, y);
         var city = new City(x, y, 1);
         tile_array[x][y].city = city;
         cities.push( city );
         this.draw_boundaries();
+        this.update_city_sprite(x, y, 1);
+
+        var map = this;
+        map.update_road_sprite(x, y);
+        for_tiles(neighbour_tiles(x,y), function(x,y){
+            map.update_road_sprite(x, y);
+        });
     }
 
     update_city_sprite(x,y,level){
@@ -458,11 +468,44 @@ class mapScene extends Phaser.Scene {
     }
 
     add_road(x, y){
-        this.put_tile_at(this.city_layer, road_sprites[0], x, y);
+        tile_array[x][y].road = true;
+        var map = this;
+        map.update_road_sprite(x, y);
+        for_tiles(neighbour_tiles(x,y), function(x,y){
+            map.update_road_sprite(x, y);
+        });
     }
     
     update_road_sprite(x, y){
-        this.put_tile_at(this.city_layer, road_sprites[0], x, y);
+        if(tile_array[x][y].road){
+            // a binary representation of the possibilities, some are repeated.
+            var crossing = 0;
+            var type = 0;
+            if(tile_array[(x+1)%map_size_x][y].road){
+                crossing += 1;
+                type += 1;
+                this.put_tile_at(this.road_layer, road_sprites[1], 3*x+2, 3*y+1, 3); // Middle tile, with intersections
+            }
+            if(tile_array[x][(y+1)%map_size_y].road){
+                crossing += 1;
+                type += 2;
+                this.put_tile_at(this.road_layer, road_sprites[2], 3*x+1, 3*y+2, 3); // Middle tile, with intersections
+            }
+            if(tile_array[(x-1+map_size_x)%map_size_x][y].road){
+                crossing += 1;
+                type += 4;
+                this.put_tile_at(this.road_layer, road_sprites[4], 3*x, 3*y+1, 3); // Middle tile, with intersections
+            }
+            if(tile_array[x][(y-1+map_size_y)%map_size_y].road){
+                crossing += 1;
+                type += 8;
+                this.put_tile_at(this.road_layer, road_sprites[8], 3*x+1, 3*y, 3); // Middle tile, with intersections
+            }
+            console.log(x,y,crossing);
+            if( crossing > 1 ){
+                this.put_tile_at(this.road_layer, road_sprites[type], 3*x+1, 3*y+1, 3); // Middle tile, with intersections
+            }
+        }
     }
 
     draw_boundaries(){
@@ -487,7 +530,7 @@ class mapScene extends Phaser.Scene {
     check_and_draw_border(x,y,xnb,ynb,xf,yf,xt,yt){
         var width =  3*this.map.tileWidth;
         var height = 3*this.map.tileHeight;
-        if( tile_array[x][y].owner != 'unowned' &&
+        if( tile_array[x][y].owner != undefined &&
             tile_array[x][y].owner != tile_array[xnb][ynb].owner )
         {
             var player = players[tile_array[x][y].owner];
@@ -559,7 +602,7 @@ function tile_click(map_scene) {
     $("#info-page").append("<p>"+map_descriptions[tile.land]+"</p>");
 
     // If there is an owner, show owner and culture
-    if(tile.owner != "unowned"){
+    if(tile.owner != undefined){
         var p = $("<p></p>").text("owner: ");
         var text = $("<span></span>").text(tile.owner).css('color', players[tile.owner].color);
         p.append(text);
@@ -585,6 +628,11 @@ function tile_click(map_scene) {
 
 function next_turn(map_scene){
     
+    // Update the cities
+    for(city_key in cities){
+        cities[city_key].update(map_scene);
+    }
+
     var new_culture_array = [];
     for (var x = 0; x < map_size_x; x++) {
         new_culture_array[x] = [];
@@ -594,24 +642,23 @@ function next_turn(map_scene){
             // Calculate culture
             for(player in players){
                 let c = 0;
-                if(tile_array[x][y].city && tile_array[x][y].owner == player){
-                    c += tile_array[x][y].city.culture();
-                }
-                var nb_tiles = neighbour_tiles(x,y); 
-                let dc = max_tiles(nb_tiles, function(x,y){
-                    return get_player_culture(player,x,y);
+                let dc = 0;
+                for_tiles(neighbour_tiles(x,y), function(x,y){
+                    dc += get_player_culture(player,x,y);
                 });
 
-                let distance_decay = 1;
+                c = 0.125*dc;
+
                 if(tile_array[x][y].land == 'f'){
-                    distance_decay += 0.5;
+                    c *= 0.5;
                 }
-                if(tile_array[x][y].road != undefined){
-                    distance_decay *= 0.5;
+                if(tile_array[x][y].road){
+                    c *= 2;
                 }
 
-                if( dc > c ){
-                    c = dc-distance_decay;
+                // Add the culture production of city if there is one
+                if(tile_array[x][y].city && tile_array[x][y].owner == player){
+                    c += tile_array[x][y].city.culture();
                 }
                 
                 if(c>=1){
@@ -621,34 +668,22 @@ function next_turn(map_scene){
         }
     }
 
-    // Send resources to cities
-    for (var x = 0; x < map_size_x; x++) {
-        for (var y = 0; y < map_size_y; y++) {
-            if(tile_array[x][y].harvested_by != undefined) {
-                var city = cities[tile_array[x][y].harvested_by];
-                if(tile_array[x][y].owner == city.owner()){
-                    city.food += tile_food_production(x,y);
-                    city.wood += tile_wood_production(x,y);
-                }
-            }
-        }
-    }
-
-    // Update the cities
-    for(city_key in cities){
-        cities[city_key].update(map_scene);
-    }
-
     // Write new culture into the array
     for (var x = 0; x < map_size_x; x++) {
         for (var y = 0; y < map_size_y; y++) {
             tile_array[x][y].culture = new_culture_array[x][y];
+        }
+    }
+    for (var x = 0; x < map_size_x; x++) {
+        for (var y = 0; y < map_size_y; y++) {
             tile_array[x][y].owner = decide_tile_owner(x,y);
         }
     }
 
     turn_counter += 1;
     $("#turn_number_text").text('Year '+turn_counter);
+
+    console.log(players);
 
     for(player in players){
         players[player].take_turn();
@@ -665,20 +700,33 @@ function get_player_culture(player, x, y){
 }
 
 function decide_tile_owner(x,y){
-    var owner = tile_array[x][y].owner;
-    var owner_culture = get_player_culture(owner,x,y);
-    var new_owner = owner;
+    var new_owner = undefined;
+    var owner_culture = 0;
     for(player_key in players){
         var player_culture = get_player_culture(player_key,x,y);
         if( player_culture == owner_culture ) {
-            // Tie goes to the original owner
-            new_owner = owner;
+            // No-one wins ties
+            new_owner = undefined;
         } else if( player_culture > owner_culture ){
             new_owner = player_key;
             owner_culture = player_culture;
         }
     }
     return new_owner;
+}
+
+
+
+// Build a road
+function build_road(player, x, y){
+    if(player.wood >= 5){
+        if(can_build_road(x,y)){
+            var mapscene = game.scene.scenes[0];
+            mapscene.add_road(x,y);
+            player.wood -= 5;
+            tile_array[x][y].road = true;
+        }
+    }
 }
 
 

@@ -1,6 +1,7 @@
 
 var blue_player = {
     color: "#0000FF",
+    wood: 0,
     take_turn: function(){
         // Check all tiles to find the best places to build
         var city_utility = -1000;
@@ -9,8 +10,8 @@ var blue_player = {
         for (var x = 0; x < map_size_x; x++) {
             for (var y = 0; y < map_size_y; y++) {
                 // Blue Builds as close as possible
-                if(is_city_allowed(x,y) && tile_array[x][y].owner == 'blue'){
-                    var tile = tile_array[x][y]
+                var tile = tile_array[x][y]
+                if(is_city_allowed(x,y) && tile.owner == 'blue'){
                     var utility = tile.culture.blue;
                     
                     // Amount of food should count more
@@ -45,43 +46,45 @@ var blue_player = {
                 if(city_x != undefined && city_y != undefined){
                     var utility = city_utility - 10 + city.level + city.food;
                     if( utility > 0 ){
-                        console.log("Green city at "+city.x+","+city.y+" builds a city at "+city_x+","+city_y);
+                        console.log("Blue city at "+city.x+","+city.y+" builds a city at "+city_x+","+city_y);
                         city.build_city(city_x,city_y,'blue');
                     }
                 }
+            }
+        }
 
-                if(city.wood >= 5){
-                    var road_utility = -1000;
-                    var road_x;
-                    var road_y;
-                    for (var x = 0; x < map_size_x; x++) {
-                        for (var y = 0; y < map_size_y; y++) {
-                            if(can_build_road(x,y,city)){
-                                var utility = sum_tiles(neighbour_tiles(x,y),function(x,y){
-                                    var util = 0;
-                                    if( is_city_allowed(x,y) ){
-                                        util -= 1;
-                                    }
-                                    if(tile_array[x][y].owner == 'blue' &&
-                                       tile_array[x][y].land == 'g' &&
-                                       tile_array[x][y].city == undefined ){
-                                        util += 1;
-                                    }
-                                    return util;
-                                });
-
-                                if(utility > road_utility){
-                                    road_x = x;
-                                    road_y = y;
-                                    road_utility = utility;
-                                }
-                            }
-                        }
+        var road_utility = -1000;
+        var road_x;
+        var road_y;
+        for (var x = 0; x < map_size_x; x++) {
+            for (var y = 0; y < map_size_y; y++) {
+                var tile = tile_array[x][y]
+                if(tile.owner == 'blue' && can_build_road(x,y)){
+                    var utility = 0;
+                    for(key in cities){
+                        var city = cities[key];
+                        var dx = city.x - x;
+                        var dy = city.y - y;
+                        var dist = dx*dx+dy*dy;
+                        utility += 1/dist;
                     }
-                    if(road_utility > 0){
-                        city.build_road(road_x,road_y);
+
+                    utility -= 0.01*tile.culture.blue;
+                    
+                    if(utility > road_utility){
+                        road_x = x;
+                        road_y = y;
+                        road_utility = utility;
                     }
                 }
+            }
+        }
+
+        console.log("Blue: best place for a road is at "+road_x+","+road_y+" (utility "+utility+")");
+        if(this.wood >= 5){
+            if(road_utility > 0){
+                build_road(this, road_x,road_y);
+                console.log("Blue builds a road at "+road_x+","+road_y);
             }
         }
     }
