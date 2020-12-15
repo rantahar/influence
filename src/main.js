@@ -59,11 +59,7 @@ var tile_array = [];
 var players = {
     'green': green_player,
     'blue': blue_player,
-    'red': {
-        color: "#FF0000",
-        take_turn: function(){
-        }
-    },
+    'red': red_player,
 }
 
 
@@ -389,6 +385,8 @@ class mapScene extends Phaser.Scene {
         this.add_city(2,2);
         tile_array[6][7].owner = 'green';
         this.add_city(6,7);
+        tile_array[1][9].owner = 'red';
+        this.add_city(1,9);
     
         this.cursors = this.input.keyboard.createCursorKeys();
         this.cameras.main.removeBounds();
