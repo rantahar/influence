@@ -57,6 +57,13 @@ var tile_array = [];
 
 //Players
 var players = {
+    'white': {
+        human: true,
+        text_color: '#FFFFFF',
+        map_color: '#FFFFFF',
+        wood: 0,
+        take_turn(){}
+    },
     'green': green_player,
     'blue': blue_player,
     'red': red_player,
@@ -290,6 +297,7 @@ class City {
 
     // Start building a new city
     build_city(x, y){
+        console.log(x,y,this,is_city_allowed(x,y));
         // check for neighbouring cities
         if(this.building == undefined && is_city_allowed(x,y) && tile_array[x][y].owner == this.owner()){
             var mapscene = game.scene.scenes[0];
@@ -354,6 +362,7 @@ class mapScene extends Phaser.Scene {
         this.city_layer;
 
         this.boundary_markers = [];
+        this.highlights = [];
     }
 
     preload (){
@@ -361,9 +370,6 @@ class mapScene extends Phaser.Scene {
     }
 
     create (){
-        //this.cameras.main.setBounds( -100, -100, 2400, 2400);
-        //this.cameras.main.setBackgroundColor("#ffffff");
-
         // create board
         this.map = this.make.tilemap({ tileWidth: 16, tileHeight: 16, width: 2*map_size_x, height: 2*map_size_y});
         var tiles = this.map.addTilesetImage('tiles');
@@ -378,6 +384,11 @@ class mapScene extends Phaser.Scene {
         this.city_layer = this.map.createBlankDynamicLayer("cities", tiles);
         this.city_layer.setScale(3);
 
+        this.preview_layer = this.map.createBlankDynamicLayer("preview", tiles);
+        this.preview_layer.setScale(3); // Roads are drawn on a smaller scale, looks nicer
+        this.preview_layer.setAlpha(0.5); // Roads are drawn on a smaller scale, looks nicer
+
+
         this.draw_map();
     
         // Add at towns
@@ -387,8 +398,11 @@ class mapScene extends Phaser.Scene {
         this.add_city(6,7);
         tile_array[1][9].owner = 'red';
         this.add_city(1,9);
+        tile_array[6][3].owner = 'white';
+        this.add_city(6,3);
     
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.escape_key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
         this.cameras.main.removeBounds();
     }
     
@@ -421,6 +435,39 @@ class mapScene extends Phaser.Scene {
             y = (y+0.5*delta+my)%my;
             this.cameras.main.scrollY = y; 
         }
+
+        // preview
+        var worldPoint = this.input.activePointer.positionToCamera(this.cameras.main);
+        var x = this.map.worldToTileX(worldPoint.x) % map_size_x;
+        var y = this.map.worldToTileY(worldPoint.y) % map_size_y;
+
+        if(this.preview == 'city'){
+            if(this.previous_preview != undefined){
+                this.preview_layer.removeTileAt(this.previous_preview.x, this.previous_preview.y);
+            }
+            this.preview_layer.putTileAt(city_sprites[0], x, y);
+            this.previous_preview = {x:x, y:y};
+        }
+
+        if(this.preview == 'road'){
+            if(this.previous_preview != undefined){
+                this.preview_layer.removeTileAt(this.previous_preview.x, this.previous_preview.y);
+            }
+            this.preview_layer.putTileAt(road_sprites[1], x, y);
+            this.previous_preview = {x:x, y:y};
+        }
+
+        if(this.preview == undefined && this.previous_preview){
+            this.preview_layer.removeTileAt(this.previous_preview.x, this.previous_preview.y);
+            this.previous_preview = undefined;
+        }
+
+        if (this.escape_key.isDown)
+        {
+            this.remove_highlight();
+            this.preview = undefined;
+        }
+    
     }
 
     draw_map(x, y){
@@ -532,7 +579,7 @@ class mapScene extends Phaser.Scene {
             tile_array[x][y].owner != tile_array[xnb][ynb].owner )
         {
             var player = players[tile_array[x][y].owner];
-            var color = Phaser.Display.Color.HexStringToColor(player.color);
+            var color = Phaser.Display.Color.HexStringToColor(player.map_color);
             var marker = this.add.graphics({ 
                 lineStyle: { width: 5, color: color.color, alpha: 0.4 }
             });
@@ -548,6 +595,19 @@ class mapScene extends Phaser.Scene {
             marker.strokePath();
             this.boundary_markers.push(marker);
         }
+    }
+
+    highlight_allowed_square(x,y){
+        var square = this.add.graphics()
+        square.fillStyle(0x55ff55, 0.5);
+        square.fillRect(16*3*x, 16*3*y, 16*3, 16*3);
+        this.highlights.push(square);
+    }
+
+    remove_highlight(){
+        this.highlights.forEach(function(marker, i){
+            marker.destroy();
+        });
     }
 
 }
@@ -574,54 +634,126 @@ $( "#next_turn_button" ).click(function() {
 });
 
 
+
+var panel_location = {x:undefined,y:undefined};
 function tile_click(map_scene) {
     var worldPoint = map_scene.input.activePointer.positionToCamera(map_scene.cameras.main);
     var x = map_scene.map.worldToTileX(worldPoint.x) % map_size_x;
     var y = map_scene.map.worldToTileY(worldPoint.y) % map_size_y;
-    var tile = tile_array[x][y];
+    panel_location.x = x;
+    panel_location.y = y;
 
-    $("#info-page").empty();
-
-    // Show city if there is one
-    if(tile.city){
-        var div = tile.city.describe()
-        $("#info-page").append(div);
-    } else {
-        if(tile.harvested_by != undefined){
-            var p = $("<p></p>").text("Harvested by ");
-            var text = $("<span></span>").text(cities[tile.harvested_by].name);
-            p.append(text);
-            $("#info-page").append(p);
-        }
+    
+    // If building
+    if( map_scene.preview == 'road'){
+        build_road(players.white, x, y);
+        map_scene.preview = undefined;
+        map_scene.remove_highlight();
     }
 
-    // Describe the tile
-    $("#info-page").append("<p><b>Tile:</b> x="+x+", y="+y+"</p>");
-    $("#info-page").append("<p>"+map_descriptions[tile.land]+"</p>");
+    if( map_scene.preview == 'city'){
+        map_scene.view_city.build_city(x, y);
+        map_scene.preview = undefined;
+        map_scene.remove_highlight();
+    }
 
-    // If there is an owner, show owner and culture
-    if(tile.owner != undefined){
-        var p = $("<p></p>").text("owner: ");
-        var text = $("<span></span>").text(tile.owner).css('color', players[tile.owner].color);
-        p.append(text);
+    update_panel();
+}
+
+function update_panel(){
+    if( panel_location.x != undefined){
+        var x = panel_location.x;
+        var y = panel_location.y;
+        var tile = tile_array[x][y];
+        $("#info-page").empty();
+
+        // Show city if there is one
+        if(tile.city){
+            var div = tile.city.describe()
+            $("#info-page").append(div);
+
+            var mapscene = game.scene.scenes[0];
+            mapscene.view_city = tile.city;
+        }
+
+        // Describe the tile
+        $("#info-page").append("<p><b>Tile:</b> x="+x+", y="+y+"</p>");
+        $("#info-page").append("<p>"+map_descriptions[tile.land]+"</p>");
+
+        // If there is an owner, show owner and culture
+        if(tile.owner != undefined){
+            var p = $("<p></p>").text("owner: ");
+            var text = $("<span></span>").text(tile.owner).css('color', players[tile.owner].text_color);
+            p.append(text);
+            $("#info-page").append(p);
+            var p = $("<p></p>").text("Culture: ");
+            var text = $("<span></span>").text(" "+tile.culture[tile.owner].toFixed(2))
+            .css('color', players[tile.owner].text_color);
+            p.append(text);
+            for(var key in tile.culture){
+                if(key != tile.owner){
+                    var text = $("<span></span>").text(" "+tile.culture[key].toFixed(2))
+                    .css('color', players[key].text_color);
+                    p.append(text);
+                }
+            }
+        }
         $("#info-page").append(p);
-        var p = $("<p></p>").text("Culture: ");
-        var text = $("<span></span>").text(" "+tile.culture[tile.owner].toFixed(2))
-        .css('color', players[tile.owner].color);
-        p.append(text);
-        for(var key in tile.culture){
-            if(key != tile.owner){
-                var text = $("<span></span>").text(" "+tile.culture[key].toFixed(2))
-                .css('color', players[key].color);
-                p.append(text);
+
+        // Add colony button
+        if(tile.city){
+            if(tile.owner == 'white'){
+                var city_button = $("<span></span>").text("Establish colony (turns)");
+                city_button.addClass("btn btn-success");
+                city_button.click(function(){ start_build_city(); });
+                $("#info-page").append(city_button);
             }
         }
     }
-    $("#info-page").append(p);
 
+    player = players.white;
+    $("#interaction-page").empty();
 
-    console.log(tile_array[x][y]);
+    var resource_text = $("<p></p>").text("Wood: " + player.wood);
+    $("#interaction-page").append(resource_text);
+
+    var road_button = $("<span></span>").text("Road (5 wood)");
+    if(player.wood >= 5){
+        road_button.addClass("btn btn-success");
+        road_button.click(function(){ start_build_road(); });
+    } else {
+        road_button.addClass("btn btn-secondary");
+    }
+
+    $("#interaction-page").append(road_button);
+
 }
+
+
+function start_build_road(){
+    var mapscene = game.scene.scenes[0];
+    mapscene.preview = 'road';
+    for (var x = 0; x < map_size_x; x++) {
+        for (var y = 0; y < map_size_y; y++) {
+            if(tile_array[x][y].owner == 'white' && can_build_road(x,y)){
+                mapscene.highlight_allowed_square(x,y);
+            }
+        }
+    }
+}
+
+function start_build_city(){
+    var mapscene = game.scene.scenes[0];
+    mapscene.preview = 'city';
+    for (var x = 0; x < map_size_x; x++) {
+        for (var y = 0; y < map_size_y; y++) {
+            if(tile_array[x][y].owner == 'white' && is_city_allowed(x,y)){
+                mapscene.highlight_allowed_square(x,y);
+            }
+        }
+    }
+}
+
 
 
 function next_turn(map_scene){
@@ -686,6 +818,8 @@ function next_turn(map_scene){
     for(player in players){
         players[player].take_turn();
     }
+
+    update_panel();
 }
 
 
@@ -718,7 +852,7 @@ function decide_tile_owner(x,y){
 // Build a road
 function build_road(player, x, y){
     if(player.wood >= 5){
-        if(can_build_road(x,y)){
+        if(players[tile_array[x][y].owner] == player && can_build_road(x,y)){
             var mapscene = game.scene.scenes[0];
             mapscene.add_road(x,y);
             player.wood -= 5;
@@ -727,6 +861,6 @@ function build_road(player, x, y){
     }
 }
 
-
+update_panel()
 
 

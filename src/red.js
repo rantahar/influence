@@ -1,6 +1,7 @@
 
 var red_player = {
-    color: "#FF0000",
+    text_color: "#FF5555",
+    map_color: "#FF0000",
     wood: 0,
     take_turn: function(){
         // Check all tiles to find the best places to build
