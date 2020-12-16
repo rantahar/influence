@@ -125,14 +125,15 @@ function neighbour_square_tiles(x,y){
 
 function neighbour_2_tiles(x,y){
     var msx = map_size_x; var msy = map_size_y;
-    return [[(x+1)%msx,y],[x,(y+1)%msy],
-            [(x-1+msx)%msx,y],[x,(y-1+msy)%msy],
-            [(x+1)%msx,(y+1)%msy],[(x-1+msx)%msx,(y+1)%msy],
-            [(x+1)%msx,(y-1+msy)%msy],[(x-1+msx)%msx,(y-1+msy)%msy],
-            [(x+2)%msx,y],[x,(y+2)%msy],
-            [(x-2+msx)%msx,y],[x,(y-2+msy)%msy]
-         ]
+    var r = [];
+    for( dx = -2; dx < 3; dx++){
+        for( dy = -2; dy < 3; dy++){
+            r.push([(x+dx+msx)%msx,(y+dy+msy)%msy]);
+        }
+    }
+    return r;
 }
+
 
 function for_tiles(tiles,f){
     var sum = 0;
