@@ -11,16 +11,16 @@ var green_player = {
         for (var x = 0; x < map_size_x; x++) {
             for (var y = 0; y < map_size_y; y++) {
                 // Green likes to build on the edges, where culture is minimal
-                if(is_city_allowed(x,y) && tile_array[x][y].owner == 'green'){
-                    var tile = tile_array[x][y]
+                if(is_city_allowed(x,y) && tiles[x][y].owner == 'green'){
+                    var tile = tiles[x][y]
                     var utility = -tile.culture.green;
                     
                     // Amount of food should count more
                     var food = sum_tiles(neighbour_tiles(x,y),function(a,b){
                         var food = 0;
-                        if(tile_array[a][b].owner == 'green' &&
-                        tile_array[a][b].land == 'g' &&
-                        tile_array[a][b].city == undefined ){
+                        if(tiles[a][b].owner == 'green' &&
+                        tiles[a][b].land == 'g' &&
+                        tiles[a][b].city == undefined ){
                             food = 1;
                         }
                         return food;
@@ -60,7 +60,7 @@ var green_player = {
         var road_y;
         for (var x = 0; x < map_size_x; x++) {
             for (var y = 0; y < map_size_y; y++) {
-                var tile = tile_array[x][y]
+                var tile = tiles[x][y]
                 if(tile.owner == 'green' && can_build_road(x,y)){
                     var utility = 100;
                     for(key in cities){

@@ -11,16 +11,16 @@ var blue_player = {
         for (var x = 0; x < map_size_x; x++) {
             for (var y = 0; y < map_size_y; y++) {
                 // Blue Builds as close as possible
-                var tile = tile_array[x][y]
+                var tile = tiles[x][y]
                 if(is_city_allowed(x,y) && tile.owner == 'blue'){
                     var utility = tile.culture.blue;
                     
                     // Amount of food should count more
                     var food = sum_tiles(neighbour_tiles(x,y),function(a,b){
                         var food = 0;
-                        if(tile_array[a][b].owner == 'blue' &&
-                        tile_array[a][b].land == 'g' &&
-                        tile_array[a][b].city == undefined ){
+                        if(tiles[a][b].owner == 'blue' &&
+                        tiles[a][b].land == 'g' &&
+                        tiles[a][b].city == undefined ){
                             food = 1;
                         }
                         return food;
@@ -59,7 +59,7 @@ var blue_player = {
         var road_y;
         for (var x = 0; x < map_size_x; x++) {
             for (var y = 0; y < map_size_y; y++) {
-                var tile = tile_array[x][y]
+                var tile = tiles[x][y]
                 if(tile.owner == 'blue' && can_build_road(x,y)){
                     var utility = 0;
                     for(key in cities){
