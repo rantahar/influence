@@ -51,6 +51,45 @@ var turn_counter = 1;
 var tiles = [];
 
 
+var green_player = new AIPlayer('green','Green',"#00AA00","#00AA00",{
+    new_city_utility: 20,
+    city_closeness: -10,
+    city_food: 1,
+    build_food: 1,
+    build_level: 1,
+    build_city_utility: 0,
+    build_base: -10,
+    new_road_utility: 10,
+    road_culture: -1,
+    road_city_connecting: -1
+})
+
+var blue_player = new AIPlayer('blue','Blue',"#5555FF","#0000FF",{
+    new_city_utility: -10,
+    city_closeness: 10,
+    city_food: 1,
+    build_food: 1,
+    build_level: 2,
+    build_city_utility: 0,
+    build_base: -14,
+    new_road_utility: -5,
+    road_culture: 5,
+    road_city_connecting: 1
+})
+
+var red_player = new AIPlayer('red','Red',"#FF5555","#FF0000",{
+    new_city_utility: -10,
+    city_closeness: 10,
+    city_food: 1,
+    build_food: 1,
+    build_level: 2,
+    build_city_utility: 0,
+    build_base: -14,
+    new_road_utility: -5,
+    road_culture: 5,
+    road_city_connecting: 1
+})
+
 //Players
 var players = {
     'white': {
@@ -62,7 +101,7 @@ var players = {
     },
     'green': green_player,
     'blue': blue_player,
-    'red': red_player,
+    'red': red_player
 }
 
 
