@@ -813,6 +813,42 @@ function next_turn(map_scene){
         }
     }
 
+    for (var x = 0; x < map_size_x; x++) {
+        for (var y = 0; y < map_size_y; y++) {
+            if(new_culture_array[x][y]['red'] > 0){
+                var red_culture = new_culture_array[x][y]['red'];
+                var n_others = 0;
+                for (var player in new_culture_array[x][y]) {
+                    if(player != 'red' && new_culture_array[x][y][player] > 0){
+                        n_others += 1;
+                    }
+                }
+                for(var n=0;n<10 && red_culture > 0 && n_others > 0; n+=1){
+                    console.log("red", x, y, red_culture, n_others);
+                    var dc = red_culture/n_others;
+                    var new_red_culture = red_culture;
+                    n_others = 0;
+                    for (var player in new_culture_array[x][y]) {
+                        if(player != 'red'){
+                            if(new_culture_array[x][y][player] >= dc){
+                                new_culture_array[x][y][player] -= dc;
+                                new_red_culture -= dc;
+                            } else {
+                                new_red_culture -= new_culture_array[x][y][player];
+                                new_culture_array[x][y][player] = 0;
+                            }
+                            if(new_culture_array[x][y][player] > 0){
+                                n_others += 1;
+                            }
+                        }
+                        red_culture = new_red_culture;
+                    }
+                }
+                new_culture_array[x][y]['red'] = red_culture;
+            }
+        }
+    }
+
     // Write new culture into the array
     for (var x = 0; x < map_size_x; x++) {
         for (var y = 0; y < map_size_y; y++) {
