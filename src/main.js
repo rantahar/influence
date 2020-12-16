@@ -685,7 +685,7 @@ function update_panel(){
         $("#info-page").append("<p><b>Tile:</b> x="+x+", y="+y+"</p>");
         $("#info-page").append("<p>"+map_descriptions[tile.land]+"</p>");
 
-        // If there is an owner, show owner and culture
+        // Show owner if there is one
         if(tile.owner != undefined){
             var p = $("<p></p>").text("owner: ");
             var text = $("<span></span>").text(tile.owner).css('color', players[tile.owner].text_color);
@@ -702,8 +702,23 @@ function update_panel(){
                     p.append(text);
                 }
             }
+            $("#info-page").append(p);
+        } else {
+            var p = $("<p></p>")
+            var first = true;
+            for(var key in tile.culture){
+                if(first){
+                    p.text("culture: ");
+                    first = false;
+                }
+                if(key != tile.owner){
+                    var text = $("<span></span>").text(" "+tile.culture[key].toFixed(2))
+                    .css('color', players[key].text_color);
+                    p.append(text);
+                }
+            }
+            $("#info-page").append(p);
         }
-        $("#info-page").append(p);
 
         // Add colony button
         if(tile.city){
