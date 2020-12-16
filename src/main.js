@@ -192,7 +192,7 @@ class City {
 
     // Calculate the culture production of the city
     culture(){
-        return 2+this.level;
+        return 2 + this.level;
     }
 
     owner(){
@@ -654,12 +654,14 @@ function tile_click(map_scene) {
         build_road(players.white, x, y);
         map_scene.preview = undefined;
         map_scene.remove_highlight();
+        return;
     }
 
     if( map_scene.preview == 'city'){
         map_scene.view_city.build_city(x, y);
         map_scene.preview = undefined;
         map_scene.remove_highlight();
+        return;
     }
 
     update_panel();
@@ -806,8 +808,22 @@ function next_turn(map_scene){
                     }
                 });
 
+                var decay = 1;
+
+                if(tiles[x][y].land == 'f'){
+                    decay *=2;
+                }
+
+                if(tiles[x][y].land == 'w'){
+                    decay *=2;
+                }
+
+                if(tiles[x][y].road){
+                    decay /=2;
+                }
+
                 if(max > c){
-                    c = max - 1;
+                    c = max - decay;
                 }
 
                 // If there is a city, it sets the minimum level
