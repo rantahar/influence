@@ -784,10 +784,8 @@ function next_turn(map_scene){
 
                 // sum of difference to neighbours
                 let max = 0;
-                let sum = 0;
                 for_tiles(neighbour_tiles(x,y), function(a,b){
                     let nbc = get_player_culture(player,a,b);
-                    sum += nbc;
                     if(nbc > max){
                         max = nbc;
                     }
@@ -795,7 +793,6 @@ function next_turn(map_scene){
 
                 if(max > c){
                     c = max - 1;
-                    c += (sum-max)/(3*max)
                 }
 
                 // If there is a city, it sets the minimum level
