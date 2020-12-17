@@ -256,7 +256,7 @@ class City {
 
     // Calculate the culture production of the city
     culture(){
-        return 2 + this.level;
+        return 10*this.level*this.level;
     }
 
     owner(){
@@ -295,8 +295,8 @@ class City {
 
     // city grows when the city has this much food
     food_limit() {
-        //return Math.pow(2,this.level-1);
         return 10*this.level;
+        //return Math.pow(10,this.level);
     }
 
     // Update the city
@@ -458,8 +458,8 @@ class mapScene extends Phaser.Scene {
         this.add_city(6,7);
         tiles[1][9].owner = 'red';
         this.add_city(1,9);
-        tiles[6][3].owner = 'white';
-        this.add_city(6,3);
+        tiles[6][1].owner = 'white';
+        this.add_city(6,1);
     
         this.cursors = this.input.keyboard.createCursorKeys();
         this.escape_key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
@@ -861,41 +861,41 @@ function next_turn(map_scene){
 
             // Calculate culture
             for(player in players){
+                var friction = 0.5;
+                var decay = 0.1;
                 let c = get_player_culture(player,x,y);
-
+                
                 // sum of difference to neighbours
-                let max = 0;
+                let dc = 0;
                 for_tiles(neighbour_tiles(x,y), function(a,b){
-                    let nbc = get_player_culture(player,a,b);
-                    if(nbc > max){
-                        max = nbc;
+                    let friction = 1;
+                    if(tiles[a][b].land == 'f'){
+                        friction /=1.414;
                     }
+                    if(tiles[a][b].land == 'w'){
+                        friction /=1.414;
+                    }
+                    if(tiles[a][b].road){
+                        friction *=1.414;
+                    }
+                    dc += friction*(get_player_culture(player,a,b)-c);
                 });
 
-                var decay = 1;
-
                 if(tiles[x][y].land == 'f'){
-                    decay *=2;
+                    friction /=1.414;
                 }
-
                 if(tiles[x][y].land == 'w'){
-                    decay *=2;
+                    friction /=1.414;
                 }
-
                 if(tiles[x][y].road){
-                    decay /=2;
+                    friction *=1.414;
                 }
+                
+                c += 0.25*friction*dc;
+                c*= 1-decay;
 
-                if(max > c){
-                    c = max - decay;
-                }
-
-                // If there is a city, it sets the minimum level
                 if(tiles[x][y].city && tiles[x][y].owner == player){
-                    var cc = tiles[x][y].city.culture();
-                    if(c<cc){
-                        c = cc;
-                    }
+                    c += tiles[x][y].city.culture();
                 }
 
                 if(c>=1){
