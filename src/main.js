@@ -1,78 +1,6 @@
 
-// Define the map. This should be moved to json files.
-var map_sprites = {
-    'w': {'map': 24*7},
-    'g': {'map': 1},
-    'f': {'map': 1, 'sprite': 6}
-}
-
-var map_descriptions = {
-    'w': 'water',
-    'g': 'field',
-    'f': 'forest'
-}
-
-var city_sprites = [7,8,8,9,9,14,14,15,15,15,15,15]
-var building_cite_sprite = 5*7+3
-
-var road_sprites = [2,71,77,70,71,71,72,66,77,84,77,63,86,65,64,78]
-
-var map_1 = [
-    ['w','w','w','w','w','w','g','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','g','g','f','g','g','g','w','w','w','w','w','w','w','w'],
-    ['w','w','g','f','g','g','g','g','w','w','w','w','w','w','w','w','w'],
-    ['w','g','g','g','f','g','g','f','w','w','w','w','w','w','w','w','w'],
-    ['w','g','g','g','g','g','g','g','w','w','w','w','w','w','w','w','w'],
-    ['w','g','f','g','g','g','g','w','w','w','w','w','w','w','w','w','w'],
-    ['w','g','f','g','f','g','g','w','w','w','w','w','w','w','w','w','w'],
-    ['w','g','g','g','g','g','g','w','w','w','w','w','w','w','w','w','w'],
-    ['w','g','f','g','g','f','g','g','w','w','w','w','w','w','w','w','w'],
-    ['w','g','g','g','g','g','g','g','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w']
-]
-
-var map_0 = [
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g'],
-    ['g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g','g']
-]
-
-
-
-var map_size_y = map_1.length;
-var map_size_x = map_1[0].length;
-
 var turn_counter = 1;
 
-
-// Create arrays indexed by x and y for each property of a tile
-var tiles = [];
 
 
 var green_player = new AIPlayer('green','Green',"#00AA00","#00AA00",{
@@ -127,6 +55,52 @@ var players = {
     'blue': blue_player,
     'red': red_player
 }
+
+
+
+
+
+
+
+
+// Information about each tile
+class Tile {
+    constructor(x, y, land) {
+        this.x = x;
+        this.y = y;
+        this.owner = undefined;
+        this.culture = {};
+        this.land = land;
+    }
+
+    is_empty(){
+        if(this.city == undefined && this.building == undefined &&
+           this.land != 'f' && this.land != 'w'){
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+
+
+var map = map_1;
+
+// Create arrays indexed by x and y for each property of a tile
+var tiles = [];
+
+var map_size_y = map.map.length;
+var map_size_x = map.map[0].length;
+
+// Create arrays indexed by x and y for each property of a tile
+for (var x = 0; x < map_size_x; x++) {
+    tiles[x] = [];
+    for (var y = 0; y < map_size_y; y++) {
+        tiles[x][y] = new Tile(x, y, map.map[y][x]);
+    }
+}
+
 
 
 
@@ -381,35 +355,6 @@ class City {
 var cities = [];
 
 
-// Information about each tile
-class Tile {
-    constructor(x, y, land) {
-        this.x = x;
-        this.y = y;
-        this.owner = undefined;
-        this.culture = {};
-        this.land = land;
-    }
-
-    is_empty(){
-        if(this.city == undefined && this.building == undefined &&
-           this.land != 'f' && this.land != 'w'){
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
-
-
-// Create arrays indexed by x and y for each property of a tile
-for (var x = 0; x < map_size_x; x++) {
-    tiles[x] = [];
-    for (var y = 0; y < map_size_y; y++) {
-        tiles[x][y] = new Tile(x, y, map_1[y][x]);
-    }
-}
-
 
 
 
@@ -452,14 +397,11 @@ class mapScene extends Phaser.Scene {
         this.draw_map();
     
         // Add at towns
-        tiles[2][2].owner = 'blue';
-        this.add_city(2,2);
-        tiles[6][7].owner = 'green';
-        this.add_city(6,7);
-        tiles[1][9].owner = 'red';
-        this.add_city(1,9);
-        tiles[6][1].owner = 'white';
-        this.add_city(6,1);
+        for(player in map.start){
+            var start = map.start[player];
+            tiles[start.x][start.y].owner = player;
+            this.add_city(start.x,start.y);
+        }
     
         this.cursors = this.input.keyboard.createCursorKeys();
         this.escape_key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
@@ -530,7 +472,7 @@ class mapScene extends Phaser.Scene {
 
     }
 
-    draw_map(x, y){
+    draw_map(){
         for (var x = 0; x < map_size_x; x++) {
             for (var y = 0; y < map_size_y; y++) {
                 var key = tiles[x][y].land;
