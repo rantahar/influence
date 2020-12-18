@@ -20,7 +20,7 @@ var road_sprites = [2,71,77,70,71,71,72,66,77,84,77,63,86,65,64,78]
 
 var water_tile = 168
 var shore_straight = [203,197,205,211]
-var shore_turn_in = [191,189,175,179]
+var shore_turn_in = [191,189,175,177]
 var shore_turn_out = [196,198,212,210]
 
 // Test map, all grass
