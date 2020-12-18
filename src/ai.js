@@ -20,29 +20,28 @@ class AIPlayer {
         this.wood = 0;
     }
 
-    take_turn() {
+    take_turn(tiles, cities, build_road) {
         // Check all tiles to find the best places to build
         var city_utility = -1000;
         var city_x;
         var city_y;
-        for (var x = 0; x < map_size_x; x++) {
-            for (var y = 0; y < map_size_y; y++) {
+        for (var x = 0; x < tiles.map_size_x; x++) {
+            for (var y = 0; y < tiles.map_size_y; y++) {
                 // Green likes to build on the edges, where culture is minimal
-                if(is_city_allowed(x,y) && tiles[x][y].owner == this.key){
+                if(tiles[x][y].is_city_allowed() && tiles[x][y].owner == this.key){
                     var tile = tiles[x][y]
                     var utility = this.new_city_utility;
                     utility += this.city_closeness*tile.culture[this.key];
                     
                     // Amount of food should count more
                     var key = this.key;
-                    var food = sum_tiles(neighbour_tiles(x,y),function(a,b){
-                        var food = 0;
-                        if(tiles[a][b].owner == key &&
-                        tiles[a][b].land == 'g' &&
-                        tiles[a][b].city == undefined ){
-                            food = 1;
+                    var food = 0;
+                    tiles[x][y].neighbours().forEach(function(tile){
+                        if(tile.owner == key &&
+                        tile.land == 'g' &&
+                        tile.city == undefined ){
+                            food += 1;
                         }
-                        return food;
                     });
                     utility += this.city_food*food;
                     
@@ -80,10 +79,10 @@ class AIPlayer {
         var road_utility = -1000;
         var road_x;
         var road_y;
-        for (var x = 0; x < map_size_x; x++) {
-            for (var y = 0; y < map_size_y; y++) {
+        for (var x = 0; x < tiles.map_size_x; x++) {
+            for (var y = 0; y < tiles.map_size_y; y++) {
                 var tile = tiles[x][y]
-                if(tile.owner == this.key && can_build_road(x,y)){
+                if(tile.owner == this.key && tiles[x][y].is_road_allowed()){
                     var utility = this.new_road_utility;
                     for(key in cities){
                         var city = cities[key];
@@ -114,6 +113,54 @@ class AIPlayer {
     }
 
 }
+
+
+var human_player_city_names = ["Aztola", "Sivola", "Thokas", "Loran", "Sinala", "Umdela", "Wendu"];
+
+
+var green_player = new AIPlayer('green','Green',"#00AA00","#00AA00",{
+    new_city_utility: 20,
+    city_closeness: -10,
+    city_food: 1,
+    build_food: 1,
+    build_level: 1,
+    build_city_utility: 0,
+    build_base: -10,
+    new_road_utility: 10,
+    road_culture: -1,
+    road_city_connecting: -1,
+    city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla"]
+})
+
+var blue_player = new AIPlayer('blue','Blue',"#5555FF","#0000FF",{
+    new_city_utility: -10,
+    city_closeness: 10,
+    city_food: 1,
+    build_food: 1,
+    build_level: 2,
+    build_city_utility: 0,
+    build_base: -14,
+    new_road_utility: -5,
+    road_culture: 5,
+    road_city_connecting: 1,
+    city_names: ["Ilnam", "Alaman", "Gellon", "Umman", "Aka-Ilnam", "Omolla", "Nala"]
+})
+
+var red_player = new AIPlayer('red','Red',"#FF5555","#FF0000",{
+    new_city_utility: -10,
+    city_closeness: 10,
+    city_food: 1,
+    build_food: 1,
+    build_level: 2,
+    build_city_utility: 0,
+    build_base: -14,
+    new_road_utility: -5,
+    road_culture: 5,
+    road_city_connecting: 1,
+    city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath"]
+})
+
+
 
 
 
