@@ -333,6 +333,9 @@ function gameboard(map){
             this.ground_layer.setInteractive();
             this.ground_layer.on('pointerdown',()=>{tile_click(this);} );
 
+            this.shore_layer = this.map.createBlankDynamicLayer("shore", tileset);
+            this.shore_layer.setScale(1);
+
             this.road_layer = this.map.createBlankDynamicLayer("roads", tileset);
             this.road_layer.setScale(1); // Roads are drawn on a smaller scale, looks nicer
 
@@ -430,6 +433,9 @@ function gameboard(map){
                     if(map_sprites[key].sprite) {
                         this.put_tile_at(this.city_layer, map_sprites[key].sprite, x, y);
                     }
+                    if(key=='w'){
+                        this.draw_shore(x,y);
+                    }
                 }
             }
         }
@@ -468,7 +474,7 @@ function gameboard(map){
         }
 
         add_building_sprite(x,y){
-            this.put_tile_at(this.city_layer, building_cite_sprite, x, y);
+            this.put_tile_at(this.map_decor, building_cite_sprite, x, y);
         }
 
         add_road(x, y){
@@ -478,6 +484,74 @@ function gameboard(map){
             tiles[x][y].neighbours().forEach(function(tile){
                 map.update_road_sprite(tile.x, tile.y);
             });
+        }
+
+        draw_shore(x,y){
+            // Check if a shore tile is required
+            if(tiles[(x+1)%tiles.map_size_x][y].land!='w'){
+                this.put_tile_at(this.shore_layer, shore_straight[0], 3*x+2, 3*y+1, 3);
+                if(tiles[x][(y+1)%tiles.map_size_y].land!='w'){
+                    this.put_tile_at(this.shore_layer, shore_turn_in[0], 3*x+2, 3*y+2, 3);
+                } else {
+                    this.put_tile_at(this.shore_layer, shore_straight[0], 3*x+2, 3*y+2, 3);
+                }
+                if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land!='w'){
+                    this.put_tile_at(this.shore_layer, shore_turn_in[4], 3*x+2, 3*y, 3);
+                } else {
+                    this.put_tile_at(this.shore_layer, shore_straight[0], 3*x+2, 3*y, 3);
+                }
+            }
+            if(tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][y].land!='w'){
+                this.put_tile_at(this.shore_layer, shore_straight[2], 3*x, 3*y+1, 3);
+                if(tiles[x][(y+1)%tiles.map_size_y].land!='w'){
+                    this.put_tile_at(this.shore_layer, shore_turn_in[1], 3*x, 3*y+2, 3);
+                } else {
+                    this.put_tile_at(this.shore_layer, shore_straight[2], 3*x, 3*y+2, 3);
+                }
+                if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land!='w'){
+                    this.put_tile_at(this.shore_layer, shore_turn_in[2], 3*x, 3*y, 3);
+                } else {
+                    this.put_tile_at(this.shore_layer, shore_straight[2], 3*x, 3*y, 3);
+                }
+            }
+            if(tiles[x][(y+1)%tiles.map_size_y].land!='w'){
+                this.put_tile_at(this.shore_layer, shore_straight[1], 3*x+1, 3*y+2, 3);
+                if(tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][y].land=='w'){
+                    this.put_tile_at(this.shore_layer, shore_straight[1], 3*x, 3*y+2, 3);
+                }
+                if(tiles[(x+1)%tiles.map_size_x][y].land=='w'){
+                    this.put_tile_at(this.shore_layer, shore_straight[1], 3*x+2, 3*y+2, 3);
+                }
+            }
+            if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land!='w'){
+                this.put_tile_at(this.shore_layer, shore_straight[3], 3*x+1, 3*y, 3);
+                if(tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][y].land=='w'){
+                    this.put_tile_at(this.shore_layer, shore_straight[3], 3*x, 3*y, 3);
+                }
+                if(tiles[(x+1)%tiles.map_size_x][y].land=='w'){
+                    this.put_tile_at(this.shore_layer, shore_straight[3], 3*x+2, 3*y, 3);
+                }
+            }
+            if(tiles[(x+1)%tiles.map_size_x][y].land=='w'){
+                if(tiles[x][(y+1)%tiles.map_size_y].land=='w' && 
+                   tiles[(x+1)%tiles.map_size_x][(y+1)%tiles.map_size_y].land != 'w'){
+                    this.put_tile_at(this.shore_layer, shore_turn_out[0], 3*x+2, 3*y+2, 3);
+                }
+                if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land=='w' && 
+                   tiles[(x+1)%tiles.map_size_x][(y-1+tiles.map_size_y)%tiles.map_size_y].land != 'w'){
+                    this.put_tile_at(this.shore_layer, shore_turn_out[3], 3*x+2, 3*y, 3);
+                }
+            }
+            if(tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][y].land=='w'){
+                if(tiles[x][(y+1)%tiles.map_size_y].land=='w' && 
+                   tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][(y+1)%tiles.map_size_y].land != 'w'){
+                    this.put_tile_at(this.shore_layer, shore_turn_out[1], 3*x, 3*y+2, 3);
+                }
+                if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land=='w' && 
+                   tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][(y-1+tiles.map_size_y)%tiles.map_size_y].land != 'w'){
+                    this.put_tile_at(this.shore_layer, shore_turn_out[2], 3*x, 3*y, 3);
+                }
+            }
         }
 
         update_road_sprite(x, y){
