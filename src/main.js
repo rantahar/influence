@@ -354,6 +354,9 @@ function gameboard(map){
                 var start = map.start[player];
                 tiles[start.x][start.y].owner = player;
                 this.add_city(start.x,start.y);
+                if(player == 'white'){
+                    this.center_camera_on(start.x,start.y);
+                }
             }
         
             this.cursors = this.input.keyboard.createCursorKeys();
@@ -425,6 +428,11 @@ function gameboard(map){
 
         }
 
+        center_camera_on(x,y){
+            this.cameras.main.scrollX = 16*3*((x-6.25+tiles.map_size_x)%tiles.map_size_x);
+            this.cameras.main.scrollY = 16*3*((y-6.25+tiles.map_size_x)%tiles.map_size_y);
+        }
+
         draw_map(){
             for(var x = 0; x < tiles.map_size_x; x++) {
                 for(var y = 0; y < tiles.map_size_y; y++) {
@@ -474,7 +482,7 @@ function gameboard(map){
         }
 
         add_building_sprite(x,y){
-            this.put_tile_at(this.map_decor, building_cite_sprite, x, y);
+            this.put_tile_at(this.city_layer, building_cite_sprite, x, y);
         }
 
         add_road(x, y){
@@ -496,7 +504,7 @@ function gameboard(map){
                     this.put_tile_at(this.shore_layer, shore_straight[0], 3*x+2, 3*y+2, 3);
                 }
                 if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land!='w'){
-                    this.put_tile_at(this.shore_layer, shore_turn_in[4], 3*x+2, 3*y, 3);
+                    this.put_tile_at(this.shore_layer, shore_turn_in[3], 3*x+2, 3*y, 3);
                 } else {
                     this.put_tile_at(this.shore_layer, shore_straight[0], 3*x+2, 3*y, 3);
                 }
@@ -596,10 +604,10 @@ function gameboard(map){
                     var msx = tiles.map_size_x; var msy = tiles.map_size_y;
                     var xp = (x+1)%msx; var yp = (y+1)%msy;
                     var xm = (x-1+msx)%msx; var ym = (y-1+msy)%msy;
-                    this.check_and_draw_border(x,y,xp,y,x+1,y+1,x+1,y);
-                    this.check_and_draw_border(x,y,xm,y,x,y+1,x,y);
-                    this.check_and_draw_border(x,y,x,yp,x+1,y+1,x,y+1);
-                    this.check_and_draw_border(x,y,x,ym,x+1,y,x,y);
+                    this.check_and_draw_border(x,y,xp,y,x+0.98,y+1,x+0.98,y);
+                    this.check_and_draw_border(x,y,xm,y,x+0.02,y+1,x+0.072,y);
+                    this.check_and_draw_border(x,y,x,yp,x+1,y+0.98,x,y+0.98);
+                    this.check_and_draw_border(x,y,x,ym,x+1,y+0.02,x,y+0.02);
                 }
             }
         }
@@ -661,7 +669,6 @@ function gameboard(map){
                         }
                     }
                     for(var n=0;n<10 && red_culture > 0 && n_others > 0; n+=1){
-                        console.log(player_key, x, y, red_culture, n_others);
                         var dc = red_culture/n_others;
                         var new_red_culture = red_culture;
                         n_others = 0;
@@ -800,15 +807,13 @@ function gameboard(map){
         var worldPoint = map_scene.input.activePointer.positionToCamera(map_scene.cameras.main);
         var x = map_scene.map.worldToTileX(worldPoint.x) % tiles.map_size_x;
         var y = map_scene.map.worldToTileY(worldPoint.y) % tiles.map_size_y;
-        panel_location.x = x;
-        panel_location.y = y;
-
 
         // If building
         if( map_scene.preview == 'road'){
             build_road(players.white, x, y);
             map_scene.preview = undefined;
             map_scene.remove_highlight();
+            update_panel();
             return;
         }
 
@@ -816,9 +821,12 @@ function gameboard(map){
             map_scene.view_city.build_city(x, y);
             map_scene.preview = undefined;
             map_scene.remove_highlight();
+            update_panel();
             return;
         }
 
+        panel_location.x = x;
+        panel_location.y = y;
         update_panel();
     }
 
@@ -968,5 +976,5 @@ function gameboard(map){
 
 }
 
-//var game = gameboard(random_map(32,32,5,40,5,false,['white','blue','green','red']));
-var game = gameboard(map_1);
+var game = gameboard(random_map(32,32,5,40,5,10,false,['white','blue','green','red']));
+//var game = gameboard(map_1);
