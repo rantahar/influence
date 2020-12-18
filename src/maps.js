@@ -62,8 +62,8 @@ var map_1 = {
     ['w','w','w','g','m','f','g','g','g','w','w','w','w','w','w','w','w'],
     ['w','w','g','f','m','g','g','g','w','w','w','w','w','w','w','w','w'],
     ['w','g','g','g','m','g','g','f','w','w','w','w','w','w','w','w','w'],
-    ['w','g','g','g','m','m','g','g','w','w','w','w','w','w','w','w','w'],
-    ['w','g','f','g','g','m','g','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','m','g','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','g','f','g','g','g','g','w','w','w','w','w','w','w','w','w','w'],
     ['w','g','f','g','f','g','g','w','w','w','w','w','w','w','w','w','w'],
     ['w','g','g','g','g','g','g','w','w','w','w','w','w','w','w','w','w'],
     ['w','g','f','g','g','f','g','g','w','w','w','w','w','w','w','w','w'],
@@ -94,7 +94,7 @@ var map_1 = {
 
 
 
-function random_map(size_x, size_y, water_amount, water_continuity, forest_amount, island, players){
+function random_map(size_x, size_y, water_amount, water_continuity, forest_amount, mountains, island, players){
     map = {}
     map.map = [];
     for(var x = 0; x < size_x; x++) {
@@ -133,11 +133,26 @@ function random_map(size_x, size_y, water_amount, water_continuity, forest_amoun
                 var choice = 0;
                 choice = Math.floor(Math.random() * 100 - water*water_continuity - water_amount);
                 if(choice > 0){
-                    var choice = Math.floor(Math.random() * 100 - forest_amount);
-                    if(choice > 0){
-                        map.map[x][y] = 'g';
+                    var choice = Math.floor(Math.random() * 500 );
+                    if(choice < mountains){
+                        var n_mounts = Math.floor(Math.random() * 5 )+1;
+                        map.map[x][y] = 'm';
+                        var a = x; var b = y;
+                        for(var n=0; n<n_mounts;n++){
+                            map.map[a][b] = 'm';
+                            if(Math.floor(Math.random() * 2 ) > 0){
+                                a = (a+1)%size_x;
+                            } else {
+                                b = (b+1)%size_y;
+                            }
+                        }
                     } else {
-                        map.map[x][y] = 'f';
+                        var choice = Math.floor(Math.random() * 100 );
+                        if(choice > (forest_amount)){
+                            map.map[x][y] = 'g';
+                        } else {
+                            map.map[x][y] = 'f';
+                        }
                     }
                 } else {
                     map.map[x][y] = 'w';
