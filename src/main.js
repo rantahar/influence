@@ -641,13 +641,16 @@ function gameboard(map){
                     let dc = 0;
                     tiles[x][y].neighbours().forEach(function(tile){
                         let friction = 1;
-                        if(tiles[tile.x][tile.y].land == 'f'){
+                        if(tile.land == 'f'){
                             friction /=1.414;
                         }
-                        if(tiles[tile.x][tile.y].land == 'w'){
+                        if(tile.land == 'm'){
+                            friction =0;
+                        }
+                        if(tile.land == 'w'){
                             friction /=1.414;
                         }
-                        if(tiles[tile.x][tile.y].road){
+                        if(tile.road){
                             friction *=1.414;
                         }
                         dc += friction*(tile.get_player_culture(player)-c);
@@ -655,6 +658,9 @@ function gameboard(map){
 
                     if(tiles[x][y].land == 'f'){
                         friction /=1.414;
+                    }
+                    if(tiles[x][y].land == 'm'){
+                        friction =0;
                     }
                     if(tiles[x][y].land == 'w'){
                         friction /=1.414;
