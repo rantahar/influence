@@ -11,6 +11,7 @@ function gameboard(map){
             text_color: '#FFFFFF',
             map_color: '#FFFFFF',
             wood: 0,
+            colonies: 0,
             take_turn(){}
         },
         'green': green_player,
@@ -277,25 +278,23 @@ function gameboard(map){
             html += "<h4>"+this.name+"</h4>";
             html += "<p>Level: "+this.level+"</p>";
             html += "<p>Food: "+this.food+"</p>";
+            if(this.building){ 
+                html += "<p>Building a "+this.building.type+"</p>";
+            }
             html += "</div>";
             return html;
         }
 
-        // Start building a new city
-        build_city(x, y){
-            // check for neighbouring cities
-            if(this.building == undefined && tiles[x][y].is_city_allowed() && tiles[x][y].owner == this.owner())    {
-                var mapscene = phaser_game.scene.scenes[0];
-                mapscene.add_building_sprite(x, y);
-                tiles[x][y].building = 'city';
-                this.building = {'food': 40, 'type': 'city', 'x': x, 'y': y};
+        // Start building a colony
+        queue_colony(){
+            if(this.building==undefined){
+                this.building = {'food': 40, 'type': 'colony'};
             }
         }
 
         building_done(){
-            if(this.building.type == 'city'){
-                var mapscene = phaser_game.scene.scenes[0];
-                mapscene.add_city(this.building.x,this.building.y,this.owner());
+            if(this.building.type == 'colony'){
+                players[this.owner()].colonies += 1;
             }
             this.building = undefined;
         }
@@ -322,29 +321,47 @@ function gameboard(map){
 
         preload (){
             this.load.image('tileset', "assets/Toens_Medieval_Strategy_Sprite_Pack/tileset.png");
+            this.load.image('citytiles', "assets/Toens_Medieval_Strategy_Sprite_Pack/cities.png");
         }
 
         create (){
             // create board
             this.map = this.make.tilemap({ tileWidth: 16, tileHeight: 16, width: 6*tiles.map_size_x, height: 6*tiles.map_size_y});
             var tileset = this.map.addTilesetImage('tileset');
+        
+            // Base ground layer. Set it interactive to capture clicks on the map
             this.ground_layer = this.map.createBlankDynamicLayer('ground', tileset);
             this.ground_layer.setScale(3);
             this.ground_layer.setInteractive();
             this.ground_layer.on('pointerdown',()=>{tile_click(this);} );
 
+            // Separate layer for shore tiles
             this.shore_layer = this.map.createBlankDynamicLayer("shore", tileset);
             this.shore_layer.setScale(1);
 
+            // and for road tiles
             this.road_layer = this.map.createBlankDynamicLayer("roads", tileset);
             this.road_layer.setScale(1); // Roads are drawn on a smaller scale, looks nicer
 
-            this.city_layer = this.map.createBlankDynamicLayer("cities", tileset);
-            this.city_layer.setScale(3);
+            // Second ground layer, for mountains, forests and such. Roads go below these
+            // if allowed
+            this.ground_2 = this.map.createBlankDynamicLayer("ground_2", tileset);
+            this.ground_2.setScale(3); 
 
             this.preview_layer = this.map.createBlankDynamicLayer("preview", tileset);
             this.preview_layer.setScale(3); // Roads are drawn on a smaller scale, looks nicer
             this.preview_layer.setAlpha(0.5); // Roads are drawn on a smaller scale, looks nicer
+
+
+            // Cities on a separate map
+            this.city_map = this.make.tilemap({ tileWidth: 32, tileHeight: 32, width: 2*tiles.map_size_x, height: 2*tiles.map_size_y});
+            var citytiles = this.city_map.addTilesetImage('citytiles');
+            this.city_layer = this.city_map.createBlankDynamicLayer("cities", citytiles);
+            this.city_layer.setScale(1.5);
+
+            this.city_preview_layer = this.city_map.createBlankDynamicLayer("city_preview", citytiles);
+            this.city_preview_layer.setScale(1.5); // Roads are drawn on a smaller scale, looks nicer
+            this.city_preview_layer.setAlpha(0.5); // Roads are drawn on a smaller scale, looks nicer
 
 
             this.draw_map();
@@ -439,7 +456,7 @@ function gameboard(map){
                     var key = tiles[x][y].land;
                     this.put_tile_at(this.ground_layer, map_sprites[key].map, x, y);
                     if(map_sprites[key].sprite) {
-                        this.put_tile_at(this.city_layer, map_sprites[key].sprite, x, y);
+                        this.put_tile_at(this.ground_2, map_sprites[key].sprite, x, y);
                     }
                     if(key=='w'){
                         this.draw_shore(x,y);
@@ -477,12 +494,7 @@ function gameboard(map){
         }
 
         update_city_sprite(x,y,level){
-            var city_sprite = city_sprites[level-1];
-            this.put_tile_at(this.city_layer, city_sprite, x, y);
-        }
-
-        add_building_sprite(x,y){
-            this.put_tile_at(this.city_layer, building_cite_sprite, x, y);
+            this.put_tile_at(this.city_layer, level-1, x, y);
         }
 
         add_road(x, y){
@@ -698,7 +710,7 @@ function gameboard(map){
     function next_turn(map_scene){
 
         for(player in players){
-            players[player].take_turn(tiles, cities, build_road);
+            players[player].take_turn(tiles, cities, build_road, build_city);
         }
 
         // Update the cities
@@ -818,16 +830,25 @@ function gameboard(map){
         }
 
         if( map_scene.preview == 'city'){
-            map_scene.view_city.build_city(x, y);
+            build_city(x,y,'white');
             map_scene.preview = undefined;
             map_scene.remove_highlight();
             update_panel();
             return;
         }
-
+        
         panel_location.x = x;
         panel_location.y = y;
         update_panel();
+    }
+    
+    function build_city(x,y,player_key){
+        // check for neighbouring cities
+        if(tiles[x][y].is_city_allowed() && tiles[x][y].owner == player_key){
+            var mapscene = phaser_game.scene.scenes[0];
+            mapscene.add_city(x,y,player_key);
+            players[player_key].colonies -= 1;
+        }
     }
 
     function update_panel(){
@@ -890,7 +911,10 @@ function gameboard(map){
                 if(tile.owner == 'white'){
                     var city_button = $("<span></span>").text("Establish colony (turns)");
                     city_button.addClass("btn btn-success");
-                    city_button.click(function(){ start_build_city(); });
+                    city_button.click(function(){
+                         tile.city.queue_colony();
+                         update_panel();
+                     });
                     $("#info-page").append(city_button);
                 }
             }
@@ -900,6 +924,8 @@ function gameboard(map){
         $("#interaction-page").empty();
 
         var resource_text = $("<p></p>").text("Wood: " + player.wood);
+        $("#interaction-page").append(resource_text);
+        var resource_text = $("<p></p>").text("colonies: " + player.colonies);
         $("#interaction-page").append(resource_text);
 
         var road_button = $("<span></span>").text("Road (10 wood)");
@@ -912,6 +938,15 @@ function gameboard(map){
 
         $("#interaction-page").append(road_button);
 
+        var colony_button = $("<span></span>").text("City (1 colony)");
+        if(player.colonies >= 1){
+            colony_button.addClass("btn btn-success");
+            colony_button.click(function(){ start_build_city(); });
+        } else {
+            colony_button.addClass("btn btn-secondary");
+        }
+        $("#interaction-page").append(colony_button);
+
     }
 
 
@@ -920,6 +955,7 @@ function gameboard(map){
     function start_build_road(){
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.preview = 'road';
+        mapscene.remove_highlight();
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
                 if(tiles[x][y].owner == 'white' && tiles[x][y].is_road_allowed()){
@@ -932,6 +968,7 @@ function gameboard(map){
     function start_build_city(){
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.preview = 'city';
+        mapscene.remove_highlight();
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
                 if(tiles[x][y].owner == 'white' && tiles[x][y].is_city_allowed()){
