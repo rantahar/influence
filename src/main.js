@@ -44,7 +44,7 @@ function gameboard(map){
             }
         }
 
-        food_production(){
+        is_food_tile(){
             if(tiles[this.x][this.y].land == 'g'){
                 return 1;
             }
@@ -73,15 +73,15 @@ function gameboard(map){
 
         neighbour_square_tiles(){
             var msx = tiles.map_size_x; var msy = tiles.map_size_y;
-            var r = [];
-            for( var dx = -1; dx < 2; dx++){
-                for( var dy = -1; dy < 2; dy++){
-                    var x = (this.x+dx+msx)%msx;
-                    var y = (this.y+dy+msy)%msy;
-                    r.push(tiles[x][y]);
-                }
-            }
-            return r;
+            return [tiles[(this.x+1)%msx][this.y],
+                    tiles[(this.x+1)%msx][(this.y+1)%msy],
+                    tiles[this.x][(this.y+1)%msy],
+                    tiles[(this.x-1+msx)%msx][(this.y+1)%msy],
+                    tiles[(this.x-1+msx)%msx][this.y],
+                    tiles[(this.x-1+msx)%msx][(this.y-1+msy)%msy],
+                    tiles[this.x][(this.y-1+msy)%msy],
+                    tiles[(this.x+1)%msx][(this.y-1+msy)%msy]
+                    ]
         }
 
         neighbour_2_tiles(){
@@ -167,9 +167,9 @@ function gameboard(map){
     // City class
     class City {
         constructor(x, y, level) {
+            this.number = cities.length;
             this.x = x;
             this.y = y;
-            this.number = cities.length;
             this.level = level;
             this.food = 0;
             this.name = "Aztola";
@@ -179,7 +179,8 @@ function gameboard(map){
 
         // Calculate the culture production of the city
         culture(){
-            return 8*this.level*this.level*this.level;
+            console.log("c", this.level);
+            return 16*this.level*this.level;
         }
 
         owner(){
@@ -189,13 +190,24 @@ function gameboard(map){
         // The amount of food produced per turn
         food_production(){
             var city = this;
-            var food = 0;
+            var workers = this.level;
+            var food_tiles = 0;
+            var fields = 0;
+            var food = 1; // City always produces 1 food
             tiles[this.x][this.y].neighbour_square_tiles()
             .forEach(function(tile){
                 if(tile.owner == city.owner()){
-                    food += tile.food_production(tile.x,tile.y);
+                    food_tiles += tile.is_food_tile();
+                    if(tile.field){
+                        fields += 1;
+                    }
                 }
             });
+            // 2 food / worker on a tile
+            food += 2*Math.min(workers, food_tiles);
+            // 1 extra for fields
+            food += Math.min(workers, fields);
+            console.log(food_tiles,fields,workers,food);
             return food;
         }
 
@@ -220,8 +232,7 @@ function gameboard(map){
 
         // city grows when the city has this much food
         food_limit() {
-            return 10*this.level;
-            //return Math.pow(10,this.level);
+            return 5*this.level;
         }
 
         // Update the city
@@ -288,7 +299,7 @@ function gameboard(map){
         // Start building a colony
         queue_colony(){
             if(this.building==undefined){
-                this.building = {'food': 40, 'type': 'colony'};
+                this.building = {'food': 12, 'type': 'colony'};
             }
         }
 
@@ -370,7 +381,7 @@ function gameboard(map){
             for(player in map.start){
                 var start = map.start[player];
                 tiles[start.x][start.y].owner = player;
-                this.add_city(start.x,start.y);
+                this.add_city(start.x,start.y, 1);
                 if(player == 'white'){
                     this.center_camera_on(start.x,start.y);
                 }
@@ -418,14 +429,16 @@ function gameboard(map){
 
             if(this.preview == 'city'){
                 if(this.previous_preview != undefined){
+                    this.remove_tile_at(this.city_preview_layer,this.previous_preview.x, this.previous_preview.y);
                     this.remove_tile_at(this.preview_layer,this.previous_preview.x, this.previous_preview.y);
                 }
-                this.put_tile_at(this.preview_layer, city_sprites[0], x, y);
+                this.put_tile_at(this.city_preview_layer, 1, x, y);
                 this.previous_preview = {x:x, y:y};
             }
 
             if(this.preview == 'road'){
                 if(this.previous_preview != undefined){
+                    this.remove_tile_at(this.city_preview_layer,this.previous_preview.x, this.previous_preview.y);
                     this.remove_tile_at(this.preview_layer,this.previous_preview.x, this.previous_preview.y);
                 }
                 this.put_tile_at(this.preview_layer, road_sprites[1], x, y);
@@ -433,6 +446,7 @@ function gameboard(map){
             }
 
             if(this.preview == undefined && this.previous_preview){
+                this.remove_tile_at(this.city_preview_layer,this.previous_preview.x, this.previous_preview.y);
                 this.remove_tile_at(this.preview_layer,this.previous_preview.x, this.previous_preview.y);
                 this.previous_preview = undefined;
             }
@@ -479,12 +493,12 @@ function gameboard(map){
             layer.removeTileAt(x+scale*tiles.map_size_x, y+scale*tiles.map_size_y);
         }
 
-        add_city(x, y){
-            var city = new City(x, y, 1);
+        add_city(x, y, level = 0){
+            var city = new City(x, y, level);
             tiles[x][y].city = city;
             cities.push( city );
             this.draw_boundaries();
-            this.update_city_sprite(x, y, 1);
+            this.update_city_sprite(x, y, level);
 
             var map = this;
             map.update_road_sprite(x, y);
@@ -494,7 +508,10 @@ function gameboard(map){
         }
 
         update_city_sprite(x,y,level){
-            this.put_tile_at(this.city_layer, level-1, x, y);
+            if(level < 20){
+                var sprite = Math.floor((level+1)/2);
+                this.put_tile_at(this.city_layer, sprite, x, y);
+            }
         }
 
         add_road(x, y){
@@ -846,7 +863,7 @@ function gameboard(map){
         // check for neighbouring cities
         if(tiles[x][y].is_city_allowed() && tiles[x][y].owner == player_key){
             var mapscene = phaser_game.scene.scenes[0];
-            mapscene.add_city(x,y,player_key);
+            mapscene.add_city(x,y);
             players[player_key].colonies -= 1;
         }
     }
