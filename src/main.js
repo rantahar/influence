@@ -179,7 +179,7 @@ function gameboard(map){
 
         // Calculate the culture production of the city
         culture(){
-            return 8*this.level*this.level;
+            return 8*this.level*this.level*this.level;
         }
 
         owner(){
