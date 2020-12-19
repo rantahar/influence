@@ -54,7 +54,7 @@ function gameboard(map){
             return 0;
         }
     
-        wood_production(){
+        is_wood_tile(){
             if(tiles[this.x][this.y].land == 'f'){
                 return 1;
             }
@@ -173,13 +173,14 @@ function gameboard(map){
             this.level = level;
             this.food = 0;
             this.name = "Aztola";
+            this.workers_food=level;
+            this.workers_wood=0;
             tiles[x][y].culture[this.owner()] = this.culture();
             tiles[x][y].road = true;
         }
 
         // Calculate the culture production of the city
         culture(){
-            console.log("c", this.level);
             return 16*this.level*this.level;
         }
 
@@ -187,22 +188,67 @@ function gameboard(map){
             return tiles[this.x][this.y].owner;
         }
 
-        // The amount of food produced per turn
-        food_production(){
+        set_food_workers(n){
+            console.log("food workers setting to ",n);
+            var max = this.level - this.workers_wood;
+            if(n >= 0 && n <= max){
+                this.workers_food = n;
+            }
+            console.log(max,this.workers_food);
+        }
+
+        set_wood_workers(n){
+            var max = this.level - this.workers_food;
+            if(n >= 0 && n <= max){
+                this.workers_wood = n;
+            }
+        }
+
+        food_tiles(){
             var city = this;
-            var workers = this.level;
-            var food_tiles = 0;
-            var fields = 0;
-            var food = 1; // City always produces 1 food
+            var food_tiles = 0; // City always produces 1 food
             tiles[this.x][this.y].neighbour_square_tiles()
             .forEach(function(tile){
                 if(tile.owner == city.owner()){
                     food_tiles += tile.is_food_tile();
+                }
+            });
+            return food_tiles;
+        }
+
+        wood_tiles(){
+            var city = this;
+            var wood_tiles = 0; // City always produces 1 wood
+            tiles[this.x][this.y].neighbour_square_tiles()
+            .forEach(function(tile){
+                if(tile.owner == city.owner()){
+                    wood_tiles += tile.is_wood_tile();
+                }
+            });
+            return wood_tiles;
+        }
+
+        fields(){
+            var city = this;
+            var fields = 0; // City always produces 1 food
+            tiles[this.x][this.y].neighbour_square_tiles()
+            .forEach(function(tile){
+                if(tile.owner == city.owner()){
                     if(tile.field){
                         fields += 1;
                     }
                 }
             });
+            return fields;
+        }
+
+        // The amount of food produced per turn
+        food_production(){
+            var workers = this.workers_food;
+            var food_tiles = this.food_tiles();
+            var fields = this.fields();
+            var food = 1; // City always produces 1 food
+           
             // 2 food / worker on a tile
             food += 2*Math.min(workers, food_tiles);
             // 1 extra for fields
@@ -213,14 +259,7 @@ function gameboard(map){
 
         // The amount of wood produced per turn
         wood_production(){
-            var city = this;
-            var wood = 0;
-            tiles[this.x][this.y].neighbour_square_tiles()
-            .forEach(function(tile){
-                if(tile.owner == city.owner()){
-                    wood += tile.wood_production(tile.x,tile.y);
-                }
-            });
+            var wood = this.wood_tiles();
             return wood;
         }
 
@@ -232,7 +271,7 @@ function gameboard(map){
 
         // city grows when the city has this much food
         food_limit() {
-            return 5*this.level;
+            return 10*this.level;
         }
 
         // Update the city
@@ -267,6 +306,12 @@ function gameboard(map){
             if(this.food > this.food_limit()){
                 this.food -= this.food_limit();
                 this.level += 1;
+                // Automatically assign to food, then wood
+                if(this.workers_food < this.food_tiles()){
+                    this.workers_food += 1;
+                } else if(this.workers_wood < this.wood_tiles()){
+                    this.workers_wood += 1;
+                }
                 map_scene.update_city_sprite(x,y,this.level);
             }
             // Or if the city shrinks
@@ -285,15 +330,49 @@ function gameboard(map){
 
         // Describe the city in html
         describe(){
-            var html = "<div>";
-            html += "<h4>"+this.name+"</h4>";
-            html += "<p>Level: "+this.level+"</p>";
-            html += "<p>Food: "+this.food+"</p>";
-            if(this.building){ 
-                html += "<p>Building a "+this.building.type+"</p>";
+            var city = this;
+            var div = $("<div></div>");
+            div.append($("<h4></h4>").text(this.name));
+            div.append($("<p></p>").text("Level: "+this.level));
+            div.append($("<p></p>").text("Food: "+this.food));
+            if(this.building){
+                div.append($("<p></p>").text("Building a "+this.building.type));
             }
-            html += "</div>";
-            return html;
+
+            if(this.food_tiles() > 0){
+                var food_slider_div = $("<div></div>").text("Food workers: ");
+                var food_slider = $('<input>').attr({
+                    type: "range",
+                    min: 0,
+                    max: Math.min(this.food_tiles(), this.level),
+                    value: this.workers_food,
+                    class: "slider"
+                }).appendTo(food_slider_div);
+                food_slider.change(function(){
+                    city.set_food_workers($(this).val());
+                    update_panel();
+                });
+                food_slider_div.append(" "+this.workers_food);
+                div.append(food_slider_div);
+            }
+
+            if(this.wood_tiles() > 0){
+                var wood_slider_div = $("<div></div>").text("Wood workers: ");
+                var wood_slider = $('<input>').attr({
+                    type: "range",
+                    min: 0,
+                    max: Math.min(this.wood_tiles(), this.level),
+                    value: this.workers_wood,
+                    class: "slider"
+                }).appendTo(wood_slider_div);
+                wood_slider.change(function(){ 
+                    city.set_wood_workers($(this).val());
+                    update_panel();
+                });
+                wood_slider_div.append(" "+this.workers_wood);
+                div.append(wood_slider_div);
+            }
+            return div;
         }
 
         // Start building a colony
