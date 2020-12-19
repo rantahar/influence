@@ -1,27 +1,29 @@
-
+// List of possible characters for defining a map tile
 var map_sprites = {
-    'w': {'map': 24*7},
-    'g': {'map': 1},
-    'f': {'map': 1, 'sprite': 6},
-    'm': {'map': 1, 'sprite': 10}
+    'w': {'map': 24*7},            // Water
+    'g': {'map': 1},               // Grass
+    'f': {'map': 1, 'sprite': 6},  // Forests
+    'm': {'map': 1, 'sprite': 10}  // Mountains
 }
 
-
+// The description printed in the side panel
 var map_descriptions = {
     'w': 'water',
     'g': 'field',
-    'f': 'forest'
+    'f': 'forest',
+    'm': 'mountain'
 }
 
-var city_sprites = [7,8,8,9,9,14,14,15,15,15,15,15]
-var building_cite_sprite = 5*7+3
-
+// Sprites for roads and shore tiles
 var road_sprites = [2,71,77,70,71,71,72,66,77,84,77,63,86,65,64,78]
-
 var water_tile = 168
 var shore_straight = [203,197,205,211]
 var shore_turn_in = [191,189,175,177]
 var shore_turn_out = [196,198,212,210]
+
+
+// Maps contain the actual list of map elements and the starting places for
+// players
 
 // Test map, all grass
 var map_0 = {
@@ -55,7 +57,7 @@ var map_0 = {
 
 
 
-// A very growded map
+// A very crowded map
 var map_1 = {
     map: [
     ['w','w','w','w','w','w','g','w','w','w','w','w','w','w','w','w','w'],
@@ -92,8 +94,7 @@ var map_1 = {
 
 
 
-
-
+// Generate a random map from a couple of parameters
 function random_map(size_x, size_y, water_amount, water_continuity, forest_amount, mountains, island, players){
     map = {}
     map.map = [];
