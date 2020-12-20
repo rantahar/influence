@@ -86,10 +86,57 @@ var map_1 = {
         green: {x: 6, y:7},
         blue: {x: 2, y:2},
         red: {x: 1, y:9}
-    }
+    },
 }
 
-
+// Shows basic elements on an empty map
+var tutorial_1 = {
+    map: [
+    ['w','w','w','w','w','w','g','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','g','m','f','g','g','g','w','w','w','w','w','w','w','w'],
+    ['w','w','g','f','m','g','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','m','g','g','f','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','m','g','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','g','f','g','g','g','g','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','f','g','f','g','g','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','g','g','g','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','f','g','g','f','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','g','g','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w']
+    ],
+    start: {
+        white: {x: 2, y:4}
+    },
+    at_start: function(){
+        game.popup({
+            title: "Tutorial",
+            text: "Text",
+            next: {
+                title: "Tutorial",
+                text: "Page 2"
+            }
+        });
+    },
+    on_update: function(){
+        console.log(this,this.two_cities, game.cities.length);
+        if(this.two_cities != undefined && game.cities.length > 2){
+            this.two_cities = true;
+            game.popup({
+                title: "Tutorial",
+                text: "Text"
+            });
+        }
+    }
+}
 
 
 

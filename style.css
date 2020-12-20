@@ -24,8 +24,13 @@ p {
     transform: translate(-50%, -50%);
 }
 
+#scenario-div {
+    display: none;
+}
 
-
+#popup {
+    display: none;
+}
 
 
 

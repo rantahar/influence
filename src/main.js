@@ -533,9 +533,13 @@ function gameboard(map){
             this.cursors = this.input.keyboard.createCursorKeys();
             this.escape_key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
             this.cameras.main.removeBounds();
+
+            if(map.at_start){
+                map.at_start();
+            }
         }
 
-        update (time, delta){
+        update(time, delta){
             if (this.cursors.left.isDown)
             {
                 var x = this.cameras.main.scrollX;
@@ -600,11 +604,14 @@ function gameboard(map){
                 this.preview = undefined;
             }
 
+            if(map.on_update){
+                map.on_update();
+            }
         }
 
         center_camera_on(x,y){
-            this.cameras.main.scrollX = 16*3*((x-6.25+tiles.map_size_x)%tiles.map_size_x);
-            this.cameras.main.scrollY = 16*3*((y-6.25+tiles.map_size_x)%tiles.map_size_y);
+            this.cameras.main.scrollX = 16*3*((x-6.25+(tiles.map_size_x+1))%(tiles.map_size_x+1));
+            this.cameras.main.scrollY = 16*3*((y-6.25+(tiles.map_size_y+1))%(tiles.map_size_y+1));
         }
 
         draw_map(){
@@ -1147,9 +1154,32 @@ function gameboard(map){
 
     update_panel()
 
+    function popup(content){
+        console.log(content);
+        if(content.title){
+            $("#popup_title").text(content.title);
+        }
+        if(content.text){
+            $("#popup_content").text(content.text);
+        }
+        if(content.next){
+            $("#popup_next").show();
+            console.log(content.next);
+            $("#popup_next").click(function(e){
+                e.preventDefault();
+                popup(content.next);
+            });
+        } else {
+            $("#popup_next").hide();
+        }
+        $("#popup").show();
+    }
+
 
     return {
-        phaser_game: phaser_game
+        phaser_game: phaser_game,
+        cities, cities,
+        popup: popup
     };
 
 }
@@ -1157,17 +1187,23 @@ function gameboard(map){
 var game;
 
 
-$("#start").click(function(){
+$("#start").click(function(e){
+    e.preventDefault();
     game = gameboard(random_map(32,32,5,40,5,10,false,['white','blue','green','red']));
     $("#main-menu").hide();
     $('#scenario-div').fadeIn();    
 });
 
-$("#tutorial").click(function(){
-    game = gameboard(map_1);
+$("#tutorial").click(function(e){
+    e.preventDefault();
+    game = gameboard(tutorial_1);
     $("#main-menu").hide();
     $('#scenario-div').fadeIn();
 });
 
+$("#popup_dismiss").click(function(e){
+    e.preventDefault();
+    $("#popup").hide();
+});
 
 

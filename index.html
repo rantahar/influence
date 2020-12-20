@@ -18,10 +18,23 @@
             <button id="Credits" type="button" class="btn btn-primary w-50 my-1">Credits</button>
         </div>
     </div>
+
+    <div class="card text-white bg-dark centered" id="popup">
+        <div class="card-header">
+            <b id="popup_title"></b>
+        </div>
+        <div class="card-body text-center">
+            <div id="popup_content"></div>
+            <div class="text-right">
+                <span id="popup_next" type="button" class="btn btn-sm btn-primary my-2">Next</span>
+                <span id="popup_dismiss" type="button" class="btn btn-sm btn-primary my-2">Dismiss</span>
+            </div>
+        </div>
+    </div>
     
     
-    <div class="container-fluid fill">
-        <div id="scenario-div" class="row">
+    <div id="scenario-div" class="container-fluid fill">
+        <div class="row">
             <div class="col-3 text-white flex-column bg-dark d-flex pr-0">
                 <h1 id="turn_number_text">Year 1</h1>
                 <div class="card text-white h-100 bg-dark flex-column d-flex pr-0">
