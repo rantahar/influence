@@ -35,6 +35,48 @@ function gameboard(map){
             this.land = land;
         }
 
+        describe(){
+            var div = this.describe_short();
+            div.append(this.describe_culture());
+            return div;
+        }
+        
+        describe_short(){
+            // Return a short description with 
+            var div = $("<div></div>");
+            div.append("<p><b>Tile:</b> x="+this.x+", y="+this.y+"</p>");
+            if(this.owner != undefined){
+                var p = $("<p></p>").text("owner: ");
+                var text = $("<span></span>").text(this.owner).css('color', players[this.owner].text_color);
+                p.append(text);
+            }
+            div.append(p);
+            div.append("<p>"+map_descriptions[this.land]+"</p>");
+            return div;
+        }
+        
+        describe_culture(){
+            // Show owner if there is one
+            var div = $("<div></div>");
+            var culture_p = $("<p></p>").text("Culture: ");
+            var first = true;
+            if(this.owner != undefined){
+                var text = $("<span></span>").text(" "+this.culture[this.owner].toFixed(2))
+                .css('color', players[this.owner].text_color);
+                first = false
+                culture_p.append(text);
+            }
+            for(var key in this.culture){
+                if(key != this.owner){
+                    var text = $("<span></span>").text(" "+this.culture[key].toFixed(2))
+                    .css('color', players[key].text_color);
+                    culture_p.append(text);
+                }
+            }
+            div.append(culture_p);
+            return div;
+        }
+
         is_empty(){
             if(this.city == undefined && this.building == undefined &&
                this.land != 'f' && this.land != 'w'){
@@ -170,6 +212,7 @@ function gameboard(map){
             this.number = cities.length;
             this.x = x;
             this.y = y;
+            this.tile = tiles[x][y];
             this.level = level;
             this.food = 0;
             this.name = "Aztola";
@@ -186,6 +229,10 @@ function gameboard(map){
 
         owner(){
             return tiles[this.x][this.y].owner;
+        }
+
+        free_workers() {
+            return this.level - this.workers_wood  - this.workers_food;
         }
 
         set_food_workers(n){
@@ -333,45 +380,62 @@ function gameboard(map){
             var city = this;
             var div = $("<div></div>");
             div.append($("<h4></h4>").text(this.name));
-            div.append($("<p></p>").text("Level: "+this.level));
-            div.append($("<p></p>").text("Food: "+this.food));
+            div.append("<p><b>Tile:</b> x="+this.x+", y="+this.y+"</p>");
+            div.append(this.tile.describe_culture());
+            div.append($("<p></p>").html("<b>Level</b>: "+this.level));
+            div.append($("<p></p>").html("<b>Food</b>: "+this.food));
+            div.append($("<p></p>").html("<b>Free workers</b>: "+this.free_workers()));
             if(this.building){
                 div.append($("<p></p>").text("Building a "+this.building.type));
             }
 
-            if(this.food_tiles() > 0){
-                var food_slider_div = $("<div></div>").text("Food workers: ");
-                var food_slider = $('<input>').attr({
-                    type: "range",
-                    min: 0,
-                    max: Math.min(this.food_tiles(), this.level),
-                    value: this.workers_food,
-                    class: "slider"
-                }).appendTo(food_slider_div);
-                food_slider.change(function(){
-                    city.set_food_workers($(this).val());
-                    update_panel();
+            if(active_city.owner() == 'white'){
+                if(this.food_tiles() > 0){
+                    var max = Math.min(this.food_tiles(), this.level);
+                    var food_slider_div = $("<div></div>").text("Food workers: ");
+                    var food_slider = $('<input>').attr({
+                        type: "range",
+                        min: 0,
+                        max: max,
+                        value: this.workers_food,
+                        class: "slider"
+                    }).appendTo(food_slider_div);
+                    food_slider.change(function(){
+                        city.set_food_workers($(this).val());
+                        update_city_page();
+                    });
+                    food_slider_div.append(" "+this.workers_food+"/"+max);
+                    div.append(food_slider_div);
+                }
+
+                if(this.wood_tiles() > 0){
+                    var max = Math.min(this.wood_tiles(), this.level);
+                    var wood_slider_div = $("<div></div>").text("Wood workers: ");
+                    var wood_slider = $('<input>').attr({
+                        type: "range",
+                        min: 0,
+                        max: max,
+                        value: this.workers_wood,
+                        class: "slider"
+                    }).appendTo(wood_slider_div);
+                    wood_slider.change(function(){ 
+                        city.set_wood_workers($(this).val());
+                        update_city_page();
+                    });
+                    wood_slider_div.append(" "+this.workers_wood+"/"+max);
+                    div.append(wood_slider_div);
+                }
+
+                // Add colony button
+                var colony_button = $("<span></span>").text("Establish colony (turns)");
+                colony_button.addClass("btn btn-success");
+                colony_button.click(function(){
+                    active_city.queue_colony();
+                    update_city_page();
                 });
-                food_slider_div.append(" "+this.workers_food);
-                div.append(food_slider_div);
+                div.append(colony_button);
             }
 
-            if(this.wood_tiles() > 0){
-                var wood_slider_div = $("<div></div>").text("Wood workers: ");
-                var wood_slider = $('<input>').attr({
-                    type: "range",
-                    min: 0,
-                    max: Math.min(this.wood_tiles(), this.level),
-                    value: this.workers_wood,
-                    class: "slider"
-                }).appendTo(wood_slider_div);
-                wood_slider.change(function(){ 
-                    city.set_wood_workers($(this).val());
-                    update_panel();
-                });
-                wood_slider_div.append(" "+this.workers_wood);
-                div.append(wood_slider_div);
-            }
             return div;
         }
 
@@ -463,6 +527,8 @@ function gameboard(map){
                 this.add_city(start.x,start.y, 1);
                 if(player == 'white'){
                     this.center_camera_on(start.x,start.y);
+                    active_city = tiles[start.x][start.y].city;
+                    update_city_page();
                 }
             }
         
@@ -891,6 +957,7 @@ function gameboard(map){
         $("#turn_number_text").text('Year '+turn_counter);
 
         update_panel();
+        update_city_page();
     }
 
 
@@ -902,21 +969,35 @@ function gameboard(map){
 
 
 
-    $( "#next_turn_button" ).click(function() {
+    $( "#next_turn_button" ).click(function(e) {
+        e.preventDefault();
         mapscene = phaser_game.scene.scenes[0];
         next_turn(mapscene);
         mapscene.draw_boundaries()
     });
 
 
+    function show_tab(id) {
+        $('#panel-tabs li a').removeClass("active");
+        $(id+"-tab").addClass("active");
+        $('.tab-pane').hide();
+        $(id).show();
+    }
 
-    var panel_location = {x:undefined,y:undefined};
+    $('#panel-tabs a').click(function (e) {
+        e.preventDefault();
+        var id = $(this).attr('href');
+        show_tab(id);
+    })
+
+
+    var active_tile;
     function tile_click(map_scene) {
         var worldPoint = map_scene.input.activePointer.positionToCamera(map_scene.cameras.main);
         var x = map_scene.map.worldToTileX(worldPoint.x) % tiles.map_size_x;
         var y = map_scene.map.worldToTileY(worldPoint.y) % tiles.map_size_y;
 
-        // If building
+        // If building, try here and do nothing else
         if( map_scene.preview == 'road'){
             build_road(players.white, x, y);
             map_scene.preview = undefined;
@@ -933,9 +1014,17 @@ function gameboard(map){
             return;
         }
         
-        panel_location.x = x;
-        panel_location.y = y;
+        // Describe the selected tile
+        active_tile = tiles[x][y];
         update_panel();
+
+        // Now check for a city and update
+        if(active_tile.city){
+            console.log()
+            active_city = active_tile.city;
+            update_city_page();
+            show_tab("#city");
+        }
     }
     
     function build_city(x,y,player_key){
@@ -944,85 +1033,41 @@ function gameboard(map){
             var mapscene = phaser_game.scene.scenes[0];
             mapscene.add_city(x,y);
             players[player_key].colonies -= 1;
+            if(player_key == "white"){
+                active_city = tiles[x][y].city;
+                update_city_page();
+            }
         }
     }
 
+    var active_city;
+    function update_city_page(){
+        $("#city").empty();
+        // Describe the tile
+        var div = active_city.describe();
+        $("#city").append(div);
+
+        var back_button = $("<span></span>").text("Back");
+        back_button.addClass("btn btn-primary");
+        back_button.click(function(){ show_tab("#home"); });
+        $("#city").append(back_button);
+    }
+
+
     function update_panel(){
-        if( panel_location.x != undefined){
-            var x = panel_location.x;
-            var y = panel_location.y;
-            var tile = tiles[x][y];
-            $("#info-page").empty();
+        player = players.white;
+        $("#home").empty();
 
-            // Show city if there is one
-            if(tile.city){
-                var div = tile.city.describe()
-                $("#info-page").append(div);
-
-                var mapscene = phaser_game.scene.scenes[0];
-                mapscene.view_city = tile.city;
-            }
-
-            // Describe the tile
-            $("#info-page").append("<p><b>Tile:</b> x="+x+", y="+y+"</p>");
-            $("#info-page").append("<p>"+map_descriptions[tile.land]+"</p>");
-
-            // Show owner if there is one
-            if(tile.owner != undefined){
-                var p = $("<p></p>").text("owner: ");
-                var text = $("<span></span>").text(tile.owner).css('color', players[tile.owner].text_color);
-                p.append(text);
-                $("#info-page").append(p);
-                var p = $("<p></p>").text("Culture: ");
-                var text = $("<span></span>").text(" "+tile.culture[tile.owner].toFixed(2))
-                .css('color', players[tile.owner].text_color);
-                p.append(text);
-                for(var key in tile.culture){
-                    if(key != tile.owner){
-                        var text = $("<span></span>").text(" "+tile.culture[key].toFixed(2))
-                        .css('color', players[key].text_color);
-                        p.append(text);
-                    }
-                }
-                $("#info-page").append(p);
-            } else {
-                var p = $("<p></p>")
-                var first = true;
-                for(var key in tile.culture){
-                    if(first){
-                        p.text("culture: ");
-                        first = false;
-                    }
-                    if(key != tile.owner){
-                        var text = $("<span></span>").text(" "+tile.culture[key].toFixed(2))
-                        .css('color', players[key].text_color);
-                        p.append(text);
-                    }
-                }
-                $("#info-page").append(p);
-            }
-
-            // Add colony button
-            if(tile.city){
-                if(tile.owner == 'white'){
-                    var city_button = $("<span></span>").text("Establish colony (turns)");
-                    city_button.addClass("btn btn-success");
-                    city_button.click(function(){
-                         tile.city.queue_colony();
-                         update_panel();
-                     });
-                    $("#info-page").append(city_button);
-                }
-            }
+        if(active_tile){
+            var div = active_tile.describe();
+            console.log(div);
+            $("#home").append(div);
         }
 
-        player = players.white;
-        $("#interaction-page").empty();
-
         var resource_text = $("<p></p>").text("Wood: " + player.wood);
-        $("#interaction-page").append(resource_text);
+        $("#home").append(resource_text);
         var resource_text = $("<p></p>").text("colonies: " + player.colonies);
-        $("#interaction-page").append(resource_text);
+        $("#home").append(resource_text);
 
         var road_button = $("<span></span>").text("Road (10 wood)");
         if(player.wood >= 10){
@@ -1032,7 +1077,7 @@ function gameboard(map){
             road_button.addClass("btn btn-secondary");
         }
 
-        $("#interaction-page").append(road_button);
+        $("#home").append(road_button);
 
         var colony_button = $("<span></span>").text("City (1 colony)");
         if(player.colonies >= 1){
@@ -1041,7 +1086,7 @@ function gameboard(map){
         } else {
             colony_button.addClass("btn btn-secondary");
         }
-        $("#interaction-page").append(colony_button);
+        $("#home").append(colony_button);
 
     }
 

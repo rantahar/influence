@@ -9,26 +9,28 @@
 <body>
 
 
-    <div class="container-fluid fill"  >
+    <div class="container-fluid fill">
         <div class="row">
-            <div class="col-3 flex-column d-flex pr-0">
-                <div class="row h-50 ">
-                    <div class="card text-white bg-dark h-100 flex-column d-flex pr-0">
-                        <div class="card-body h-100 flex-column d-flex">
-                            <h1 id="turn_number_text">Year 1</h1>
+            <div class="col-3 text-white flex-column bg-dark d-flex pr-0">
+                <h1 id="turn_number_text">Year 1</h1>
+                <div class="card text-white h-100 bg-dark flex-column d-flex pr-0">
+                    <ul class="nav nav-tabs card-header-tabs" id="panel-tabs" role="tablist">
+                        <li class="nav-item bg-dark" role="presentation">
+                            <a class="nav-link bg-dark active" data-toggle="tab" href="#home" id="home-tab">Home</a>
+                        </li>
+                        <li>
+                            <a class="nav-link bg-dark" data-toggle="tab" href="#city" id="city-tab">City</a>
+                        </li>
+                    </ul>
+                    <div class="card-body h-100 flex-column d-flex">
 
-                            <div id="info-page" ></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row h-50">
-                    <div class="card text-white h-100 bg-dark flex-column d-flex pr-0">
-                        <div class="card-body h-100 flex-column d-flex">
-                
-                            <div id="interaction-page" ></div>
+                        <div class="tab-content" id="panel-content">
+                            <div class="tab-pane active text-white" id="home" role="tabpanel"></div>
 
-                            <button id="next_turn_button" type="button" class="btn btn-primary mt-auto text-right">Next Turn</button>
+                            <div class="tab-pane text-white" id="city" role="tabpanel"></div>
                         </div>
+
+                        <button id="next_turn_button" type="button" class="btn btn-primary mt-auto text-right">Next Turn</button>
                     </div>
                 </div>
             </div>
