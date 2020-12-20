@@ -119,24 +119,22 @@ var tutorial_1 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "Text",
-            next: {
-                title: "Tutorial",
-                text: "Page 2"
-            }
+            text: "You are a god, newly born in at the dawn of humanity. You are worshipped in a small "+
+            "village in the middle of nowhere, but you aspire to spread your influence around the world. "+
+            "First, click on your home city on the map."
         });
     },
     on_update: function(){
-        if(this.city_click != undefined && $("#city").hasClass("active")){
+        if(this.city_click == undefined && $("#city-tab").hasClass("active")){
             this.city_click = true;
             game.popup({
                 title: "Tutorial",
                 text: "The city panel has opened on the left. Your first city starts from level 1 and has "+
-                "1 free worker. The city also produces influence for you. your influence spreads at the "+
+                "1 free worker. The city also produces influence for you. Your influence spreads at the "+
                 "each turn. Click 'Next Turn' to see it spread."
             });
         }
-        if(this.turn_2 != undefined && game.turn > 1){
+        if(this.turn_2 == undefined && game.turn > 1){
             this.turn_2 = true;
             game.popup({
                 title: "Tutorial",
@@ -153,8 +151,8 @@ var tutorial_1 = {
 
             });
         }
-        if(this.colony != undefined && game.player.colonies > 0){
-            this.turn_2 = true;
+        if(this.colony == undefined && game.player.colonies > 0){
+            this.colony = true;
             game.popup({
                 title: "Tutorial",
                 text: "Great! You can now send your colony to establish a new city in the 'home' menu. "+
@@ -162,21 +160,104 @@ var tutorial_1 = {
                 "'Next Turn' a couple more times first. Build your second city."
             });
         }
-        if(this.two_cities != undefined && game.cities.length > 2){
+        if(this.two_cities == undefined && game.cities.length > 1){
             this.two_cities = true;
+            this.goal_next_turn = true;
             game.popup({
                 title: "Tutorial",
                 text: "Your second city will take a few turns to flourish, but rest assured it will.",
                 next: {
                     title: "Tutorial",
                     text: "You can also build roads in the home tab. Roads make culture flow more easily "+
-                    "and can be used to control its flow."
+                    "and can be used to control its flow.",
+                    next: {
+                        title: "Tutorial",
+                        text: "Your goal is to spread your influence as far as you can. Since there are "+
+                        "no other gods on this island, you can take your time. You win when you control "+
+                        "more than half of the world or have more influence than anyone else after 500 "+
+                        "turns."
+                    }
                 }
             });
         }
     }
 }
 
+// Shows basic elements on an empty map
+var tutorial_2 = {
+    map: [
+    ['w','w','w','w','w','w','g','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','g','m','f','g','g','g','w','w','w','w','w','w','w','w'],
+    ['w','w','g','f','m','g','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','m','g','g','f','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','m','g','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','g','f','g','g','g','g','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','f','g','f','g','g','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','g','g','g','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','f','g','g','f','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','g','g','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w']
+    ],
+    start: {
+        white: {x: 2, y:4},
+        blue:  {x: 6, y:1}
+    },
+    at_start: function(){
+        game.popup({
+            title: "Tutorial",
+            text: "Now you have competition. The blue city is owned by some god of water. It doesn't "+
+            "matter who, they all are competition. Other gods have the same win conditions as you."
+        });
+    }
+}
+
+
+// Shows basic elements on an empty map
+var tutorial_2 = {
+    map: [
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','g','m','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','g','f','g','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','g','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','g','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','f','g','g','g','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','g','f','g','f','g','g','f','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','g','g','g','m','w','w','w','w','w','w','w','w','w'],
+    ['w','g','f','g','g','f','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','g','g','g','g','g','g','g','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w']
+    ],
+    start: {
+        white: {x: 2, y:2},
+        blue:  {x: 6, y:9},
+        red:  {x: 1, y:8}
+    },
+    at_start: function(){
+        game.popup({
+            title: "Tutorial",
+            text: "The red god is Mars, a god of war. It's influence cannot mix with others. This can give"+
+            "you an edge in an otherwise symmetric situation."
+        });
+    }
+}
 
 
 

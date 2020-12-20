@@ -1175,13 +1175,12 @@ function gameboard(map){
         $("#popup").show();
     }
 
-
     return {
         phaser_game: phaser_game,
         cities, cities,
-        turn: turn_counter,
         popup: popup,
-        player: players['white']
+        player: players['white'],
+        get turn() { return turn_counter; },
     };
 
 }
@@ -1193,7 +1192,7 @@ $("#start").click(function(e){
     e.preventDefault();
     game = gameboard(random_map(32,32,5,40,5,10,false,['white','blue','green','red']));
     $("#main-menu").hide();
-    $('#scenario-div').fadeIn();    
+    $('#scenario-div').fadeIn();
 });
 
 $("#tutorial").click(function(e){
