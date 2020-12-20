@@ -129,19 +129,19 @@ var tutorial_1 = {
             this.city_click = true;
             game.popup({
                 title: "Tutorial",
-                text: "The city panel has opened on the left. Your first city starts from level 1 and has "+
-                "1 free worker. The city also produces influence for you. Your influence spreads at the "+
-                "each turn. Click 'Next Turn' to see it spread."
+                text: "The city panel has opened on the left. Your first city starts from level 1, but it "+
+                "grows as it produces more food. The city also produces influence for you. Your influence "+ "spreads at the end of each turn. Click 'Next Turn' to see it spread."
             });
         }
         if(this.turn_2 == undefined && game.turn > 1){
             this.turn_2 = true;
             game.popup({
                 title: "Tutorial",
-                text: "You now control four tiles around your city. In the city panel you can set your "+
-                "worker to produce either food or wood, thanks to the field and forest tiles around the "+
-                "city. It is better to produce food right now. The people in the city need food and food "+
-                "makes the city grow.",
+                text: "You now control four tiles around your city. In the city panel you see that you have "+
+                "one worker, currently producing food. The worker can produce either food or wood, thanks "+
+                "to the field and forest tiles around the city. "+
+                "It is better to produce food in the beginning, since this helps the city grow and create"+
+                "more workers.",
                 next: {
                     title: "Tutorial",
                     text: "Once you have some food, you can start producing a colony. It is a good idea to"+

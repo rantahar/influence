@@ -351,6 +351,7 @@ function gameboard(map){
                 this.food -= this.food_limit();
                 this.level += 1;
                 // Automatically assign to food, then wood
+                console.log(this.workers_food);
                 if(this.workers_food < this.food_tiles()){
                     this.workers_food += 1;
                 } else if(this.workers_wood < this.wood_tiles()){
