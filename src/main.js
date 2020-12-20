@@ -1154,5 +1154,20 @@ function gameboard(map){
 
 }
 
-var game = gameboard(random_map(32,32,5,40,5,10,false,['white','blue','green','red']));
-//var game = gameboard(map_1);
+var game;
+
+
+$("#start").click(function(){
+    game = gameboard(random_map(32,32,5,40,5,10,false,['white','blue','green','red']));
+    $("#main-menu").hide();
+    $('#scenario-div').fadeIn();    
+});
+
+$("#tutorial").click(function(){
+    game = gameboard(map_1);
+    $("#main-menu").hide();
+    $('#scenario-div').fadeIn();
+});
+
+
+
