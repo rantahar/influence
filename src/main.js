@@ -334,15 +334,12 @@ function gameboard(map){
 
             // Check buildings
             if(food > 0 && this.building != undefined){
-                var done = true;
-                if(this.building.food > food){
-                    this.building.food -= food;
-                    food = 0;
-                    done = false;
-                } else {
-                    food -= this.building.food;
-                }
-                if(done){
+                var workers = this.free_workers();
+                this.building.food -= Math.min(0,workers);
+                var food_diff = Math.min(food,this.building.food);
+                this.building.food -= food_diff;
+                food -= food_diff;
+                if(this.building.food <= 0 ) {
                     this.building_done();
                 }
             }
@@ -383,13 +380,14 @@ function gameboard(map){
             div.append("<p><b>Tile:</b> x="+this.x+", y="+this.y+"</p>");
             div.append(this.tile.describe_culture());
             div.append($("<p></p>").html("<b>Level</b>: "+this.level));
-            div.append($("<p></p>").html("<b>Food</b>: "+this.food));
-            div.append($("<p></p>").html("<b>Free workers</b>: "+this.free_workers()));
-            if(this.building){
-                div.append($("<p></p>").text("Building a "+this.building.type));
-            }
-
             if(active_city.owner() == 'white'){
+                div.append($("<p></p>").html("<b>Food</b>: "+this.food));
+                div.append($("<p></p>").html("<b>Free workers</b>: "+this.free_workers()));
+                if(this.building){
+                    div.append($("<p></p>").text("Building a "+this.building.type
+                     + "("+this.building.food+")"));
+                }
+
                 if(this.food_tiles() > 0){
                     var max = Math.min(this.food_tiles(), this.level);
                     var food_slider_div = $("<div></div>").text("Food workers: ");
@@ -1024,6 +1022,8 @@ function gameboard(map){
             active_city = active_tile.city;
             update_city_page();
             show_tab("#city");
+        } else {
+            show_tab("#home");
         }
     }
     
@@ -1047,10 +1047,10 @@ function gameboard(map){
         var div = active_city.describe();
         $("#city").append(div);
 
-        var back_button = $("<span></span>").text("Back");
-        back_button.addClass("btn btn-primary");
-        back_button.click(function(){ show_tab("#home"); });
-        $("#city").append(back_button);
+        //var back_button = $("<span></span>").text("Back");
+        //back_button.addClass("btn btn-primary");
+        //back_button.click(function(){ show_tab("#home"); });
+        //$("#city").append(back_button);
     }
 
 
