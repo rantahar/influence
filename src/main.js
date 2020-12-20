@@ -306,7 +306,7 @@ function gameboard(map){
 
         // The amount of wood produced per turn
         wood_production(){
-            var wood = this.wood_tiles();
+            var wood = Math.min(this.workers_wood, this.wood_tiles());
             return wood;
         }
 
@@ -1179,7 +1179,9 @@ function gameboard(map){
     return {
         phaser_game: phaser_game,
         cities, cities,
-        popup: popup
+        turn: turn_counter,
+        popup: popup,
+        player: players['white']
     };
 
 }

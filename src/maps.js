@@ -127,12 +127,51 @@ var tutorial_1 = {
         });
     },
     on_update: function(){
-        console.log(this,this.two_cities, game.cities.length);
+        if(this.city_click != undefined && $("#city").hasClass("active")){
+            this.city_click = true;
+            game.popup({
+                title: "Tutorial",
+                text: "The city panel has opened on the left. Your first city starts from level 1 and has "+
+                "1 free worker. The city also produces influence for you. your influence spreads at the "+
+                "each turn. Click 'Next Turn' to see it spread."
+            });
+        }
+        if(this.turn_2 != undefined && game.turn > 1){
+            this.turn_2 = true;
+            game.popup({
+                title: "Tutorial",
+                text: "You now control four tiles around your city. In the city panel you can set your "+
+                "worker to produce either food or wood, thanks to the field and forest tiles around the "+
+                "city. It is better to produce food right now. The people in the city need food and food "+
+                "makes the city grow.",
+                next: {
+                    title: "Tutorial",
+                    text: "Once you have some food, you can start producing a colony. It is a good idea to"+
+                    "have some more workers first, since preparing a colony takes a lot of food." +
+                    "When you are ready, build a colony."
+                }
+
+            });
+        }
+        if(this.colony != undefined && game.player.colonies > 0){
+            this.turn_2 = true;
+            game.popup({
+                title: "Tutorial",
+                text: "Great! You can now send your colony to establish a new city in the 'home' menu. "+
+                "Cities cannot be established too close to the original, so you might have to click "+
+                "'Next Turn' a couple more times first. Build your second city."
+            });
+        }
         if(this.two_cities != undefined && game.cities.length > 2){
             this.two_cities = true;
             game.popup({
                 title: "Tutorial",
-                text: "Text"
+                text: "Your second city will take a few turns to flourish, but rest assured it will.",
+                next: {
+                    title: "Tutorial",
+                    text: "You can also build roads in the home tab. Roads make culture flow more easily "+
+                    "and can be used to control its flow."
+                }
             });
         }
     }
