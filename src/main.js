@@ -1064,18 +1064,21 @@ function gameboard(map){
 
     function update_panel(){
         player = players.white;
-        $("#home").empty();
-
+        
         if(active_tile){
+            $("#tile_info").empty();
             var div = active_tile.describe();
-            console.log(div);
-            $("#home").append(div);
+            $("#tile_info").append(div);
         }
+        
+        $("#player_info").empty();
+        var Title = $("<h4></h4>").html("Your empire:");
+        $("#player_info").append(Title);
 
         var resource_text = $("<p></p>").text("Wood: " + player.wood);
-        $("#home").append(resource_text);
+        $("#player_info").append(resource_text);
         var resource_text = $("<p></p>").text("colonies: " + player.colonies);
-        $("#home").append(resource_text);
+        $("#player_info").append(resource_text);
 
         var road_button = $("<span></span>").text("Road (10 wood)");
         if(player.wood >= 10){
@@ -1085,7 +1088,7 @@ function gameboard(map){
             road_button.addClass("btn btn-secondary");
         }
 
-        $("#home").append(road_button);
+        $("#player_info").append(road_button);
 
         var colony_button = $("<span></span>").text("City (1 colony)");
         if(player.colonies >= 1){
@@ -1094,7 +1097,7 @@ function gameboard(map){
         } else {
             colony_button.addClass("btn btn-secondary");
         }
-        $("#home").append(colony_button);
+        $("#player_info").append(colony_button);
 
     }
 
