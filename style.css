@@ -15,7 +15,20 @@ p {
 }
 
 
+.btn-vsm {
+    margin: 0 !important; 
+    padding: 5px !important;
+    vertical-align: middle;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
 
+div input{
+    vertical-align: middle;
+    width: 50%;
+    padding:0px;
+    margin:0px;
+}
 
 .centered {
     position: fixed;

@@ -391,7 +391,13 @@ function gameboard(map){
 
                 if(this.food_tiles() > 0){
                     var max = Math.min(this.food_tiles(), this.level);
-                    var food_slider_div = $("<div></div>").text("Food workers: ");
+                    var food_slider_div = $("<div></div>").html("Food workers:</br>");
+                    var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
+                    mbutton.click(function(){
+                        city.set_food_workers(city.workers_food-1);
+                        update_city_page();
+                    });
+                    food_slider_div.append(mbutton);
                     var food_slider = $('<input>').attr({
                         type: "range",
                         min: 0,
@@ -403,13 +409,25 @@ function gameboard(map){
                         city.set_food_workers($(this).val());
                         update_city_page();
                     });
+                    var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
+                    pbutton.click(function(){
+                        city.set_food_workers(city.workers_food+1);
+                        update_city_page();
+                    });
+                    food_slider_div.append(pbutton);
                     food_slider_div.append(" "+this.workers_food+"/"+max);
                     div.append(food_slider_div);
                 }
 
                 if(this.wood_tiles() > 0){
                     var max = Math.min(this.wood_tiles(), this.level);
-                    var wood_slider_div = $("<div></div>").text("Wood workers: ");
+                    var wood_slider_div = $("<div></div>").text("Wood workers:</br>");
+                    var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
+                    mbutton.click(function(){
+                        city.set_wood_workers(city.workers_wood-1);
+                        update_city_page();
+                    });
+                    wood_slider_div.append(mbutton);
                     var wood_slider = $('<input>').attr({
                         type: "range",
                         min: 0,
@@ -421,6 +439,12 @@ function gameboard(map){
                         city.set_wood_workers($(this).val());
                         update_city_page();
                     });
+                    var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
+                    pbutton.click(function(){
+                        city.set_wood_workers(city.workers_wood+1);
+                        update_city_page();
+                    });
+                    wood_slider_div.append(pbutton);
                     wood_slider_div.append(" "+this.workers_wood+"/"+max);
                     div.append(wood_slider_div);
                 }
@@ -430,7 +454,7 @@ function gameboard(map){
                 var turns_left = Math.ceil(this.colony_cost / build_per_turn);
                 if( turns_left < Infinity ) {
                     var colony_button = $("<span></span>").text("Colony ("+turns_left+" turns)");
-                    colony_button.addClass("btn btn-success");
+                    colony_button.addClass("btn btn-success my-1");
                     colony_button.click(function(){
                         active_city.queue_colony();
                         update_city_page();
@@ -1086,22 +1110,22 @@ function gameboard(map){
         var resource_text = $("<p></p>").text("colonies: " + player.colonies);
         $("#player_info").append(resource_text);
 
-        var road_button = $("<span></span>").text("Road (10 wood)");
+        var road_button = $("<div></div>").text("Road (10 wood)");
         if(player.wood >= 10){
-            road_button.addClass("btn btn-success");
+            road_button.addClass("btn btn-success my-1");
             road_button.click(function(){ start_build_road(); });
         } else {
-            road_button.addClass("btn btn-secondary");
+            road_button.addClass("btn btn-secondary my-1");
         }
 
         $("#player_info").append(road_button);
 
-        var colony_button = $("<span></span>").text("City (1 colony)");
+        var colony_button = $("<div></div>").text("City (1 colony)");
         if(player.colonies >= 1){
-            colony_button.addClass("btn btn-success");
+            colony_button.addClass("btn btn-success my-1");
             colony_button.click(function(){ start_build_city(); });
         } else {
-            colony_button.addClass("btn btn-secondary");
+            colony_button.addClass("btn btn-secondary my-1");
         }
         $("#player_info").append(colony_button);
 
