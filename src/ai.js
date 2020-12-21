@@ -19,6 +19,8 @@ class AIPlayer {
         
         this.wood = 0;
         this.colonies = 0;
+        this.culture = 0;
+        this.owned_tiles = 1;
     }
 
     take_turn(tiles, cities, build_road, build_city) {

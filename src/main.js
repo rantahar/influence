@@ -12,6 +12,8 @@ function gameboard(map){
             map_color: '#FFFFFF',
             wood: 0,
             colonies: 0,
+            culture: 0,
+            owned_tiles: 1,
             take_turn(){}
         },
         'green': green_player,
@@ -989,6 +991,24 @@ function gameboard(map){
             }
         }
 
+        // Calculate the number of tiles owned per player
+        // and the global sum of culture
+        for(player in players){
+            players[player].culture = 0;
+            players[player].owned_tiles=0;
+        }
+
+        for(var x = 0; x < tiles.map_size_x; x++) {
+            for(var y = 0; y < tiles.map_size_y; y++) {
+                if(tiles[x][y].owner){
+                    players[tiles[x][y].owner].owned_tiles += 1;
+                }
+                for(player in tiles[x][y].culture){
+                    players[player].culture += tiles[x][y].culture[player];
+                }
+            }
+        }
+
         turn_counter += 1;
         $("#turn_number_text").text('Year '+turn_counter);
 
@@ -1105,6 +1125,15 @@ function gameboard(map){
         var Title = $("<h4></h4>").html("Your empire:");
         $("#player_info").append(Title);
 
+        var info = $("<p></p>").text("Culture: " + player.culture.toFixed(0));
+        $("#player_info").append(info);
+        var info = $("<p></p>").text("Tiles controlled: " + player.owned_tiles +
+                                     "/" + tiles.map_size_x*tiles.map_size_y);
+        $("#player_info").append(info);
+
+        
+        var resource_title = $("<b></b>").html("</br>resources:");
+        $("#player_info").append(resource_title);
         var resource_text = $("<p></p>").text("Wood: " + player.wood);
         $("#player_info").append(resource_text);
         var resource_text = $("<p></p>").text("colonies: " + player.colonies);
