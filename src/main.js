@@ -364,7 +364,14 @@ function gameboard(map){
             // Or if the city shrinks
             if(this.food < 0 && this.level > 1){
                 this.level -= 1;
-                this.food = 0;
+                this.food = this.food_limit()/2;
+                if(this.free_workers() == 0){
+                    if(this.workers_wood > 0){
+                        this.workers_wood -= 1;
+                    } else {
+                        this.workers_food -= 1;
+                    }
+                }
                 map_scene.update_city_sprite(x,y,this.level);
             }
 
@@ -1253,7 +1260,7 @@ var game;
 
 $("#start").click(function(e){
     e.preventDefault();
-    game = gameboard(random_map(32,32,5,40,5,10,false,['white','blue','green','red']));
+    game = gameboard(random_map(24,24,5,40,5,10,false,['white','blue','green','red']));
     $("#main-menu").hide();
     $('#scenario-div').fadeIn();
 });
