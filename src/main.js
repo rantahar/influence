@@ -45,12 +45,6 @@ function gameboard(map){
             // Return a short description with 
             var div = $("<div></div>");
             div.append("<p><b>Tile:</b> x="+this.x+", y="+this.y+"</p>");
-            if(this.owner != undefined){
-                var p = $("<p></p>").text("owner: ");
-                var text = $("<span></span>").text(this.owner).css('color', players[this.owner].text_color);
-                p.append(text);
-            }
-            div.append(p);
             div.append("<p>"+map_descriptions[this.land]+"</p>");
             return div;
         }
@@ -58,15 +52,19 @@ function gameboard(map){
         describe_culture(){
             // Show owner if there is one
             var div = $("<div></div>");
-            var culture_p = $("<p></p>").text("Culture: ");
             var first = true;
             if(this.owner != undefined){
+                var culture_p = $("<p></p>").text("Culture: ");
                 var text = $("<span></span>").text(" "+this.culture[this.owner].toFixed(2))
                 .css('color', players[this.owner].text_color);
                 first = false
                 culture_p.append(text);
             }
             for(var key in this.culture){
+                if(first) {
+                    var culture_p = $("<p></p>").text("Culture: ");
+                }
+                first = false;
                 if(key != this.owner){
                     var text = $("<span></span>").text(" "+this.culture[key].toFixed(2))
                     .css('color', players[key].text_color);
@@ -220,6 +218,8 @@ function gameboard(map){
             this.workers_wood=0;
             tiles[x][y].culture[this.owner()] = this.culture();
             tiles[x][y].road = true;
+
+            this.colony_cost = 12;
         }
 
         // Calculate the culture production of the city
@@ -426,13 +426,17 @@ function gameboard(map){
                 }
 
                 // Add colony button
-                var colony_button = $("<span></span>").text("Establish colony (turns)");
-                colony_button.addClass("btn btn-success");
-                colony_button.click(function(){
-                    active_city.queue_colony();
-                    update_city_page();
-                });
-                div.append(colony_button);
+                var build_per_turn = (this.food_production() + this.free_workers() - this.food_consumption());
+                var turns_left = Math.ceil(this.colony_cost / build_per_turn);
+                if( turns_left < Infinity ) {
+                    var colony_button = $("<span></span>").text("Colony ("+turns_left+" turns)");
+                    colony_button.addClass("btn btn-success");
+                    colony_button.click(function(){
+                        active_city.queue_colony();
+                        update_city_page();
+                    });
+                    div.append(colony_button);
+                }
             }
 
             return div;
@@ -441,7 +445,7 @@ function gameboard(map){
         // Start building a colony
         queue_colony(){
             if(this.building==undefined){
-                this.building = {'food': 12, 'type': 'colony'};
+                this.building = {'food': this.colony_cost, 'type': 'colony'};
             }
         }
 
@@ -519,7 +523,7 @@ function gameboard(map){
 
             this.draw_map();
         
-            // Add at towns
+            // Add towns
             for(player in map.start){
                 var start = map.start[player];
                 tiles[start.x][start.y].owner = player;
@@ -528,6 +532,8 @@ function gameboard(map){
                     this.center_camera_on(start.x,start.y);
                     active_city = tiles[start.x][start.y].city;
                     update_city_page();
+                    active_tile = tiles[start.x][start.y];
+                    update_panel();
                 }
             }
         
@@ -1050,15 +1056,15 @@ function gameboard(map){
 
     var active_city;
     function update_city_page(){
-        $("#city").empty();
+        $("#city_card").empty();
         // Describe the tile
         var div = active_city.describe();
-        $("#city").append(div);
+        $("#city_card").append(div);
 
         //var back_button = $("<span></span>").text("Back");
         //back_button.addClass("btn btn-primary");
         //back_button.click(function(){ show_tab("#home"); });
-        //$("#city").append(back_button);
+        //$("#city_card").append(back_button);
     }
 
 
