@@ -1,9 +1,9 @@
 // List of possible characters for defining a map tile
 var map_sprites = {
-    'w': {'map': 24*7},            // Water
-    'g': {'map': 1},               // Grass
-    'f': {'map': 1, 'sprite': 6},  // Forests
-    'm': {'map': 1, 'sprite': 10}  // Mountains
+    'w': {'map': 1},   // Water
+    'g': {'map': 0},   // Grass
+    'f': {'map': 3},   // Forests
+    'm': {'map': 2}    // Mountains
 }
 
 // The description printed in the side panel
@@ -15,7 +15,36 @@ var map_descriptions = {
 }
 
 // Sprites for roads and shore tiles
-var road_sprites = [2,71,77,70,71,71,72,66,77,84,77,63,86,65,64,78]
+var numbers      = [0,1,2,3,4,5,
+                    6,7,8,9,10,11,
+                    12,13,14,15,
+                    16,17,18,
+                    19,20,
+                    21,
+                    22,23,24,25,
+                    26,27,28, //
+                    28,29,30,
+                    31,32,33,34,35,36,37,38,
+                    40,41,42,43,44,45,46,47,48,49,50,51,
+                    52,53,54,55,56,
+                    57]
+var road_sprites = [0,5,0,10,
+                    1,14,6,24,
+                    2,17,7,58,
+                    11,13,21,41,  //12
+                    3,19,8,27,
+                    12,21,22,23,  //20
+                    15,25,26,44,
+                    30,29,39,52,
+                    4,20,9,29,    //32
+                    13,37,38,39,
+                    16,41,42,43,  //40
+                    44,45,46,47,
+                    18,38,28,59,
+                    33,49,42,54,  //52
+                    36,28,58,55,
+                    60,56,51,57,  //60
+                   ]
 var water_tile = 168
 var shore_straight = [203,197,205,211]
 var shore_turn_in = [191,189,175,177]
@@ -51,7 +80,7 @@ var map_0 = {
     ],
     start: {
         white: {x: 4, y:4},
-        green: {x: 4, y:4}
+        green: {x: 16, y:16}
     }
 }
 
