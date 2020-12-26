@@ -649,8 +649,18 @@ function gameboard(map){
         }
 
         center_camera_on(x,y){
-            this.cameras.main.scrollX = 16*3*((x-6.25+(tiles.map_size_x+1))%(tiles.map_size_x+1));
-            this.cameras.main.scrollY = 16*3*((y-6.25+(tiles.map_size_y+1))%(tiles.map_size_y+1));
+            var width = this.tile_scale*this.tile_width;
+            var height = this.tile_scale*this.tile_height;
+            var loc_x = (x+tiles.map_size_x+1)%(tiles.map_size_x+1);
+            var loc_y = (y+tiles.map_size_y+1)%(tiles.map_size_y+1);
+            if( loc_x < tiles.map_size_x/2){
+                loc_x += tiles.map_size_x;
+            }
+            if( loc_y < tiles.map_size_y/2){
+                loc_y += tiles.map_size_y;
+            }
+            this.cameras.main.scrollX = width*loc_x - 300;
+            this.cameras.main.scrollY = height*loc_y - 300;
         }
 
         draw_map(){
