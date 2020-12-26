@@ -442,7 +442,7 @@ function gameboard(map){
 
                 if(this.wood_tiles() > 0){
                     var max = Math.min(this.wood_tiles(), this.level);
-                    var wood_slider_div = $("<div></div>").text("Wood workers:</br>");
+                    var wood_slider_div = $("<div></div>").html("Wood workers:</br>");
                     var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
                     mbutton.click(function(){
                         city.set_wood_workers(city.workers_wood-1);
@@ -1362,6 +1362,10 @@ function gameboard(map){
                 e.preventDefault();
                 popup(content.next);
             });
+            // Prevent the mousedown event on the canvas
+            $("#popup_next").mousedown(function(e){
+                return false;
+            });
         } else {
             $("#popup_next").hide();
         }
@@ -1381,6 +1385,7 @@ function gameboard(map){
 var game;
 
 
+// Start button click
 $("#start").click(function(e){
     e.preventDefault();
     game = gameboard(random_map(24,24,5,40,5,10,false,['white','blue','green','red']));
@@ -1388,6 +1393,12 @@ $("#start").click(function(e){
     $('#scenario-div').fadeIn();
 });
 
+// Prevent the mousedown event on the canvas
+$("#popup_dismiss").mousedown(function(e){
+    return false;
+});
+
+// tutorial click
 $("#tutorial").click(function(e){
     e.preventDefault();
     game = gameboard(tutorial_1);
@@ -1395,9 +1406,21 @@ $("#tutorial").click(function(e){
     $('#scenario-div').fadeIn();
 });
 
+// Prevent the mousedown event on the canvas
+$("#popup_dismiss").mousedown(function(e){
+    return false;
+});
+
+// popup dismiss button
 $("#popup_dismiss").click(function(e){
     e.preventDefault();
     $("#popup").hide();
+    return false;
+});
+
+// Prevent the mousedown event on the canvas
+$("#popup_dismiss").mousedown(function(e){
+    return false;
 });
 
 

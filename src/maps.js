@@ -165,7 +165,7 @@ var tutorial_1 = {
                         title: "Tutorial",
                         text: "Your goal is to spread your influence as far as you can. Since there are "+
                         "no other gods on this island, you can take your time. You win when you control "+
-                        "more than half of the world or have more influence than anyone else after 500 "+
+                        "more than half of the world or have more influence than anyone else after 200 "+
                         "turns."
                     }
                 }

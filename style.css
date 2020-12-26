@@ -47,6 +47,7 @@ div input{
     top: 590px;
     left: 50%;
     transform: translate(-50%, -100%);
+    z-index: 10;
 }
 
 
