@@ -541,6 +541,11 @@ function gameboard(map){
                 "assets/elite_command_art_terrain/tileset.png",
                 { frameWidth: 32, frameHeight: 34 }
             );
+            this.load.spritesheet(
+                'foresttile',
+                "assets/elite_command_art_terrain/modified/forest.png",
+                { frameWidth: 32, frameHeight: 34 }
+            );
         }
 
         create (){
@@ -677,6 +682,15 @@ function gameboard(map){
             sprite.on('pointerdown',function() {
                 tile_click(phaser_game.scene.scenes[0],tile);
             });
+            if(map_sprites[key].decor){
+                var sprite = this.add.sprite(
+                    this.tile_scale*this.tile_width*x,
+                    this.tile_scale*this.tile_height*y,
+                    map_sprites[key].decor[0], map_sprites[key].decor[1]
+                );
+                sprite.setScale(this.tile_scale,this.tile_scale);
+                sprite.depth=3; // above the road layer
+            }
         }
 
         draw_dynamic_tile(x,y,z,sheet, key, angle){

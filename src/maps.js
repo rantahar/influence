@@ -1,9 +1,9 @@
 // List of possible characters for defining a map tile
 var map_sprites = {
-    'w': {'map': 1},   // Water
-    'g': {'map': 0},   // Grass
-    'f': {'map': 3},   // Forests
-    'm': {'map': 2}    // Mountains
+    'w': {map: 1},   // Water
+    'g': {map: 0},   // Grass
+    'f': {map: 0, decor: ['foresttile',0]},   // Forests
+    'm': {map: 2}    // Mountains
 }
 
 // The description printed in the side panel
