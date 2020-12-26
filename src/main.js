@@ -1372,7 +1372,7 @@ $("#start").click(function(e){
 
 $("#tutorial").click(function(e){
     e.preventDefault();
-    game = gameboard(map_0);
+    game = gameboard(tutorial_1);
     $("#main-menu").hide();
     $('#scenario-div').fadeIn();
 });
