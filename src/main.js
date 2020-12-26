@@ -528,7 +528,7 @@ function gameboard(map){
         preload (){
             this.load.spritesheet(
                 'roadtiles',
-                "assets/elite_command_art_terrain/modified/roads.png",
+                "assets/roads.png",
                 { frameWidth: 32, frameHeight: 34 }
             );
             this.load.spritesheet(
@@ -621,7 +621,7 @@ function gameboard(map){
                 if(this.previous_preview){
                     this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
                 }
-                this.put_tile_at(x, y, 5, 'roadtiles', road_sprites[7]);
+                this.put_tile_at(x, y, 5, 'roadtiles', 0);
                 this.previous_preview = {x: x, y: y, z: 5};
             }
 
@@ -679,7 +679,7 @@ function gameboard(map){
             });
         }
 
-        draw_dynamic_tile(x,y,z,sheet, key){
+        draw_dynamic_tile(x,y,z,sheet, key, angle){
             var sprite = this.add.sprite(
                 this.tile_scale*this.tile_width*x,
                 this.tile_scale*this.tile_height*y,
@@ -687,6 +687,7 @@ function gameboard(map){
             );
             sprite.setScale(this.tile_scale,this.tile_scale);
             sprite.depth=z;
+            sprite.angle=angle;
             return sprite;
         }
 
@@ -716,12 +717,7 @@ function gameboard(map){
             }
         }
 
-        put_tile_at(x,y,z,sheet,key){
-            var yhex = y;
-            var xhex = x;
-            if(y%2){
-                xhex += 0.5;
-            }
+        remove_tiles_at(x,y,z){
             for(var i in tiles[x][y].sprites) {
                 var sprite = tiles[x][y].sprites[i];
                 if(sprite.depth == z){
@@ -729,12 +725,25 @@ function gameboard(map){
                     delete tiles[x][y].sprites[i];
                 }
             }
+        }
+
+        add_tile_at(x,y,z,sheet,key,angle=0){
+            var yhex = y;
+            var xhex = x;
+            if(y%2){
+                xhex += 0.5;
+            }
             tiles[x][y].sprites.push(
-                this.draw_dynamic_tile(xhex, yhex, z, sheet, key),
-                this.draw_dynamic_tile(xhex + tiles.map_size_x, yhex, z, sheet, key),
-                this.draw_dynamic_tile(xhex, yhex+tiles.map_size_y, z, sheet, key),
-                this.draw_dynamic_tile(xhex + tiles.map_size_x, yhex+tiles.map_size_y, z, sheet, key)
+                this.draw_dynamic_tile(xhex, yhex, z, sheet, key, angle),
+                this.draw_dynamic_tile(xhex + tiles.map_size_x, yhex, z, sheet, key, angle),
+                this.draw_dynamic_tile(xhex, yhex+tiles.map_size_y, z, sheet, key, angle),
+                this.draw_dynamic_tile(xhex + tiles.map_size_x, yhex+tiles.map_size_y, z, sheet, key, angle)
             )
+        }
+
+        put_tile_at(x,y,z,sheet,key,angle=0){
+            this.remove_tiles_at(x,y,z);
+            this.add_tile_at(x,y,z,sheet,key,angle);
         }
 
         add_city(x, y, level = 0){
@@ -767,77 +776,11 @@ function gameboard(map){
             });
         }
 
-        draw_shore(x,y){
-            /// Shore tiles don't exist for the hexagonal tiles
-            if(tiles[(x+1)%tiles.map_size_x][y].land!='w'){
-                this.put_tile_at(this.shore_layer, shore_straight[0], 3*x+2, 3*y+1, 3);
-                if(tiles[x][(y+1)%tiles.map_size_y].land!='w'){
-                    this.put_tile_at(this.shore_layer, shore_turn_in[0], 3*x+2, 3*y+2, 3);
-                } else {
-                    this.put_tile_at(this.shore_layer, shore_straight[0], 3*x+2, 3*y+2, 3);
-                }
-                if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land!='w'){
-                    this.put_tile_at(this.shore_layer, shore_turn_in[3], 3*x+2, 3*y, 3);
-                } else {
-                    this.put_tile_at(this.shore_layer, shore_straight[0], 3*x+2, 3*y, 3);
-                }
-            }
-            if(tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][y].land!='w'){
-                this.put_tile_at(this.shore_layer, shore_straight[2], 3*x, 3*y+1, 3);
-                if(tiles[x][(y+1)%tiles.map_size_y].land!='w'){
-                    this.put_tile_at(this.shore_layer, shore_turn_in[1], 3*x, 3*y+2, 3);
-                } else {
-                    this.put_tile_at(this.shore_layer, shore_straight[2], 3*x, 3*y+2, 3);
-                }
-                if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land!='w'){
-                    this.put_tile_at(this.shore_layer, shore_turn_in[2], 3*x, 3*y, 3);
-                } else {
-                    this.put_tile_at(this.shore_layer, shore_straight[2], 3*x, 3*y, 3);
-                }
-            }
-            if(tiles[x][(y+1)%tiles.map_size_y].land!='w'){
-                this.put_tile_at(this.shore_layer, shore_straight[1], 3*x+1, 3*y+2, 3);
-                if(tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][y].land=='w'){
-                    this.put_tile_at(this.shore_layer, shore_straight[1], 3*x, 3*y+2, 3);
-                }
-                if(tiles[(x+1)%tiles.map_size_x][y].land=='w'){
-                    this.put_tile_at(this.shore_layer, shore_straight[1], 3*x+2, 3*y+2, 3);
-                }
-            }
-            if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land!='w'){
-                this.put_tile_at(this.shore_layer, shore_straight[3], 3*x+1, 3*y, 3);
-                if(tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][y].land=='w'){
-                    this.put_tile_at(this.shore_layer, shore_straight[3], 3*x, 3*y, 3);
-                }
-                if(tiles[(x+1)%tiles.map_size_x][y].land=='w'){
-                    this.put_tile_at(this.shore_layer, shore_straight[3], 3*x+2, 3*y, 3);
-                }
-            }
-            if(tiles[(x+1)%tiles.map_size_x][y].land=='w'){
-                if(tiles[x][(y+1)%tiles.map_size_y].land=='w' && 
-                   tiles[(x+1)%tiles.map_size_x][(y+1)%tiles.map_size_y].land != 'w'){
-                    this.put_tile_at(this.shore_layer, shore_turn_out[0], 3*x+2, 3*y+2, 3);
-                }
-                if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land=='w' && 
-                   tiles[(x+1)%tiles.map_size_x][(y-1+tiles.map_size_y)%tiles.map_size_y].land != 'w'){
-                    this.put_tile_at(this.shore_layer, shore_turn_out[3], 3*x+2, 3*y, 3);
-                }
-            }
-            if(tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][y].land=='w'){
-                if(tiles[x][(y+1)%tiles.map_size_y].land=='w' && 
-                   tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][(y+1)%tiles.map_size_y].land != 'w'){
-                    this.put_tile_at(this.shore_layer, shore_turn_out[1], 3*x, 3*y+2, 3);
-                }
-                if(tiles[x][(y-1+tiles.map_size_y)%tiles.map_size_y].land=='w' && 
-                   tiles[(x-1+tiles.map_size_x)%tiles.map_size_x][(y-1+tiles.map_size_y)%tiles.map_size_y].land != 'w'){
-                    this.put_tile_at(this.shore_layer, shore_turn_out[2], 3*x, 3*y, 3);
-                }
-            }
-        }
 
         update_road_sprite(x, y){
+            this.remove_tiles_at(x,y,2);
             if(tiles[x][y].road){
-                // a binary representation of the possibilities, some are repeated.
+                // a binary representation of the possibilities.
                 var type = 0;
                 var binary = 1;
                 var nbs = tiles[x][y].neighbours();
@@ -845,12 +788,13 @@ function gameboard(map){
                     var tile = nbs[i];
                     if(tile.road){
                         type += binary;
+                        var angle = i*60;
+                        this.add_tile_at(x, y, 2, 'roadtiles', 0, angle);
                     }
                     binary *= 2;
                 }
                 console.log("s", x, y, type, binary);
                 if(type > 0){
-                    this.put_tile_at(x, y, 2, 'roadtiles', road_sprites[type]);
                 }
             }
         }
