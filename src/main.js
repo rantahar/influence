@@ -780,21 +780,13 @@ function gameboard(map){
         update_road_sprite(x, y){
             this.remove_tiles_at(x,y,2);
             if(tiles[x][y].road){
-                // a binary representation of the possibilities.
-                var type = 0;
-                var binary = 1;
                 var nbs = tiles[x][y].neighbours();
                 for(var i in nbs){
                     var tile = nbs[i];
                     if(tile.road){
-                        type += binary;
                         var angle = i*60;
                         this.add_tile_at(x, y, 2, 'roadtiles', 0, angle);
                     }
-                    binary *= 2;
-                }
-                console.log("s", x, y, type, binary);
-                if(type > 0){
                 }
             }
         }
