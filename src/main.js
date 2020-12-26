@@ -576,6 +576,7 @@ function gameboard(map){
             if(map.at_start){
                 map.at_start();
             }
+
         }
 
         update(time, delta){
@@ -609,10 +610,17 @@ function gameboard(map){
             }
 
             // preview
+            // Translate mouse location to tile xy coordinate
             var x = this.input.activePointer.x + this.cameras.main.scrollX;
             var y = this.input.activePointer.y + this.cameras.main.scrollY;
-            x = Math.floor( (x / (this.tile_scale*this.tile_width)  + tiles.map_size_x) % tiles.map_size_x);
-            y = Math.floor( (y / (this.tile_scale*this.tile_height) + tiles.map_size_y) % tiles.map_size_y);
+            var width =  this.tile_scale*this.tile_width;
+            var height = this.tile_scale*this.tile_height
+            y = Math.floor( ((y / height) + 0.5 + tiles.map_size_y) % tiles.map_size_y);
+            if(y%2==0){
+                x = Math.floor( ((x / width) + 0.5 + tiles.map_size_x) % tiles.map_size_x);
+            } else {
+                x = Math.floor( ((x / width) + tiles.map_size_x) % tiles.map_size_x);
+            }
 
             if(this.preview == 'city'){
                 if(this.previous_preview){
