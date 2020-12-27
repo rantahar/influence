@@ -163,19 +163,6 @@ function gameboard(map){
             ]
         }
 
-        neighbour_square_tiles(){
-            var msx = tiles.map_size_x; var msy = tiles.map_size_y;
-            return [tiles[(this.x+1)%msx][this.y],
-                    tiles[(this.x+1)%msx][(this.y+1)%msy],
-                    tiles[this.x][(this.y+1)%msy],
-                    tiles[(this.x-1+msx)%msx][(this.y+1)%msy],
-                    tiles[(this.x-1+msx)%msx][this.y],
-                    tiles[(this.x-1+msx)%msx][(this.y-1+msy)%msy],
-                    tiles[this.x][(this.y-1+msy)%msy],
-                    tiles[(this.x+1)%msx][(this.y-1+msy)%msy]
-                    ]
-        }
-
         neighbour_2_tiles(){
             var msx = tiles.map_size_x; var msy = tiles.map_size_y;
 
@@ -320,8 +307,8 @@ function gameboard(map){
 
         food_tiles(){
             var city = this;
-            var food_tiles = 0; // City always produces 1 food
-            tiles[this.x][this.y].neighbour_square_tiles()
+            var food_tiles = 0;
+            tiles[this.x][this.y].neighbours()
             .forEach(function(tile){
                 if(tile.owner == city.owner()){
                     food_tiles += tile.is_food_tile();
@@ -332,8 +319,8 @@ function gameboard(map){
 
         wood_tiles(){
             var city = this;
-            var wood_tiles = 0; // City always produces 1 wood
-            tiles[this.x][this.y].neighbour_square_tiles()
+            var wood_tiles = 0;
+            tiles[this.x][this.y].neighbours()
             .forEach(function(tile){
                 if(tile.owner == city.owner()){
                     wood_tiles += tile.is_wood_tile();
@@ -344,8 +331,8 @@ function gameboard(map){
 
         fields(){
             var city = this;
-            var fields = 0; // City always produces 1 food
-            tiles[this.x][this.y].neighbour_square_tiles()
+            var fields = 0;
+            tiles[this.x][this.y].neighbours()
             .forEach(function(tile){
                 if(tile.owner == city.owner()){
                     if(tile.field){
