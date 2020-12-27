@@ -682,52 +682,60 @@ function gameboard(map){
 
             // preview
             // Translate mouse location to tile xy coordinate
-            var x = this.input.activePointer.x + this.cameras.main.scrollX;
-            var y = this.input.activePointer.y + this.cameras.main.scrollY;
-            var width =  this.tile_scale*this.tile_width;
-            var height = this.tile_scale*this.tile_height
-            y = Math.floor( ((y / height) + 0.5 + tiles.map_size_y) % tiles.map_size_y);
-            if(y%2==0){
-                x = Math.floor( ((x / width) + 0.5 + tiles.map_size_x) % tiles.map_size_x);
-            } else {
-                x = Math.floor( ((x / width) + tiles.map_size_x) % tiles.map_size_x);
-            }
-
-            if(this.preview == 'city'){
-                if(this.previous_preview){
-                    this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
+            var x = this.input.activePointer.x;
+            var y = this.input.activePointer.y;
+            if(x > 0 && x<600 && y>0 && y<600){
+                var width  = this.tile_scale*this.tile_width;
+                var height = this.tile_scale*this.tile_height
+                x = (x+this.cameras.main.scrollX)/width;
+                y = (y+this.cameras.main.scrollY)/height;
+                y = Math.floor( (y + 0.5 + tiles.map_size_y) % tiles.map_size_y);
+                if(y%2==0){
+                    x = Math.floor( (x + 0.5 + tiles.map_size_x) % tiles.map_size_x);
+                } else {
+                    x = Math.floor( (x + tiles.map_size_x) % tiles.map_size_x);
                 }
-                this.put_tile_at(x, y, 5, 'citytiles', 1);
-                this.previous_preview = {x: x, y: y, z: 5};
-            }
-
-            if(this.preview == 'field'){
-                if(this.previous_preview){
-                    this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
+            
+                if(this.preview == 'city'){
+                    if(this.previous_preview){
+                        this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
+                    }
+                    this.put_tile_at(x, y, 5, 'citytiles', 1);
+                    this.previous_preview = {x: x, y: y, z: 5};
                 }
-                this.put_tile_at(x, y, 5, 'allToenstiles', 48);
-                this.previous_preview = {x: x, y: y, z: 5};
-            }
-
-            if(this.preview == 'road'){
-                if(this.previous_preview){
-                    this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
+            
+                if(this.preview == 'field'){
+                    if(this.previous_preview){
+                        this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
+                    }
+                    this.put_tile_at(x, y, 5, 'allToenstiles', 48);
+                    this.previous_preview = {x: x, y: y, z: 5};
                 }
-                this.put_tile_at(x, y, 5, 'roadtiles', 0);
-                this.previous_preview = {x: x, y: y, z: 5};
-            }
-
-            if(this.preview == undefined && this.previous_preview){
-                if(this.previous_preview){
-                    this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
+            
+                if(this.preview == 'road'){
+                    if(this.previous_preview){
+                        this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
+                    }
+                    this.put_tile_at(x, y, 5, 'roadtiles', 0);
+                    this.previous_preview = {x: x, y: y, z: 5};
                 }
-                this.previous_preview = undefined;
-            }
-
-            if (this.escape_key.isDown)
-            {
-                this.remove_highlight();
-                this.preview = undefined;
+            
+                if(this.preview == undefined && this.previous_preview){
+                    if(this.previous_preview){
+                        this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
+                    }
+                    this.previous_preview = undefined;
+                }
+            
+                if (this.escape_key.isDown)
+                {
+                    this.remove_highlight();
+                    this.preview = undefined;
+                }
+            
+                if(this.input.activePointer.isDown){
+                    tile_click(this, tiles[x][y]);
+                }
             }
 
             if(map.on_update){
@@ -776,9 +784,9 @@ function gameboard(map){
             sprite.setScale(this.tile_scale,this.tile_scale);
             sprite.depth=1;
             sprite.setInteractive();
-            sprite.on('pointerdown',function() {
-                tile_click(phaser_game.scene.scenes[0],tile);
-            });
+            //sprite.on('pointerdown',function() {
+            //    tile_click(phaser_game.scene.scenes[0],tile);
+            //});
             if(map_sprites[key].decor){
                 var sprite = this.add.sprite(
                     this.tile_scale*this.tile_width*x,
@@ -1284,7 +1292,6 @@ function gameboard(map){
     function tile_click(map_scene, tile) {
         var x = tile.x;
         var y = tile.y;
-        console.log(map_scene.preview);
 
         // If building, try here and do nothing else
         if( map_scene.preview == 'road'){
@@ -1296,7 +1303,6 @@ function gameboard(map){
         }
 
         if( map_scene.preview == 'field'){
-            console.log(map_scene.preview);
             build_field('white',x,y);
             map_scene.preview = undefined;
             map_scene.remove_highlight();
@@ -1479,7 +1485,7 @@ function gameboard(map){
     }
 
     function announce_winner(key){
-        console.log("Winner!", key);
+        console.log(key+" is the winner!");
         var winner = players[key];
         popup({
             title: winner.name + " Wins!",
