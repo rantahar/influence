@@ -589,6 +589,8 @@ function gameboard(map){
             this.tile_scale = 1.5;
             this.tile_height = 25;
             this.tile_width = 31;
+            
+            this.click_time = 100000;
         }
 
         preload (){
@@ -651,6 +653,8 @@ function gameboard(map){
         }
 
         update(time, delta){
+            this.click_time += delta;
+
             if (this.cursors.left.isDown)
             {
                 var x = this.cameras.main.scrollX;
@@ -734,7 +738,10 @@ function gameboard(map){
                 }
             
                 if(this.input.activePointer.isDown){
-                    tile_click(this, tiles[x][y]);
+                    if(this.click_time > 20){
+                        tile_click(this, tiles[x][y]);
+                        this.click_time = 0;
+                    }
                 }
             }
 
