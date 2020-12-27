@@ -39,6 +39,52 @@ function gameboard(map){
             this.sprites = [];
         }
 
+        xup(){
+            var msx = tiles.map_size_x;
+            return tiles[(this.x+1)%msx][this.y];
+        }
+
+        xdn(){
+            var msx = tiles.map_size_x;
+            return tiles[(this.x-1+msx)%msx][this.y];
+        }
+
+        yupleft(){
+            var msx = tiles.map_size_x; var msy = tiles.map_size_y;
+            if(this.y%2) {
+                return tiles[this.x][(this.y+1)%msy];
+            } else {
+                return tiles[(this.x-1+msx)%msx][(this.y+1)%msy];
+            }
+        }
+
+        yupright(){
+            var msx = tiles.map_size_x; var msy = tiles.map_size_y;
+            if(this.y%2) {
+                return tiles[(this.x+1)%msx][(this.y+1)%msy];
+            } else {
+                return tiles[this.x][(this.y+1)%msy];
+            }
+        }
+
+        ydnleft(){
+            var msx = tiles.map_size_x; var msy = tiles.map_size_y;
+            if(this.y%2) {
+                return tiles[this.x][(this.y-1+msy)%msy];
+            } else {
+                return tiles[(this.x-1+msx)%msx][(this.y-1+msy)%msy];
+            }
+        }
+
+        ydnright(){
+            var msx = tiles.map_size_x; var msy = tiles.map_size_y;
+            if(this.y%2) {
+                return tiles[(this.x+1)%msx][(this.y-1+msy)%msy];
+            } else {
+                return tiles[this.x][(this.y-1+msy)%msy];
+            }
+        }
+
         describe(){
             var div = this.describe_short();
             div.append(this.describe_culture());
@@ -107,26 +153,14 @@ function gameboard(map){
 
 
         neighbours = function (){
-            var msx = tiles.map_size_x; var msy = tiles.map_size_y;
-            if(this.y%2){
-                return [
-                    tiles[(this.x+1)%msx][this.y],
-                    tiles[(this.x+1+msx)%msx][(this.y+1+msy)%msy],
-                    tiles[this.x][(this.y+1+msy)%msy],
-                    tiles[(this.x-1+msx)%msx][this.y],
-                    tiles[this.x][(this.y-1+msy)%msy],
-                    tiles[(this.x+1+msx)%msx][(this.y-1+msy)%msy],
-                ]
-            } else {
-                return [
-                    tiles[(this.x+1)%msx][this.y],
-                    tiles[this.x][(this.y+1+msy)%msy],
-                    tiles[(this.x-1+msx)%msx][(this.y+1+msy)%msy],
-                    tiles[(this.x-1+msx)%msx][this.y],
-                    tiles[(this.x-1+msx)%msx][(this.y-1+msy)%msy],
-                    tiles[this.x][(this.y-1+msy)%msy],
-                ]
-            }
+            return [
+                this.xup(),
+                this.yupright(),
+                this.yupleft(),
+                this.xdn(),
+                this.ydnleft(),
+                this.ydnright()
+            ]
         }
 
         neighbour_square_tiles(){
@@ -146,7 +180,6 @@ function gameboard(map){
             var msx = tiles.map_size_x; var msy = tiles.map_size_y;
 
             // These are always the same
-
             var r = [];
 
             for( var dx = -1; dx < 2; dx++){
