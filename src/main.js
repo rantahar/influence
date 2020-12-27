@@ -144,12 +144,30 @@ function gameboard(map){
 
         neighbour_2_tiles(){
             var msx = tiles.map_size_x; var msy = tiles.map_size_y;
+
+            // These are always the same
+
             var r = [];
+
+            for( var dx = -1; dx < 2; dx++){
+                r.push(tiles[(this.x+dx+msx)%msx][(this.y+2)%msy]);
+                r.push(tiles[(this.x+dx+msx)%msx][(this.y-2+msy)%msy]);
+            }
+
             for( var dx = -2; dx < 3; dx++){
-                for( var dy = -2; dy < 3; dy++){
-                    var x = (this.x+dx+msx)%msx;
-                    var y = (this.y+dy+msy)%msy;
-                    r.push(tiles[x][y]);
+                r.push(tiles[(this.x+dx+msx)%msx][this.y]);
+            }
+
+            // The x-values at dy=+-1 depend on y
+            if(this.y%2==1){
+                for( var dx = -1; dx < 3; dx++){
+                    r.push(tiles[(this.x+dx+msx)%msx][(this.y-1+msy)%msy]);
+                    r.push(tiles[(this.x+dx+msx)%msx][(this.y+1+msy)%msy]);
+                }
+            } else {
+                for( var dx = -2; dx < 2; dx++){
+                    r.push(tiles[(this.x+dx+msx)%msx][(this.y-1+msy)%msy]);
+                    r.push(tiles[(this.x+dx+msx)%msx][(this.y+1+msy)%msy]);
                 }
             }
             return r;
