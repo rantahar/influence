@@ -441,7 +441,15 @@ function gameboard(map){
             div.append(this.tile.describe_culture());
             div.append($("<p></p>").html("<b>Level</b>: "+this.level));
             if(active_city.owner() == 'white'){
-                div.append($("<p></p>").html("<b>Food</b>: "+this.food));
+                var food_text = $("<p></p>").html("<b>Food</b>: "+this.food+" (");
+                var food_prod = this.food_production() - this.food_consumption();
+                if(food_prod >= 0){
+                    food_text.append($("<span></span>").text("+"+food_prod.toFixed(0)).css('color', 'green'));
+                } else {
+                    food_text.append($("<span></span>").text("-"+food_prod.toFixed(0)).css('color', 'red'));
+                }
+                food_text.append($("<span></span>").text(")"));
+                div.append(food_text);
                 div.append($("<p></p>").html("<b>Free workers</b>: "+this.free_workers()));
                 if(this.building){
                     div.append($("<p></p>").text("Building a "+this.building.type
