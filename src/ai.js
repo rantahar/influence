@@ -23,7 +23,7 @@ class AIPlayer {
         this.owned_tiles = 1;
     }
 
-    take_turn(tiles, cities, build_road, build_city) {
+    take_turn(tiles, cities, build_road, build_city, build_field) {
         if(this.colonies > 0){
             // Check all tiles to find the best places to build
             var city_utility = -1000;
@@ -65,7 +65,7 @@ class AIPlayer {
             if(city_x != undefined && city_y != undefined){
                 if( utility > 0 ){
                     console.log(this.name+" builds a city at "+city_x+","+city_y);
-                    build_city(city_x,city_y,this.key);
+                    build_city(this.key,city_x,city_y);
                 }
             }
         }
@@ -114,7 +114,7 @@ class AIPlayer {
         console.log(this.name+": best place for a road is at "+road_x+","+road_y+" (utility "+utility+")");
         if(this.wood >= 5){
             if(road_utility > 0){
-                build_road(this, road_x,road_y);
+                build_road(this.key, road_x,road_y);
                 console.log(this.name+" builds a road at "+road_x+","+road_y);
             }
         }

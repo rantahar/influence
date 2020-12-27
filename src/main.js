@@ -10,7 +10,7 @@ function gameboard(map){
             human: true,
             text_color: '#FFFFFF',
             map_color: '#FFFFFF',
-            wood: 1000000,
+            wood: 0,
             colonies: 0,
             culture: 0,
             owned_tiles: 1,
@@ -127,6 +127,7 @@ function gameboard(map){
 
         is_empty(){
             if(this.city == undefined && this.building == undefined &&
+               this.field == undefined &&
                this.land != 'f' && this.land != 'w'){
                 return true;
             } else {
@@ -219,6 +220,22 @@ function gameboard(map){
             this.neighbours().forEach(function(tile){
                 if(tile.road != undefined ||
                    tile.city != undefined ){
+                    return allowed = true;
+                }
+            });
+            return allowed;
+        }
+
+        is_field_allowed(){
+            if( this.city != undefined || this.field != undefined){
+                return false;
+            }
+            if( this.land != 'g' ){
+                return false;
+            }
+            var allowed = false;
+            this.neighbours().forEach(function(tile){
+                if( tile.city != undefined ){
                     return allowed = true;
                 }
             });
@@ -349,10 +366,11 @@ function gameboard(map){
             var food_tiles = this.food_tiles();
             var fields = this.fields();
             var food = 1; // City always produces 1 food
-           
+
             // 2 food / worker on a tile
             food += 2*Math.min(workers, food_tiles);
-            // 1 extra for fields
+            
+            // +1 extra for fields
             food += Math.min(workers, fields);
             return food;
         }
@@ -583,6 +601,11 @@ function gameboard(map){
                 { frameWidth: 32, frameHeight: 32 }
             );
             this.load.spritesheet(
+                'allToenstiles',
+                "assets/Toens_Medieval_Strategy_Sprite_Pack/tileset.png",
+                { frameWidth: 16, frameHeight: 16 }
+            );
+            this.load.spritesheet(
                 'hexground',
                 "assets/elite_command_art_terrain/tileset.png",
                 { frameWidth: 32, frameHeight: 34 }
@@ -673,6 +696,14 @@ function gameboard(map){
                     this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
                 }
                 this.put_tile_at(x, y, 5, 'citytiles', 1);
+                this.previous_preview = {x: x, y: y, z: 5};
+            }
+
+            if(this.preview == 'field'){
+                if(this.previous_preview){
+                    this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
+                }
+                this.put_tile_at(x, y, 5, 'allToenstiles', 48);
                 this.previous_preview = {x: x, y: y, z: 5};
             }
 
@@ -852,6 +883,12 @@ function gameboard(map){
             tiles[x][y].neighbours().forEach(function(tile){
                 map.update_road_sprite(tile.x, tile.y);
             });
+        }
+
+        add_field(x, y){
+            console.log("adding field at ",x,y);
+            tiles[x][y].field = true;
+            this.put_tile_at(x,y,3,'allToenstiles', 48);
         }
 
 
@@ -1090,7 +1127,7 @@ function gameboard(map){
     function next_turn(map_scene){
 
         for(player in players){
-            players[player].take_turn(tiles, cities, build_road, build_city);
+            players[player].take_turn(tiles, cities, build_road, build_city, build_field);
         }
 
         // Update the cities
@@ -1231,10 +1268,20 @@ function gameboard(map){
     function tile_click(map_scene, tile) {
         var x = tile.x;
         var y = tile.y;
+        console.log(map_scene.preview);
 
         // If building, try here and do nothing else
         if( map_scene.preview == 'road'){
-            build_road(players.white, x, y);
+            build_road('white', x, y);
+            map_scene.preview = undefined;
+            map_scene.remove_highlight();
+            update_panel();
+            return;
+        }
+
+        if( map_scene.preview == 'field'){
+            console.log(map_scene.preview);
+            build_field('white',x,y);
             map_scene.preview = undefined;
             map_scene.remove_highlight();
             update_panel();
@@ -1242,7 +1289,7 @@ function gameboard(map){
         }
 
         if( map_scene.preview == 'city'){
-            build_city(x,y,'white');
+            build_city('white', x, y);
             map_scene.preview = undefined;
             map_scene.remove_highlight();
             update_panel();
@@ -1260,19 +1307,6 @@ function gameboard(map){
             show_tab("#city");
         } else {
             show_tab("#home");
-        }
-    }
-    
-    function build_city(x,y,player_key){
-        // check for neighbouring cities
-        if(tiles[x][y].is_city_allowed() && tiles[x][y].owner == player_key){
-            var mapscene = phaser_game.scene.scenes[0];
-            mapscene.add_city(x,y);
-            players[player_key].colonies -= 1;
-            if(player_key == "white"){
-                active_city = tiles[x][y].city;
-                update_city_page();
-            }
         }
     }
 
@@ -1327,6 +1361,16 @@ function gameboard(map){
 
         $("#player_info").append(road_button);
 
+        var field_button = $("<div></div>").text("field (25 wood)");
+        if(player.wood >= 25){
+            field_button.addClass("btn btn-success my-1");
+            field_button.click(function(){ start_build_field(); });
+        } else {
+            field_button.addClass("btn btn-secondary my-1");
+        }
+
+        $("#player_info").append(field_button);
+
         var colony_button = $("<div></div>").text("City (1 colony)");
         if(player.colonies >= 1){
             colony_button.addClass("btn btn-success my-1");
@@ -1367,10 +1411,49 @@ function gameboard(map){
         }
     }
 
+    function start_build_field(){
+        var mapscene = phaser_game.scene.scenes[0];
+        mapscene.preview = 'field';
+        mapscene.remove_highlight();
+        for(var x = 0; x < tiles.map_size_x; x++) {
+            for(var y = 0; y < tiles.map_size_y; y++) {
+                if(tiles[x][y].owner == 'white' && tiles[x][y].is_field_allowed()){
+                    mapscene.highlight_allowed_tile(x,y);
+                }
+            }
+        }
+    }
+
+    function build_field(player_key,x,y){
+        // check for neighbouring cities
+        if(players[player_key].wood >= 25){
+            if(tiles[x][y].owner == player_key && tiles[x][y].is_field_allowed()){
+                var mapscene = phaser_game.scene.scenes[0];
+                mapscene.add_field(x,y);
+                players[player_key].wood -= 25;
+            }
+        }
+    }
+    
+    function build_city(player_key,x,y){
+        // check for neighbouring cities
+        if(players[player_key].colonies > 0){
+            if(tiles[x][y].owner == player_key && tiles[x][y].is_city_allowed()){
+                var mapscene = phaser_game.scene.scenes[0];
+                mapscene.add_city(x,y);
+                players[player_key].colonies -= 1;
+                if(player_key == "white"){
+                    active_city = tiles[x][y].city;
+                    update_city_page();
+                }
+            }
+        }
+    }
+
     // Build a road
-    function build_road(player, x, y){
-        if(player.wood >= 10){
-            if(players[tiles[x][y].owner] == player && tiles[x][y].is_road_allowed()){
+    function build_road(player_key, x, y){
+        if(players[player_key].wood >= 10){
+            if(tiles[x][y].owner == player_key && tiles[x][y].is_road_allowed()){
                 var mapscene = phaser_game.scene.scenes[0];
                 mapscene.add_road(x,y);
                 player.wood -= 10;
