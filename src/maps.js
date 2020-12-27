@@ -110,8 +110,9 @@ var tutorial_1 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "You are a god, newly born in at the dawn of humanity. You are worshipped in a small "+
-            "village in the middle of nowhere, but you aspire to spread your influence around the world. "+
+            text: "You are a newly born god, worshipped in a small village in the middle of "+
+            "nowhere at the dawn of humanity. "+
+            "But you are ambitious and aspire to spread your influence to very corner of the world. "+
             "First, click on your home city on the map."
         });
     },
