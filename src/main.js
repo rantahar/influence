@@ -8,6 +8,8 @@ function gameboard(map){
     var players = {
         'white': {
             human: true,
+            key: 'white',
+            name: "White",
             text_color: '#FFFFFF',
             map_color: '#FFFFFF',
             wood: 0,
@@ -1231,13 +1233,27 @@ function gameboard(map){
 
         update_panel();
         update_city_page();
+
+        // Check for win conditions
+        if(turn_counter == 201) {
+            var winner;
+            var winner_culture = -1;
+            for(player_key in players){
+                if(players[player_key].culture > winner_culture){
+                    winner = player_key;
+                    winner_culture = players[player_key].culture;
+                }
+                announce_winner(winner);
+            }
+            
+        }
+        for(player_key in players){
+            player = players[player_key];
+            if(player.owned_tiles > 0.5*tiles.map_size_x*tiles.map_size_y){
+                announce_winner(player_key);
+            }
+        }
     }
-
-
-
-
-
-
 
 
 
@@ -1460,6 +1476,15 @@ function gameboard(map){
                 tiles[x][y].road = true;
             }
         }
+    }
+
+    function announce_winner(key){
+        console.log("Winner!", key);
+        var winner = players[key];
+        popup({
+            title: winner.name + " Wins!",
+            text: winner.name + " has conquered the known world!"
+        });
     }
 
 
