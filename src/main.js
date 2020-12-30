@@ -325,7 +325,7 @@ function gameboard(map){
 
         set_food_workers(n){
             var max = this.level - this.workers_wood;
-            max = Math.max(this.wood_tiles(), max);
+            max = Math.max(this.food_tiles(), max);
             if(n >= 0 && n <= max){
                 this.workers_food = n;
             }
@@ -333,7 +333,7 @@ function gameboard(map){
 
         set_wood_workers(n){
             var max = this.level - this.workers_food;
-            max = Math.max(this.food_tiles(), max);
+            max = Math.max(this.wood_tiles(), max);
             if(n >= 0 && n <= max){
                 this.workers_wood = n;
             }
@@ -489,6 +489,12 @@ function gameboard(map){
                 if(this.building){
                     div.append($("<p></p>").text("Building a "+this.building.type
                      + "("+this.building.food+")"));
+                    var cancel_button = $("<span></span>").text("Cancel").addClass("btn btn-primary btn-vsm");
+                    cancel_button.click(function(){
+                        city.cancel_building();
+                        update_city_page();
+                    });
+                    div.append(cancel_button);
                 }
 
                 if(this.food_tiles() > 0){
@@ -572,6 +578,12 @@ function gameboard(map){
         queue_colony(){
             if(this.building==undefined){
                 this.building = {'food': this.colony_cost, 'type': 'colony'};
+            }
+        }
+
+        cancel_building(){
+            if(this.building!=undefined){
+                this.building = undefined;
             }
         }
 
