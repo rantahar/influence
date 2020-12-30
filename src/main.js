@@ -1584,18 +1584,29 @@ function gameboard(map){
 var game;
 
 
-// Start button click
-$("#start").click(function(e){
-    e.preventDefault();
-    game = gameboard(random_map(24,24,5,40,5,10,false,['white','blue','green','red', 'purple']));
-    $("#main-menu").hide();
-    $('#scenario-div').fadeIn();
-});
 
 // Prevent the mousedown event on the canvas
 $("#popup_dismiss").mousedown(function(e){
     return false;
 });
+
+
+// Click on random map
+$("#random-map").click(function(e){
+    $("#main-menu").fadeOut();
+    $('#random-menu').fadeIn();
+});
+
+// Start button click
+$("#start").click(function(e){
+    e.preventDefault();
+    var size = 2*Math.floor($("#map_size").val());
+    console.log(size);
+    game = gameboard(random_map(size,size,5,40,5,10,false,['white','blue','green','red', 'purple']));
+    $("#random-menu").hide();
+    $('#scenario-div').fadeIn();
+});
+
 
 // Click on tutorial maps
 $("#tutorial-maps").click(function(e){
