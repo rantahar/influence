@@ -50,5 +50,8 @@ div input{
     z-index: 10;
 }
 
+.menu {
+    display: none;
+}
 
 
