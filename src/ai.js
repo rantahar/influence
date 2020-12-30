@@ -251,7 +251,9 @@ var red_player = new AIPlayer('red','Red',"#FF5555","#FF0000",{
     field_culture: -1,
     field_city_level: -10,
     wood_to_food_ratio: 0.2,
-    city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath"],
+    city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath", "Arostagath",
+                 "Ungoth", "Tramath", "Etrukrol", "Dimrasta", "Igratas", "Fedrath", "Brastagrath",
+                 "Olrath", "Amdaras", "Edrukostarath", "Ostregtha"],
     city_prefix: "Dre-"
 })
 
