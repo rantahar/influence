@@ -160,15 +160,25 @@ var tutorial_1 = {
                 text: "Your second city will take a few turns to flourish, but rest assured it will.",
                 next: {
                     title: "Tutorial",
-                    text: "You can also build roads in the home tab. Roads make culture flow more easily "+
-                    "and can be used to control its flow.",
-                    next: {
-                        title: "Tutorial",
-                        text: "Your goal is to spread your influence as far as you can. Since there are "+
-                        "no other gods on this island, you can take your time. You win when you control "+
-                        "more than half of the world or have more influence than anyone else after 200 "+
-                        "turns."
-                    }
+                    text: "Wood is used to build improvements. Roads help you spread your influence "+
+                    "and fields help your cities grow faster and bigger. Next, gather 25 wood."
+                }
+            });
+        }
+        if(this.wood_25 == undefined && game.player.wood >= 25){
+            this.wood_25 = true;
+            this.goal_next_turn = true;
+            game.popup({
+                title: "Tutorial",
+                text: "Now you can build a field in the home screen. Each field allows a worker to produce "+
+                "one more food per turn. Roads allow your influence to flow more quickly, but they do not "+
+                "increase the overall amount.",
+                next: {
+                    title: "Tutorial",
+                    text: "Your goal is to spread your influence as far as you can. Since there are "+
+                    "no other gods on this island, you can take your time. You win when you control "+
+                    "more than half of the world or have more influence than anyone else after 200 "+
+                    "turns."
                 }
             });
         }
@@ -204,15 +214,20 @@ var tutorial_2 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "Now you have competition. The blue city is owned by some god of water. It doesn't "+
-            "matter who, they all are competition. Other gods have the same win conditions as you."
+            text: "Now you have competition. The blue city is owned by Inla, the messenger."+
+            "Where it has control, it will build roads to connect cities, whether they belong"+
+            "to it or to someone else.",
+            next: {
+                title: "Tutorial",
+                text: "Other gods have the same win conditions as you."
+            }
         });
     }
 }
 
 
 // Shows basic elements on an empty map
-var tutorial_2 = {
+var tutorial_3 = {
     map: [
         ['w','w','w','w','w','w','g','w','w','w','w','w','w','w'],
         ['w','w','w','g','m','f','g','g','g','w','w','w','w','w'],
@@ -234,15 +249,84 @@ var tutorial_2 = {
         ['w','w','w','w','w','w','w','w','w','w','w','w','w','w']
         ],    
     start: {
-        white: {x: 2, y:2},
+        white: {x: 2, y:4},
+        green: {x: 6, y:7}
+    },
+    at_start: function(){
+        game.popup({
+            title: "Tutorial",
+            text: "The green god is Onma, the god of agriculture. "+
+            "It likes to build fields and grow large cities."
+        });
+    }
+}
+
+// Shows basic elements on an empty map
+var tutorial_4 = {
+    map: [
+        ['w','w','w','w','w','w','g','w','w','w','w','w','w','w'],
+        ['w','w','w','g','m','f','g','g','g','w','w','w','w','w'],
+        ['w','w','g','f','m','g','g','g','w','w','w','w','w','w'],
+        ['w','g','g','g','m','g','g','f','w','w','w','w','w','w'],
+        ['w','g','g','g','m','g','g','g','w','w','w','w','w','w'],
+        ['w','g','f','g','g','g','g','w','w','w','w','w','w','w'],
+        ['w','g','f','g','f','g','g','w','w','w','w','w','w','w'],
+        ['w','g','g','g','g','g','g','w','w','w','w','w','w','w'],
+        ['w','g','f','g','g','f','g','g','w','w','w','w','w','w'],
+        ['w','g','g','g','g','g','g','g','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w']
+        ],    
+    start: {
+        white: {x: 2, y:4},
         blue:  {x: 6, y:9},
         red:  {x: 1, y:8}
     },
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "The red god is Mars, a god of war. It's influence cannot mix with others. This can give"+
+            text: "The red god is Osmar, a god of war. It's influence cannot mix with others. This can give"+
             "you an edge in an otherwise symmetric situation."
+        });
+    }
+}
+
+// Shows basic elements on an empty map
+var tutorial_5 = {
+    map: [
+        ['w','w','w','w','w','w','g','w','w','w','w','w','w','w'],
+        ['w','w','w','g','m','f','g','g','g','w','w','w','w','w'],
+        ['w','w','g','f','m','g','g','g','w','w','w','w','w','w'],
+        ['w','g','g','g','m','g','g','f','w','w','w','w','w','w'],
+        ['w','g','g','g','m','g','g','g','w','w','w','w','w','w'],
+        ['w','g','f','g','g','g','g','w','w','w','w','w','w','w'],
+        ['w','g','f','g','f','g','g','w','w','w','w','w','w','w'],
+        ['w','g','g','g','g','g','g','w','w','w','w','w','w','w'],
+        ['w','g','f','g','g','f','g','g','w','w','w','w','w','w'],
+        ['w','g','g','g','g','g','g','g','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w']
+        ],    
+    start: {
+        white: {x: 2, y:4},
+        purple:  {x: 5, y:5}
+    },
+    at_start: function(){
+        game.popup({
+            title: "Tutorial",
+            text: "Mornas engulfs all things. It is the eater of worlds and not of this realm."
         });
     }
 }
