@@ -12,7 +12,10 @@ function gameboard(map){
             name: "White",
             text_color: '#FFFFFF',
             map_color: '#FFFFFF',
-            city_names: ["Aztola", "Sivola", "Thokas", "Loran", "Sinala", "Umdela", "Wendu"],
+            city_names: ["Aztola", "Sivola", "Thokas", "Loran", "Sinala", "Umdela", "Wendu", "Umar",
+                         "Ava-Umar","Atala","Ashtal Emal", "Lordan", "Ulanith", "Thelenula", "Astu",
+                         "Omnal", "Eftala", "Alran", "Leran", "Sulona"],
+            city_prefix: "Ala-",
             wood: 0,
             colonies: 0,
             culture: 0,
@@ -303,8 +306,10 @@ function gameboard(map){
         // Name the city
         next_name(){
             var owner = players[this.owner()];
-            console.log(this.owner(), owner);
             var name = owner.city_names[owner.cities];
+            if(name == undefined){
+                name = owner.city_prefix+owner.city_names[owner.cities%owner.city_names.length];
+            }
             owner.cities += 1;
             return name;
         }
@@ -656,7 +661,7 @@ function gameboard(map){
             this.draw_map();
 
             // Add towns
-            for(player in map.start){
+            for(var player in map.start){
                 var start = map.start[player];
                 tiles[start.x][start.y].owner = player;
                 this.add_city(start.x,start.y, 1);
@@ -1290,7 +1295,7 @@ function gameboard(map){
             
         }
         for(player_key in players){
-            player = players[player_key];
+            var player = players[player_key];
             if(player.owned_tiles > 0.5*tiles.map_size_x*tiles.map_size_y){
                 announce_winner(player_key);
             }
@@ -1512,7 +1517,7 @@ function gameboard(map){
             if(tiles[x][y].owner == player_key && tiles[x][y].is_road_allowed()){
                 var mapscene = phaser_game.scene.scenes[0];
                 mapscene.add_road(x,y);
-                player.wood -= 10;
+                players[player_key].wood -= 10;
                 tiles[x][y].road = true;
             }
         }
@@ -1582,7 +1587,7 @@ var game;
 // Start button click
 $("#start").click(function(e){
     e.preventDefault();
-    game = gameboard(random_map(24,24,5,40,5,10,false,['white','blue','green','red']));
+    game = gameboard(random_map(24,24,5,40,5,10,false,['white','blue','green','red', 'purple']));
     $("#main-menu").hide();
     $('#scenario-div').fadeIn();
 });

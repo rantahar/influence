@@ -23,6 +23,7 @@ class AIPlayer {
         this.field_city_level = aiconfig.field_city_level;
 
         this.city_names = aiconfig.city_names;
+        this.city_prefix = aiconfig.city_prefix;
         
         this.wood = 0;
         this.colonies = 0;
@@ -207,7 +208,8 @@ var green_player = new AIPlayer('green','Green',"#00AA00","#00AA00",{
     field_culture: 0,
     field_city_level: 1,
     wood_to_food_ratio: 0,
-    city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla"]
+    city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
+    city_prefix: "Am"
 })
 
 var blue_player = new AIPlayer('blue','Blue',"#5555FF","#0000FF",{
@@ -227,7 +229,9 @@ var blue_player = new AIPlayer('blue','Blue',"#5555FF","#0000FF",{
     field_culture: 5,
     field_city_level: 0,
     wood_to_food_ratio: 0.5,
-    city_names: ["Ilnam", "Alaman", "Gellon", "Umman", "Aka-Ilnam", "Omolla", "Nala"]
+    city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
+                 "Kolma", "Enta", "Aflan", "Ylman", "Umilla", "Wenna", "Tornal", "Kilman" ],
+    city_prefix: "Aka-"
 })
 
 var red_player = new AIPlayer('red','Red',"#FF5555","#FF0000",{
@@ -247,7 +251,8 @@ var red_player = new AIPlayer('red','Red',"#FF5555","#FF0000",{
     field_culture: -1,
     field_city_level: -10,
     wood_to_food_ratio: 0.2,
-    city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath"]
+    city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath"],
+    city_prefix: "Dre-"
 })
 
 var purple_player = new AIPlayer('purple','Purple',"#710193","#710193",{
@@ -267,7 +272,10 @@ var purple_player = new AIPlayer('purple','Purple',"#710193","#710193",{
     field_culture: -1,
     field_city_level: -2,
     wood_to_food_ratio: 0.2,
-    city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta"]
+    city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta", "Odrila", "Ondara",
+                 "Okra", "Omrana", "Otria", "Oula", "Ogra", "Onderasta", "Omudira", "Owdamas",
+                 "Omkorsta"],
+    city_prefix: "Dral"
 })
 
 
