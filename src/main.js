@@ -12,15 +12,18 @@ function gameboard(map){
             name: "White",
             text_color: '#FFFFFF',
             map_color: '#FFFFFF',
+            city_names: ["Aztola", "Sivola", "Thokas", "Loran", "Sinala", "Umdela", "Wendu"],
             wood: 0,
             colonies: 0,
             culture: 0,
+            cities: 0,
             owned_tiles: 1,
             take_turn(){}
         },
         'green': green_player,
         'blue': blue_player,
-        'red': red_player
+        'red': red_player,
+        'purple': purple_player
     }
     
     
@@ -288,14 +291,24 @@ function gameboard(map){
             this.tile = tiles[x][y];
             this.level = level;
             this.food = 0;
-            this.name = "Aztola";
-            this.workers_food=level;
-            this.workers_wood=0;
+            this.name = this.next_name();
+            this.workers_food = level;
+            this.workers_wood = 0;
             tiles[x][y].culture[this.owner()] = this.culture();
             tiles[x][y].road = true;
 
             this.colony_cost = 12;
         }
+
+        // Name the city
+        next_name(){
+            var owner = players[this.owner()];
+            console.log(this.owner(), owner);
+            var name = owner.city_names[owner.cities];
+            owner.cities += 1;
+            return name;
+        }
+
 
         // Calculate the culture production of the city
         culture(){
@@ -307,11 +320,12 @@ function gameboard(map){
         }
 
         free_workers() {
-            return this.level - this.workers_wood  - this.workers_food;
+            return this.level - this.workers_wood - this.workers_food;
         }
 
         set_food_workers(n){
             var max = this.level - this.workers_wood;
+            max = Math.max(this.wood_tiles(), max);
             if(n >= 0 && n <= max){
                 this.workers_food = n;
             }
@@ -319,6 +333,7 @@ function gameboard(map){
 
         set_wood_workers(n){
             var max = this.level - this.workers_food;
+            max = Math.max(this.food_tiles(), max);
             if(n >= 0 && n <= max){
                 this.workers_wood = n;
             }
@@ -1565,11 +1580,45 @@ $("#popup_dismiss").mousedown(function(e){
     return false;
 });
 
-// tutorial click
-$("#tutorial").click(function(e){
+// Click on tutorial maps
+$("#tutorial-maps").click(function(e){
+    $("#main-menu").fadeOut();
+    $('#tutorial-menu').fadeIn();
+});
+
+// tutorial map click
+$("#tutorial_1").click(function(e){
     e.preventDefault();
     game = gameboard(tutorial_1);
-    $("#main-menu").hide();
+    $("#tutorial-menu").hide();
+    $('#scenario-div').fadeIn();
+});
+
+$("#tutorial_2").click(function(e){
+    e.preventDefault();
+    game = gameboard(tutorial_2);
+    $("#tutorial-menu").hide();
+    $('#scenario-div').fadeIn();
+});
+
+$("#tutorial_3").click(function(e){
+    e.preventDefault();
+    game = gameboard(tutorial_3);
+    $("#tutorial-menu").hide();
+    $('#scenario-div').fadeIn();
+});
+
+$("#tutorial_4").click(function(e){
+    e.preventDefault();
+    game = gameboard(tutorial_4);
+    $("#tutorial-menu").hide();
+    $('#scenario-div').fadeIn();
+});
+
+$("#tutorial_5").click(function(e){
+    e.preventDefault();
+    game = gameboard(tutorial_5);
+    $("#tutorial-menu").hide();
     $('#scenario-div').fadeIn();
 });
 
