@@ -26,7 +26,7 @@ function gameboard(map){
         'green': green_player,
         'blue': blue_player,
         'red': red_player,
-        'purple': purple_player
+        'violet': violet_player
     }
     
     

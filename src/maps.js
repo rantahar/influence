@@ -214,9 +214,9 @@ var tutorial_2 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "Now you have competition. The blue city is owned by Inla, the messenger."+
-            "Where it has control, it will build roads to connect cities, whether they belong"+
-            "to it or to someone else.",
+            text: "Now you have competition. Blue is the messenger."+
+            "Where it has control, it will build roads to connect cities, whether the cities"+
+            "belong to it or to someone else.",
             next: {
                 title: "Tutorial",
                 text: "Other gods have the same win conditions as you."
@@ -255,8 +255,10 @@ var tutorial_3 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "The green god is Onma, the god of agriculture. "+
-            "It likes to build fields and grow large cities."
+            text: "Green is the god of agriculture. "+
+            "It likes to build fields and grow large cities. "+
+            "Remember that the god with the most influence wins after 200 turns. "+
+            "It does not matter how many tiles you own then."
         });
     }
 }
@@ -291,7 +293,7 @@ var tutorial_4 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "The red god is Osmar, a god of war. It's influence cannot mix with others. This can give"+
+            text: "Red is the god of war. It's influence cannot mix with others. This can give"+
             "you an edge in an otherwise symmetric situation."
         });
     }
@@ -326,7 +328,8 @@ var tutorial_5 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "Mornas engulfs all things. It is the eater of worlds and not of this realm."
+            text: "Violet engulfs all things. It is the god of growth and of competition, "+
+            "whether winning or losing."
         });
     }
 }

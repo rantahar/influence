@@ -195,7 +195,7 @@ var green_player = new AIPlayer('green','Green',"#00AA00","#00AA00",{
     city_utility: 0,
     city_culture: 1,
     city_food: 1,
-    city_wood: 1.5,
+    city_wood: 2.5,
     colony_base: -60,
     colony_food:  1,
     colony_level: 10,
@@ -216,7 +216,7 @@ var blue_player = new AIPlayer('blue','Blue',"#5555FF","#0000FF",{
     city_utility: 0,
     city_culture: 1,
     city_food: 1,
-    city_wood: 1.5,
+    city_wood: 2.5,
     colony_base: -200,
     colony_food: +10,
     colony_level: -1,
@@ -238,7 +238,7 @@ var red_player = new AIPlayer('red','Red',"#FF5555","#FF0000",{
     city_utility: 1000,
     city_culture: -1,
     city_food: 1,
-    city_wood: 1.5,
+    city_wood: 2.5,
     colony_base: -40,
     colony_food: 1,
     colony_level: 10,
@@ -257,11 +257,11 @@ var red_player = new AIPlayer('red','Red',"#FF5555","#FF0000",{
     city_prefix: "Dre-"
 })
 
-var purple_player = new AIPlayer('purple','Purple',"#710193","#710193",{
+var violet_player = new AIPlayer('violet','Violet',"#710193","#710193",{
     city_utility: 100000,
     city_culture: -1,
     city_food: 1,
-    city_wood: 2,
+    city_wood: 3,
     colony_base: -40,
     colony_food: 1,
     colony_level: 10,
