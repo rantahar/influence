@@ -28,8 +28,8 @@ function gameboard(map){
         'red': red_player,
         'purple': purple_player
     }
-    
-    
+
+
     // Create arrays indexed by x and y for each property of a tile
     var tiles = [];
     tiles.map_size_y = map.map.length;
@@ -98,15 +98,15 @@ function gameboard(map){
             div.append(this.describe_culture());
             return div;
         }
-        
+
         describe_short(){
-            // Return a short description with 
+            // Return a short description with
             var div = $("<div></div>");
             div.append("<p><b>Tile:</b> x="+this.x+", y="+this.y+"</p>");
             div.append("<p>"+map_descriptions[this.land]+"</p>");
             return div;
         }
-        
+
         describe_culture(){
             // Show owner if there is one
             var div = $("<div></div>");
@@ -152,7 +152,7 @@ function gameboard(map){
             }
             return 0;
         }
-    
+
         is_wood_tile(){
             if(tiles[this.x][this.y].land == 'f'){
                 return 1;
@@ -201,7 +201,7 @@ function gameboard(map){
             }
             return r;
         }
-    
+
         is_city_allowed(){
             // check for neighbouring cities
             if( !(this.is_empty()) ){
@@ -391,7 +391,7 @@ function gameboard(map){
 
             // 2 food / worker on a tile
             food += 2*Math.min(workers, food_tiles);
-            
+
             // +1 extra for fields
             food += Math.min(workers, fields);
             return food;
@@ -548,7 +548,7 @@ function gameboard(map){
                         value: this.workers_wood,
                         class: "slider"
                     }).appendTo(wood_slider_div);
-                    wood_slider.change(function(){ 
+                    wood_slider.change(function(){
                         city.set_wood_workers($(this).val());
                         update_city_page();
                     });
@@ -603,7 +603,7 @@ function gameboard(map){
     // Keep track of existing cities
     var cities = [];
 
- 
+
 
 
 
@@ -621,7 +621,7 @@ function gameboard(map){
             this.tile_scale = 1.5;
             this.tile_height = 25;
             this.tile_width = 31;
-            
+
             this.click_time = 100000;
         }
 
@@ -673,7 +673,7 @@ function gameboard(map){
                     update_panel();
                 }
             }
-        
+
             this.cursors = this.input.keyboard.createCursorKeys();
             this.escape_key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
             this.cameras.main.removeBounds();
@@ -692,28 +692,28 @@ function gameboard(map){
                 var x = this.cameras.main.scrollX;
                 var mx = tiles.map_size_x*this.tile_width*this.tile_scale;
                 x = (x-0.5*delta+mx)%mx;
-                this.cameras.main.scrollX = x; 
+                this.cameras.main.scrollX = x;
             }
             else if (this.cursors.right.isDown)
             {
                 var x = this.cameras.main.scrollX;
                 var mx = tiles.map_size_x*this.tile_width*this.tile_scale;
                 x = (x+0.5*delta+mx)%mx;
-                this.cameras.main.scrollX = x; 
+                this.cameras.main.scrollX = x;
             }
             else if (this.cursors.up.isDown)
             {
                 var y = this.cameras.main.scrollY;
                 var my = tiles.map_size_y*this.tile_height*this.tile_scale;
                 y = (y-0.5*delta+my)%my;
-                this.cameras.main.scrollY = y; 
+                this.cameras.main.scrollY = y;
             }
             else if (this.cursors.down.isDown)
             {
                 var y = this.cameras.main.scrollY;
                 var my = tiles.map_size_y*this.tile_height*this.tile_scale;
                 y = (y+0.5*delta+my)%my;
-                this.cameras.main.scrollY = y; 
+                this.cameras.main.scrollY = y;
             }
 
             // preview
@@ -731,7 +731,7 @@ function gameboard(map){
                 } else {
                     x = Math.floor( (x + tiles.map_size_x) % tiles.map_size_x);
                 }
-            
+
                 if(this.preview == 'city'){
                     if(this.previous_preview){
                         this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
@@ -739,7 +739,7 @@ function gameboard(map){
                     this.put_tile_at(x, y, 5, 'citytiles', 1);
                     this.previous_preview = {x: x, y: y, z: 5};
                 }
-            
+
                 if(this.preview == 'field'){
                     if(this.previous_preview){
                         this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
@@ -747,7 +747,7 @@ function gameboard(map){
                     this.put_tile_at(x, y, 5, 'allToenstiles', 48);
                     this.previous_preview = {x: x, y: y, z: 5};
                 }
-            
+
                 if(this.preview == 'road'){
                     if(this.previous_preview){
                         this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
@@ -755,20 +755,20 @@ function gameboard(map){
                     this.put_tile_at(x, y, 5, 'roadtiles', 0);
                     this.previous_preview = {x: x, y: y, z: 5};
                 }
-            
+
                 if(this.preview == undefined && this.previous_preview){
                     if(this.previous_preview){
                         this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
                     }
                     this.previous_preview = undefined;
                 }
-            
+
                 if (this.escape_key.isDown)
                 {
                     this.remove_highlight();
                     this.preview = undefined;
                 }
-            
+
                 if(this.input.activePointer.isDown){
                     if(this.click_time > 20){
                         tile_click(this, tiles[x][y]);
@@ -990,7 +990,7 @@ function gameboard(map){
             {
                 var player = players[tiles[x][y].owner];
                 var color = Phaser.Display.Color.HexStringToColor(player.map_color);
-                var marker = this.add.graphics({ 
+                var marker = this.add.graphics({
                     lineStyle: { width: 5, color: color.color, alpha: 0.4 }
                 });
                 marker.beginPath();
@@ -1035,7 +1035,7 @@ function gameboard(map){
             {
                 var player = players[tiles[x][y].owner];
                 var color = Phaser.Display.Color.HexStringToColor(player.map_color);
-                var marker = this.add.graphics({ 
+                var marker = this.add.graphics({
                     lineStyle: { width: 5, color: color.color, alpha: 0.4 }
                 });
                 marker.beginPath();
@@ -1079,7 +1079,7 @@ function gameboard(map){
             {
                 var player = players[tiles[x][y].owner];
                 var color = Phaser.Display.Color.HexStringToColor(player.map_color);
-                var marker = this.add.graphics({ 
+                var marker = this.add.graphics({
                     lineStyle: { width: 5, color: color.color, alpha: 0.4 }
                 });
                 marker.beginPath();
@@ -1292,7 +1292,7 @@ function gameboard(map){
                 }
                 announce_winner(winner);
             }
-            
+
         }
         for(player_key in players){
             var player = players[player_key];
@@ -1356,7 +1356,7 @@ function gameboard(map){
             update_panel();
             return;
         }
-        
+
         // Describe the selected tile
         active_tile = tiles[x][y];
         update_panel();
@@ -1387,13 +1387,13 @@ function gameboard(map){
 
     function update_panel(){
         player = players.white;
-        
+
         if(active_tile){
             $("#tile_info").empty();
             var div = active_tile.describe();
             $("#tile_info").append(div);
         }
-        
+
         $("#player_info").empty();
         var Title = $("<h4></h4>").html("Your empire:");
         $("#player_info").append(Title);
@@ -1404,7 +1404,7 @@ function gameboard(map){
                                      "/" + tiles.map_size_x*tiles.map_size_y);
         $("#player_info").append(info);
 
-        
+
         var resource_title = $("<b></b>").html("</br>resources:");
         $("#player_info").append(resource_title);
         var resource_text = $("<p></p>").text("Wood: " + player.wood);
@@ -1495,7 +1495,7 @@ function gameboard(map){
             }
         }
     }
-    
+
     function build_city(player_key,x,y){
         // check for neighbouring cities
         if(players[player_key].colonies > 0){
@@ -1542,8 +1542,8 @@ function gameboard(map){
         roundPixels: true,
         scene: [mapScene]
     };
-        
-        
+
+
     var phaser_game = new Phaser.Game(config);
 
     update_panel()
@@ -1593,6 +1593,7 @@ $("#popup_dismiss").mousedown(function(e){
 
 // Click on random map
 $("#random-map").click(function(e){
+    console.log("random clicked");
     $("#main-menu").fadeOut();
     $('#random-menu').fadeIn();
 });
@@ -1666,5 +1667,3 @@ $("#popup_dismiss").click(function(e){
 $("#popup_dismiss").mousedown(function(e){
     return false;
 });
-
-
