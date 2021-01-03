@@ -247,7 +247,7 @@ var tutorial_3 = {
         ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
         ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
         ['w','w','w','w','w','w','w','w','w','w','w','w','w','w']
-        ],    
+        ],
     start: {
         white: {x: 2, y:4},
         green: {x: 6, y:7}
@@ -284,7 +284,7 @@ var tutorial_4 = {
         ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
         ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
         ['w','w','w','w','w','w','w','w','w','w','w','w','w','w']
-        ],    
+        ],
     start: {
         white: {x: 2, y:4},
         blue:  {x: 6, y:9},
@@ -320,7 +320,7 @@ var tutorial_5 = {
         ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
         ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
         ['w','w','w','w','w','w','w','w','w','w','w','w','w','w']
-        ],    
+        ],
     start: {
         white: {x: 2, y:4},
         purple:  {x: 5, y:5}
@@ -341,67 +341,39 @@ function random_map(size_x, size_y, water_amount, water_continuity, forest_amoun
     map = {}
     map.map = [];
     for(var x = 0; x < size_x; x++) {
-        map.map[x] = [];
-        for(var y = 0; y < size_y; y++) {
-            map.map[x][y] = undefined;
-        }
+      map.map[x] = [];
+      for(var y = 0; y < size_y; y++) {
+          map.map[x][y] = undefined;
+      }
     }
 
     if(island){
-        for(var x = 0; x < size_x; x++) {
-            map.map[x][0] = 'w';
-            map.map[x][size_y-1] = 'w';
+      for(var x = 0; x < size_x; x++) {
+        for(var y=0; y < 6; y++){
+          map.map[x][y] = 'w';
         }
-        for(var y = 0; y < size_y; y++) {
-            map.map[0][y] = 'w';
-            map.map[size_x-1][y] = 'w';
+      }
+      for(var y = 0; y < size_y; y++) {
+        for(var x = 0; x < 6; x++) {
+          map.map[x][y] = 'w';
         }
+      }
     }
-    for(var x = 0; x < size_x; x++) {
-        for(var y = 0; y < size_y; y++) {
-            if(map.map[x][y] == undefined){
-                var water = 0;
-                if(map.map[(x+1+size_x)%size_x][y] == 'w'){
-                    water += 1;
-                }
-                if(map.map[(x-1+size_x)%size_x][y] == 'w'){
-                    water += 1;
-                }
-                if(map.map[x][(y+1+size_y)%size_y] == 'w'){
-                    water += 1;
-                }
-                if(map.map[x][(y-1+size_y)%size_y] == 'w'){
-                    water += 1;
-                }
-                var choice = 0;
-                choice = Math.floor(Math.random() * 100 - water*water_continuity - water_amount);
-                if(choice > 0){
-                    var choice = Math.floor(Math.random() * 500 );
-                    if(choice < mountains){
-                        var n_mounts = Math.floor(Math.random() * 5 )+1;
-                        map.map[x][y] = 'm';
-                        var a = x; var b = y;
-                        for(var n=0; n<n_mounts;n++){
-                            map.map[a][b] = 'm';
-                            if(Math.floor(Math.random() * 2 ) > 0){
-                                a = (a+1)%size_x;
-                            } else {
-                                b = (b+1)%size_y;
-                            }
-                        }
-                    } else {
-                        var choice = Math.floor(Math.random() * 100 );
-                        if(choice > (forest_amount)){
-                            map.map[x][y] = 'g';
-                        } else {
-                            map.map[x][y] = 'f';
-                        }
-                    }
-                } else {
-                    map.map[x][y] = 'w';
-                }
-            }
+    for( x=0; x < size_x/2; x++ ){
+      for(var y = 0; y < size_y/2; y++) {
+        if(map.map[x][y] == undefined){
+          draw_tile(map,x,y,size_x,size_y,water_amount, water_continuity, forest_amount, mountains, island);
         }
+        if(map.map[size_x-x-1][y] == undefined){
+          draw_tile(map,size_x-x-1,y,size_x,size_y,water_amount, water_continuity, forest_amount, mountains, island);
+        }
+        if(map.map[x][size_y-y-1] == undefined){
+          draw_tile(map,x,size_y-y-1,size_x,size_y,water_amount, water_continuity, forest_amount, mountains, island);
+        }
+        if(map.map[size_x-x-1][size_y-y-1] == undefined){
+          draw_tile(map,size_x-x-1,size_y-y-1,size_x,size_y,water_amount, water_continuity, forest_amount, mountains, island);
+        }
+      }
     }
 
     min_distance = Math.min(0.2*(size_x*size_x + size_y*size_y), 9);
@@ -444,5 +416,72 @@ function random_map(size_x, size_y, water_amount, water_continuity, forest_amoun
 }
 
 
+function draw_tile(map,x,y,size_x,size_y,water_amount, water_continuity, forest_amount, mountains, island){
+  if(map.map[x][y] == undefined){
+    var water = 0;
+    if(map.map[(x+1)%size_x][y] == 'w'){
+      water += 1;
+    }
+    if(map.map[(x-1+size_x)%size_x][y] == 'w'){
+      water += 1;
+    }
+    if(y%2) {
+      if(map.map[x][(y+1)%size_y] == 'w'){
+        water += 1;
+      }
+      if(map.map[(x+1)%size_x][(y+1)%size_y] == 'w'){
+        water += 1;
+      }
+      if(map.map[x][(y-1+size_y)%size_y] == 'w'){
+        water += 1;
+      }
+      if(map.map[(x+1)%size_x][(y-1+size_y)%size_y] == 'w'){
+        water += 1;
+      }
+    } else {
+      if(map.map[(x-1+size_x)%size_x][(y+1)%size_y] == 'w'){
+        water += 1;
+      }
+      if(map.map[x][(y+1)%size_y] == 'w'){
+        water += 1;
+      }
+      if(map.map[(x-1+size_x)%size_x][(y-1+size_y)%size_y] == 'w'){
+        water += 1;
+      }
+      if(map.map[x][(y-1+size_y)%size_y] == 'w'){
+        water += 1;
+      }
+    }
 
-
+    var water_prob = water*water_continuity + water_amount;
+    var choice = 0;
+    choice = Math.floor(Math.random() * 100);
+    console.log(x,y, water, choice, water_prob);
+    if(choice >= water_prob){
+      choice -= water_prob;
+      var choice = Math.floor(Math.random() * 500 );
+      if(choice < mountains){
+        var n_mounts = Math.floor(Math.random() * 5 )+1;
+        map.map[x][y] = 'm';
+        var a = x; var b = y;
+        for(var n=0; n<n_mounts;n++) if(map.map[a][b] == undefined){
+          map.map[a][b] = 'm';
+          if(Math.floor(Math.random() * 2 ) > 0){
+            a = (a+1)%size_x;
+          } else {
+            b = (b+1)%size_y;
+          }
+        }
+      } else {
+          var choice = Math.floor(Math.random() * 100 );
+          if(choice > (forest_amount)){
+            map.map[x][y] = 'g';
+          } else {
+            map.map[x][y] = 'f';
+          }
+      }
+    } else {
+        map.map[x][y] = 'w';
+    }
+  }
+}
