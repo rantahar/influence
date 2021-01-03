@@ -1602,8 +1602,27 @@ $("#random-map").click(function(e){
 $("#start").click(function(e){
     e.preventDefault();
     var size = 2*Math.floor($("#map_size").val());
-    console.log(size);
-    game = gameboard(random_map(size,size,5,40,5,10,false,['white','blue','green','red', 'purple']));
+    var water = Math.floor($("#water_percentage").val());
+    var water_continuity = Math.floor($("#water_continuity").val());
+    var forests = Math.floor($("#forest_percentage").val());
+    var mountains = Math.floor($("#mountain_percentage").val());
+    var island = $("#is_island").is(':checked');
+    var players = ['white',]
+    if( $("#blue").is(':checked') ){
+      players.push('blue');
+    }
+    if( $("#green").is(':checked') ){
+      players.push('green');
+    }
+    if( $("#red").is(':checked') ){
+      players.push('red');
+    }
+    if( $("#violet").is(':checked') ){
+      players.push('violet');
+    }
+    console.log(size, water, water_continuity, forests, mountains, island);
+    console.log(players);
+    game = gameboard(random_map(size, size, water, water_continuity, forests, mountains, island, players));
     $("#random-menu").hide();
     $('#scenario-div').fadeIn();
 });
