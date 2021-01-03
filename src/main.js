@@ -1627,6 +1627,11 @@ $("#start").click(function(e){
     $('#scenario-div').fadeIn();
 });
 
+$("#random_back").click(function(e){
+    $("#random-menu").hide();
+    $("#main-menu").fadeIn();
+});
+
 
 // Click on tutorial maps
 $("#tutorial-maps").click(function(e){
@@ -1668,6 +1673,11 @@ $("#tutorial_5").click(function(e){
     game = gameboard(tutorial_5);
     $("#tutorial-menu").hide();
     $('#scenario-div').fadeIn();
+});
+
+$("#tutorial_back").click(function(e){
+    $("#tutorial-menu").hide();
+    $("#main-menu").fadeIn();
 });
 
 // Prevent the mousedown event on the canvas
