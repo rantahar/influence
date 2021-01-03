@@ -24,7 +24,7 @@ class AIPlayer {
 
         this.city_names = aiconfig.city_names;
         this.city_prefix = aiconfig.city_prefix;
-        
+
         this.wood = 0;
         this.colonies = 0;
         this.culture = 0;
@@ -42,7 +42,7 @@ class AIPlayer {
                     if(tiles[x][y].is_city_allowed() && tiles[x][y].owner == this.key){
                         // Found a tile where cities are allowed
                         var tile = tiles[x][y];
-                        
+
                         // Calculate the utility. There is a base value and some
                         // modifiers
                         var utility = this.city_utility;
@@ -171,7 +171,7 @@ class AIPlayer {
                             utility += player.field_city_level*tile.city.level;
                         }
                     });
-                    
+
                     if(utility > field_utility){
                         field_x = x; field_y = y;
                         field_utility = utility;
@@ -201,8 +201,8 @@ var green_player = new AIPlayer('green','Green',"#00AA00","#00AA00",{
     colony_level: 10,
     max_colonies: 1,
     road_utility: -2,
-    road_to_own_cities: 2,
-    road_to_other_cities: 0,
+    road_to_own_cities: 1,
+    road_to_other_cities: 1,
     road_culture: 0,
     field_utility: 1,
     field_culture: 0,
@@ -217,13 +217,13 @@ var blue_player = new AIPlayer('blue','Blue',"#5555FF","#0000FF",{
     city_culture: 1,
     city_food: 1,
     city_wood: 2.5,
-    colony_base: -200,
-    colony_food: +10,
+    colony_base: -210,
+    colony_food: 10,
     colony_level: -1,
     max_colonies: 5,
     road_utility: 0,
-    road_to_own_cities: 1,
-    road_to_other_cities: 1,
+    road_to_own_cities: 2,
+    road_to_other_cities: 2,
     road_culture: 0,
     field_utility: -5,
     field_culture: 5,
@@ -279,8 +279,3 @@ var violet_player = new AIPlayer('violet','Violet',"#710193","#710193",{
                  "Omkorsta"],
     city_prefix: "Dral"
 })
-
-
-
-
-
