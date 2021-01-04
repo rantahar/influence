@@ -317,7 +317,7 @@ function gameboard(map){
 
         // Calculate the culture production of the city
         culture(){
-            return 16*Math.pow(2,this.level);
+            return 12*Math.pow(2,this.level);
         }
 
         owner(){
@@ -329,17 +329,19 @@ function gameboard(map){
         }
 
         set_food_workers(n){
-            var max = this.level - this.workers_wood;
-            max = Math.max(this.food_tiles(), max);
-            if(n >= 0 && n <= max){
+            var min = this.level - this.workers_wood;
+            min = Math.min(this.food_tiles(), min);
+            console.log(this.food_tiles(), this.level - this.workers_wood);
+            if(n >= 0 && n <= min){
                 this.workers_food = n;
             }
         }
 
         set_wood_workers(n){
-            var max = this.level - this.workers_food;
-            max = Math.max(this.wood_tiles(), max);
-            if(n >= 0 && n <= max){
+            var min = this.level - this.workers_food;
+            min = Math.min(this.wood_tiles(), min);
+            console.log(this.wood_tiles(), this.level - this.workers_food);
+            if(n >= 0 && n <= min){
                 this.workers_wood = n;
             }
         }
@@ -426,12 +428,20 @@ function gameboard(map){
             food -= this.food_consumption();
 
             // Check buildings
-            if(food > 0 && this.building != undefined){
+            if(this.building != undefined){
+                if(this.owner()=='white'){
+                  console.log(this.building.food);
+                }
                 var workers = this.free_workers();
-                this.building.food -= Math.min(0,workers);
-                var food_diff = Math.min(food,this.building.food);
-                this.building.food -= food_diff;
-                food -= food_diff;
+                this.building.food -= Math.max(0, workers);
+                if(food > 0){
+                  var food_diff = Math.min(food,this.building.food);
+                  this.building.food -= food_diff;
+                  food -= food_diff;
+                  if(this.owner()=='white'){
+                    console.log(this.building.food, workers, food_diff, food);
+                  }
+                }
                 if(this.building.food <= 0 ) {
                     this.building_done();
                 }
@@ -440,7 +450,7 @@ function gameboard(map){
             this.food += food;
 
             // Check if the city grows
-            if(this.food > this.food_limit()){
+            if(this.food >= this.food_limit()){
                 this.food -= this.food_limit();
                 this.level += 1;
                 // Automatically assign to food, then wood
@@ -492,6 +502,7 @@ function gameboard(map){
                 div.append(food_text);
                 div.append($("<p></p>").html("<b>Free workers</b>: "+this.free_workers()));
                 if(this.building){
+                    console.log(this.building.food);
                     div.append($("<p></p>").text("Building a "+this.building.type
                      + "("+this.building.food+")"));
                     var cancel_button = $("<span></span>").text("Cancel").addClass("btn btn-primary btn-vsm");
@@ -770,7 +781,8 @@ function gameboard(map){
                 }
 
                 if(this.input.activePointer.isDown){
-                    if(this.click_time > 20){
+                    if(this.click_time > 500){
+                        console.log('click', this.click_time);
                         tile_click(this, tiles[x][y]);
                         this.click_time = 0;
                     }
