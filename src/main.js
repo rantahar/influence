@@ -1,7 +1,13 @@
 
+var items = {
+  field_price: 12,
+  road_price: 5,
+  colony_cost: 12,
+}
+
+
 
 function gameboard(map){
-
     var turn_counter = 1;
 
     //Players
@@ -34,7 +40,7 @@ function gameboard(map){
       var r;
       if( n < 10 ){
         r=n.toFixed(2);
-      } else if( n < 100 ){
+      } else {
         r=n.toLocaleString();
       }
       return r;
@@ -310,8 +316,6 @@ function gameboard(map){
             this.workers_wood = 0;
             tiles[x][y].culture[this.owner()] = this.culture();
             tiles[x][y].road = true;
-
-            this.colony_cost = 12;
         }
 
         // Name the city
@@ -587,7 +591,7 @@ function gameboard(map){
                 // Add colony button
                 var build_per_turn = (this.food_production() + this.free_workers() - this.food_consumption());
                 if(build_per_turn > 0){
-                  var turns_left = Math.ceil(this.colony_cost / build_per_turn);
+                  var turns_left = Math.ceil(items.colony_cost / build_per_turn);
                   if( turns_left < Infinity ) {
                     var colony_button = $("<span></span>").text("Colony ("+turns_left+" turns)");
                     colony_button.addClass("btn btn-success my-1");
@@ -606,7 +610,7 @@ function gameboard(map){
         // Start building a colony
         queue_colony(){
             if(this.building==undefined){
-                this.building = {'food': this.colony_cost, 'type': 'colony'};
+                this.building = {'food': items.colony_cost, 'type': 'colony'};
             }
         }
 
@@ -1437,8 +1441,8 @@ function gameboard(map){
         var resource_text = $("<p></p>").text("colonies: " + player.colonies);
         $("#player_info").append(resource_text);
 
-        var road_button = $("<div></div>").text("Road (5 wood)");
-        if(player.wood >= 5){
+        var road_button = $("<div></div>").text("Road ("+items.road_price+" wood)");
+        if(player.wood >= items.road_price){
             road_button.addClass("btn btn-success my-1");
             road_button.click(function(){ start_build_road(); });
         } else {
@@ -1447,8 +1451,8 @@ function gameboard(map){
 
         $("#player_info").append(road_button);
 
-        var field_button = $("<div></div>").text("field (12 wood)");
-        if(player.wood >= 12){
+        var field_button = $("<div></div>").text("field ("+items.field_price+" wood)");
+        if(player.wood >= items.field_price){
             field_button.addClass("btn btn-success my-1");
             field_button.click(function(){ start_build_field(); });
         } else {
@@ -1512,11 +1516,11 @@ function gameboard(map){
 
     function build_field(player_key,x,y){
         // check for neighbouring cities
-        if(players[player_key].wood >= 12){
+        if(players[player_key].wood >= items.field_price){
             if(tiles[x][y].owner == player_key && tiles[x][y].is_field_allowed()){
                 var mapscene = phaser_game.scene.scenes[0];
                 mapscene.add_field(x,y);
-                players[player_key].wood -= 12;
+                players[player_key].wood -= items.field_price;
             }
         }
     }
@@ -1538,11 +1542,11 @@ function gameboard(map){
 
     // Build a road
     function build_road(player_key, x, y){
-        if(players[player_key].wood >= 5){
+        if(players[player_key].wood >= items.road_price){
             if(tiles[x][y].owner == player_key && tiles[x][y].is_road_allowed()){
                 var mapscene = phaser_game.scene.scenes[0];
                 mapscene.add_road(x,y);
-                players[player_key].wood -= 5;
+                players[player_key].wood -= items.road_price;
                 tiles[x][y].road = true;
             }
         }

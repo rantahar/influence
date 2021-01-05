@@ -147,7 +147,7 @@ class AIPlayer {
         }
 
         console.log(this.name+": best place for a road is at "+road_x+","+road_y+" (utility "+utility+")");
-        if(this.wood >= 5 && road_utility > 0){
+        if(this.wood >= items.road_price && road_utility > 0){
             build_road(this.key, road_x,road_y);
             console.log(this.name+" builds a road at "+road_x+","+road_y);
         }
