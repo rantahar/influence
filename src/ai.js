@@ -181,7 +181,7 @@ class AIPlayer {
         }
 
         console.log(this.name+": best place for a field is at "+field_x+","+field_y+" (utility "+utility+")");
-        if(this.wood >= 25 && field_utility > 0){
+        if(this.wood >= 12 && field_utility > 0){
             build_field(this.key, field_x,field_y);
             console.log(this.name+" builds a field at "+field_x+","+field_y);
         }

@@ -29,6 +29,17 @@ function gameboard(map){
         'violet': violet_player
     }
 
+    // Format a number for displaying
+    function format_number(n){
+      var r;
+      if( n < 10 ){
+        r=n.toFixed(2);
+      } else if( n < 100 ){
+        r=n.toLocaleString();
+      }
+      return r;
+    }
+
 
     // Create arrays indexed by x and y for each property of a tile
     var tiles = [];
@@ -113,7 +124,7 @@ function gameboard(map){
             var first = true;
             if(this.owner != undefined){
                 var culture_p = $("<p></p>").text("Culture: ");
-                var text = $("<span></span>").text(" "+this.culture[this.owner].toFixed(2))
+                var text = $("<span></span>").text(" "+format_number(this.culture[this.owner]))
                 .css('color', players[this.owner].text_color);
                 first = false
                 culture_p.append(text);
@@ -124,7 +135,7 @@ function gameboard(map){
                 }
                 first = false;
                 if(key != this.owner){
-                    var text = $("<span></span>").text(" "+this.culture[key].toFixed(2))
+                    var text = $("<span></span>").text(" "+format_number(this.culture[key]))
                     .css('color', players[key].text_color);
                     culture_p.append(text);
                 }
@@ -287,13 +298,13 @@ function gameboard(map){
 
     // City class
     class City {
-        constructor(x, y, level) {
+        constructor(x, y, level, food) {
             this.number = cities.length;
             this.x = x;
             this.y = y;
             this.tile = tiles[x][y];
             this.level = level;
-            this.food = 0;
+            this.food = food;
             this.name = this.next_name();
             this.workers_food = level;
             this.workers_wood = 0;
@@ -496,7 +507,7 @@ function gameboard(map){
                 if(food_prod >= 0){
                     food_text.append($("<span></span>").text("+"+food_prod.toFixed(0)).css('color', 'green'));
                 } else {
-                    food_text.append($("<span></span>").text("-"+food_prod.toFixed(0)).css('color', 'red'));
+                    food_text.append($("<span></span>").text(""+food_prod.toFixed(0)).css('color', 'red'));
                 }
                 food_text.append($("<span></span>").text(")"));
                 div.append(food_text);
@@ -575,8 +586,9 @@ function gameboard(map){
 
                 // Add colony button
                 var build_per_turn = (this.food_production() + this.free_workers() - this.food_consumption());
-                var turns_left = Math.ceil(this.colony_cost / build_per_turn);
-                if( turns_left < Infinity ) {
+                if(build_per_turn > 0){
+                  var turns_left = Math.ceil(this.colony_cost / build_per_turn);
+                  if( turns_left < Infinity ) {
                     var colony_button = $("<span></span>").text("Colony ("+turns_left+" turns)");
                     colony_button.addClass("btn btn-success my-1");
                     colony_button.click(function(){
@@ -584,6 +596,7 @@ function gameboard(map){
                         update_city_page();
                     });
                     div.append(colony_button);
+                  }
                 }
             }
 
@@ -675,7 +688,7 @@ function gameboard(map){
             for(var player in map.start){
                 var start = map.start[player];
                 tiles[start.x][start.y].owner = player;
-                this.add_city(start.x,start.y, 1);
+                this.add_city(start.x,start.y, 3, 5);
                 if(player == 'white'){
                     this.center_camera_on(start.x,start.y);
                     active_city = tiles[start.x][start.y].city;
@@ -916,8 +929,8 @@ function gameboard(map){
             this.add_tile_at(x,y,z,sheet,key,angle);
         }
 
-        add_city(x, y, level = 0){
-            var city = new City(x, y, level);
+        add_city(x, y, level = 0, food = 0){
+            var city = new City(x, y, level, food);
             tiles[x][y].city = city;
             cities.push( city );
             this.draw_boundaries();
@@ -1410,7 +1423,7 @@ function gameboard(map){
         var Title = $("<h4></h4>").html("Your empire:");
         $("#player_info").append(Title);
 
-        var info = $("<p></p>").text("Culture: " + player.culture.toFixed(0));
+        var info = $("<p></p>").text("Culture: " + format_number(player.culture));
         $("#player_info").append(info);
         var info = $("<p></p>").text("Tiles controlled: " + player.owned_tiles +
                                      "/" + tiles.map_size_x*tiles.map_size_y);
@@ -1424,8 +1437,8 @@ function gameboard(map){
         var resource_text = $("<p></p>").text("colonies: " + player.colonies);
         $("#player_info").append(resource_text);
 
-        var road_button = $("<div></div>").text("Road (10 wood)");
-        if(player.wood >= 10){
+        var road_button = $("<div></div>").text("Road (5 wood)");
+        if(player.wood >= 5){
             road_button.addClass("btn btn-success my-1");
             road_button.click(function(){ start_build_road(); });
         } else {
@@ -1434,8 +1447,8 @@ function gameboard(map){
 
         $("#player_info").append(road_button);
 
-        var field_button = $("<div></div>").text("field (25 wood)");
-        if(player.wood >= 25){
+        var field_button = $("<div></div>").text("field (12 wood)");
+        if(player.wood >= 12){
             field_button.addClass("btn btn-success my-1");
             field_button.click(function(){ start_build_field(); });
         } else {
@@ -1499,11 +1512,11 @@ function gameboard(map){
 
     function build_field(player_key,x,y){
         // check for neighbouring cities
-        if(players[player_key].wood >= 25){
+        if(players[player_key].wood >= 12){
             if(tiles[x][y].owner == player_key && tiles[x][y].is_field_allowed()){
                 var mapscene = phaser_game.scene.scenes[0];
                 mapscene.add_field(x,y);
-                players[player_key].wood -= 25;
+                players[player_key].wood -= 12;
             }
         }
     }
@@ -1525,11 +1538,11 @@ function gameboard(map){
 
     // Build a road
     function build_road(player_key, x, y){
-        if(players[player_key].wood >= 10){
+        if(players[player_key].wood >= 5){
             if(tiles[x][y].owner == player_key && tiles[x][y].is_road_allowed()){
                 var mapscene = phaser_game.scene.scenes[0];
                 mapscene.add_road(x,y);
-                players[player_key].wood -= 10;
+                players[player_key].wood -= 5;
                 tiles[x][y].road = true;
             }
         }

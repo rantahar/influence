@@ -161,12 +161,12 @@ var tutorial_1 = {
                 next: {
                     title: "Tutorial",
                     text: "Wood is used to build improvements. Roads help you spread your influence "+
-                    "and fields help your cities grow faster and bigger. Next, gather 25 wood."
+                    "and fields help your cities grow faster and bigger. Next, gather 12 wood."
                 }
             });
         }
-        if(this.wood_25 == undefined && game.player.wood >= 25){
-            this.wood_25 = true;
+        if(this.wood_12 == undefined && game.player.wood >= 12){
+            this.wood_12 = true;
             this.goal_next_turn = true;
             game.popup({
                 title: "Tutorial",
