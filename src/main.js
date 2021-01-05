@@ -41,7 +41,7 @@ function gameboard(map){
       if( n < 10 ){
         r=n.toFixed(2);
       } else {
-        r=n.toLocaleString();
+        r=n.toFixed(0).toLocaleString();
       }
       return r;
     }
