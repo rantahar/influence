@@ -629,7 +629,7 @@ function gameboard(map){
             this.boundary_markers = [];
             this.highlights = [];
 
-            this.tile_scale = 1.5;
+            this.tile_scale = 1.75;
             this.tile_height = 25;
             this.tile_width = 31;
 
@@ -731,7 +731,7 @@ function gameboard(map){
             // Translate mouse location to tile xy coordinate
             var x = this.input.activePointer.x;
             var y = this.input.activePointer.y;
-            if(x > 0 && x<600 && y>0 && y<600){
+            if(x > 0 && x<650 && y>0 && y<650){
                 var width  = this.tile_scale*this.tile_width;
                 var height = this.tile_scale*this.tile_height
                 x = (x+this.cameras.main.scrollX)/width;
@@ -1548,8 +1548,8 @@ function gameboard(map){
     var config = {
         type: Phaser.AUTO,
         parent: "Container",
-        width: 600,
-        height: 600,
+        width: 650,
+        height: 650,
         pixelArt: true,
         roundPixels: true,
         scene: [mapScene]

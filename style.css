@@ -2,21 +2,39 @@
 
 .pr-0 {
     padding-right: 0 !important;
-    margin-right: 0 !important; 
+    margin-right: 0 !important;
 }
 
 .pl-0 {
     padding-left: 0 !important;
-    margin-left: 0 !important; 
+    margin-left: 0 !important;
 }
 
 p {
-    margin: 0 !important; 
+    margin: 0 !important;
 }
 
+.panel_column {
+    height: 650px;
+    width: 300px;
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    padding-left: 5px;
+}
+
+.game_container {
+    height: 650px;
+    width: 650px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 300px;
+}
 
 .btn-vsm {
-    margin: 0 !important; 
+    margin: 0 !important;
     padding: 5px !important;
     vertical-align: middle;
     padding-top: 0 !important;
@@ -65,4 +83,3 @@ label {
     width: 80px;
     padding-left: 20 !important;
 }
-
