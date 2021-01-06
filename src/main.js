@@ -1360,7 +1360,7 @@ function gameboard(map){
         update_city_page();
 
         // Check for win conditions
-        if(turn_counter == 201) {
+        if(turn_counter == 200) {
             var winner;
             var winner_influence = -1;
             for(player_key in players){
@@ -1368,14 +1368,24 @@ function gameboard(map){
                     winner = player_key;
                     winner_influence = players[player_key].influence;
                 }
-                announce_winner(winner);
+                console.log(winner+" is the winner!");
+                var winner = players[winner];
+                popup({
+                    title: winner.name + " wins!",
+                    text: winner.name + " has won the game!"
+                });
             }
 
         }
         for(player_key in players){
             var player = players[player_key];
             if(player.owned_tiles > 0.5*tiles.map_size_x*tiles.map_size_y){
-                announce_winner(player_key);
+              console.log(winner+" is the winner!");
+              var winner = players[winner];
+              popup({
+                  title: winner.name + " wins!",
+                  text: winner.name + " has conguered (half) the world!"
+              });
             }
         }
 
@@ -1613,15 +1623,6 @@ function gameboard(map){
         }
     }
 
-    function announce_winner(key){
-        console.log(key+" is the winner!");
-        var winner = players[key];
-        popup({
-            title: winner.name + " Wins!",
-            text: winner.name + " has conquered the known world!"
-        });
-    }
-
 
     var config = {
         type: Phaser.AUTO,
@@ -1661,9 +1662,16 @@ function gameboard(map){
         $("#popup").show();
     }
 
+    function destroy(){
+      console.log("destroy");
+      $("#game_container").html("<div class='pl-0' id='Container'></div>");
+      phaser_game.destroy();
+    }
+
     return {
         phaser_game: phaser_game,
         cities, cities,
+        destroy: destroy,
         popup: popup,
         player: players['white'],
         get turn() { return turn_counter; },
@@ -1689,6 +1697,9 @@ $("#random-map").click(function(e){
 
 // Start button click
 $("#start").click(function(e){
+    if(game){
+      game.destroy();
+    }
     e.preventDefault();
     var size = 2*Math.floor($("#map_size").val());
     var water = Math.floor($("#water_percentage").val());
@@ -1736,6 +1747,9 @@ $("#tutorial_1").click(function(e){
 
 $("#tutorial_2").click(function(e){
     e.preventDefault();
+    if(game){
+      game.destroy();
+    }
     game = gameboard(tutorial_2);
     $("#tutorial-menu").hide();
     $('#scenario-div').fadeIn();
@@ -1743,6 +1757,9 @@ $("#tutorial_2").click(function(e){
 
 $("#tutorial_3").click(function(e){
     e.preventDefault();
+    if(game){
+      game.destroy();
+    }
     game = gameboard(tutorial_3);
     $("#tutorial-menu").hide();
     $('#scenario-div').fadeIn();
@@ -1750,6 +1767,9 @@ $("#tutorial_3").click(function(e){
 
 $("#tutorial_4").click(function(e){
     e.preventDefault();
+    if(game){
+      game.destroy();
+    }
     game = gameboard(tutorial_4);
     $("#tutorial-menu").hide();
     $('#scenario-div').fadeIn();
@@ -1757,6 +1777,9 @@ $("#tutorial_4").click(function(e){
 
 $("#tutorial_5").click(function(e){
     e.preventDefault();
+    if(game){
+      game.destroy();
+    }
     game = gameboard(tutorial_5);
     $("#tutorial-menu").hide();
     $('#scenario-div').fadeIn();
@@ -1777,6 +1800,18 @@ $("#credits-back").click(function(e){
     $("#credits-page").hide();
     $("#main-menu").fadeIn();
 });
+
+$("#main_menu_button").click(function(e){
+    $("#scenario-div").hide();
+    $("#main-menu").fadeIn();
+    $("#continue").fadeIn();
+});
+
+$("#continue").click(function(e){
+    $("#main-menu").hide();
+    $("#scenario-div").fadeIn();
+});
+
 
 
 // Prevent the mousedown event on the canvas

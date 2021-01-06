@@ -14,6 +14,7 @@
             <h1>Influence</h1>
         </div>
         <div class="card-body text-center">
+            <button id="continue" type="button" class="btn btn-primary w-50 my-1 hidden">Continue</button>
             <button id="random-map" type="button" class="btn btn-primary w-50 my-1">Random Map</button>
             <button id="tutorial-maps" type="button" class="btn btn-primary w-50 my-1">Tutorial Maps</button>
             <button id="Credits" type="button" class="btn btn-primary w-50 my-1">Credits</button>
@@ -22,7 +23,7 @@
 
 
     <!-- The tutorial menu: a card and some buttons -->
-    <div class="card text-white bg-dark centered menu" id="tutorial-menu">
+    <div class="card text-white bg-dark centered hidden" id="tutorial-menu">
         <div class="card-header text-center">
             <h1>Tutorial</h1>
         </div>
@@ -37,7 +38,7 @@
     </div>
 
     <!-- The random map menu -->
-    <div class="card text-white bg-dark centered menu" id="random-menu">
+    <div class="card text-white bg-dark centered hidden" id="random-menu">
         <div class="card-header text-center">
             <h1>Random Map</h1>
         </div>
@@ -80,7 +81,7 @@
         </div>
     </div>
 
-    <div class="card text-white bg-dark centered menu" id="credits-page">
+    <div class="card text-white bg-dark centered hidden" id="credits-page">
         <div class="card-header text-center">
             <h1>Credits</h1>
         </div>
@@ -134,12 +135,13 @@
                             </div>
                         </div>
 
-                        <button id="next_turn_button" type="button" class="btn btn-primary mt-auto text-right"><u>N</u>ext Turn</button>
+                        <button id="next_turn_button" type="button my-1" class="btn btn-success mt-auto text-right"><u>N</u>ext Turn</button>
+                        <button id="main_menu_button" type="button my-1" class="btn btn-primary mt-auto">Main Menu</button>
                     </div>
                 </div>
             </div>
             <div class="game_container pl-0 pr-0">
-                <div class="pl-0" id="Container"></div>
+              <div class='pl-0' id='Container'></div>
             </div>
     </div>
 

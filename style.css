@@ -65,7 +65,7 @@ div input{
     z-index: 10;
 }
 
-.menu {
+.hidden {
     display: none;
 }
 
