@@ -1682,7 +1682,7 @@ function gameboard(map){
 
 }
 
-let game;
+var game;
 
 
 
@@ -1743,6 +1743,9 @@ $("#tutorial-maps").click(function(e){
 // tutorial map click
 $("#tutorial_1").click(function(e){
     e.preventDefault();
+    if(game){
+      game.destroy();
+    }
     game = gameboard(tutorial_1);
     $("#tutorial-menu").hide();
     $('#scenario-div').fadeIn();
