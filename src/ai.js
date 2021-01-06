@@ -191,7 +191,7 @@ class AIPlayer {
 
 
 
-var green_player = new AIPlayer('green player','Green player',"#00AA00","#00AA00",{
+var green_player = new AIPlayer('green','Green player',"#00AA00","#00AA00",{
     city_utility: 0,
     city_influence: 1,
     city_food: 1,
@@ -212,7 +212,7 @@ var green_player = new AIPlayer('green player','Green player',"#00AA00","#00AA00
     city_prefix: "Am"
 })
 
-var blue_player = new AIPlayer('blue player','Blue player',"#5555FF","#0000FF",{
+var blue_player = new AIPlayer('blue','Blue player',"#5555FF","#0000FF",{
     city_utility: 0,
     city_influence: 1,
     city_food: 1,
@@ -234,7 +234,7 @@ var blue_player = new AIPlayer('blue player','Blue player',"#5555FF","#0000FF",{
     city_prefix: "Aka-"
 })
 
-var red_player = new AIPlayer('red player','Red player',"#FF5555","#FF0000",{
+var red_player = new AIPlayer('red','Red player',"#FF5555","#FF0000",{
     city_utility: 1000,
     city_influence: -1,
     city_food: 1,
@@ -257,7 +257,7 @@ var red_player = new AIPlayer('red player','Red player',"#FF5555","#FF0000",{
     city_prefix: "Dre-"
 })
 
-var violet_player = new AIPlayer('violet player','Violet player',"#710193","#710193",{
+var violet_player = new AIPlayer('violet','Violet player',"#710193","#710193",{
     city_utility: 100000,
     city_influence: -1,
     city_food: 1,

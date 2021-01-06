@@ -1368,20 +1368,20 @@ function gameboard(map){
                     winner = player_key;
                     winner_influence = players[player_key].influence;
                 }
-                console.log(winner+" is the winner!");
-                var winner = players[winner];
-                popup({
-                    title: winner.name + " wins!",
-                    text: winner.name + " has won the game!"
-                });
-            }
+              }
+              console.log(winner+" is the winner!");
+              var winner = players[winner];
+              popup({
+                  title: winner.name + " wins!",
+                  text: winner.name + " has won the game!"
+              });
 
         }
         for(player_key in players){
             var player = players[player_key];
             if(player.owned_tiles > 0.5*tiles.map_size_x*tiles.map_size_y){
-              console.log(winner+" is the winner!");
-              var winner = players[winner];
+              console.log(player_key+" is the winner!");
+              var winner = players[player_key];
               popup({
                   title: winner.name + " wins!",
                   text: winner.name + " has conguered (half) the world!"
