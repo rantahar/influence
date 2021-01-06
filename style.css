@@ -69,6 +69,20 @@ div input{
     display: none;
 }
 
+#next_turn_button{
+  display:inline-block;
+  position: absolute;
+  top: 510px;
+  width: 280px;
+}
+
+#main_menu_button{
+  display:inline-block;
+  position: absolute;
+  top: 550px;
+  width: 280px;
+}
+
 label {
   display: inline-block;
   width: 180px;
