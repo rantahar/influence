@@ -10,12 +10,9 @@
     margin-left: 0 !important;
 }
 
-p {
-    margin: 0 !important;
-}
 
 .panel_column {
-    height: 600px;
+    height: 650px;
     width: 300px;
     position: fixed;
     z-index: 2;
@@ -25,8 +22,8 @@ p {
 }
 
 .game_container {
-    height: 600px;
-    width: 600px;
+    height: 650px;
+    width: 650px;
     position: fixed;
     z-index: 1;
     top: 0;
