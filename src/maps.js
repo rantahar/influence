@@ -214,7 +214,7 @@ var tutorial_2 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "Now you have competition. Blue is the messenger."+
+            text: "Now you have competition. Blue is the messenger. "+
             "Where it has control, it will build roads to connect cities, whether the cities"+
             "belong to it or to someone else.",
             next: {
@@ -293,7 +293,7 @@ var tutorial_4 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "Red is the god of war. It's influence cannot mix with others. This can give"+
+            text: "Red is the god of war. It's influence cannot mix with others. This can give "+
             "you an edge in an otherwise symmetric situation."
         });
     }
