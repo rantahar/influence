@@ -7,7 +7,7 @@ class AIPlayer {
         this.text_color = text_color;
         this.map_color = map_color;
         this.city_utility = aiconfig.city_utility;
-        this.city_culture = aiconfig.city_culture;
+        this.city_influence = aiconfig.city_influence;
         this.city_food = aiconfig.city_food;
         this.city_wood = aiconfig.city_wood;
         this.colony_base = aiconfig.colony_base;
@@ -17,9 +17,9 @@ class AIPlayer {
         this.road_utility = aiconfig.road_utility;
         this.road_to_own_cities = aiconfig.road_to_own_cities;
         this.road_to_other_cities = aiconfig.road_to_other_cities;
-        this.road_culture = aiconfig.road_culture;
+        this.road_influence = aiconfig.road_influence;
         this.field_utility = aiconfig.field_utility;
-        this.field_culture = aiconfig.field_culture;
+        this.field_influence = aiconfig.field_influence;
         this.field_city_level = aiconfig.field_city_level;
 
         this.city_names = aiconfig.city_names;
@@ -27,7 +27,7 @@ class AIPlayer {
 
         this.wood = 0;
         this.colonies = 0;
-        this.culture = 0;
+        this.influence = 0;
         this.owned_tiles = 1;
         this.cities = 0;
     }
@@ -46,8 +46,8 @@ class AIPlayer {
                         // Calculate the utility. There is a base value and some
                         // modifiers
                         var utility = this.city_utility;
-                        // Use culture value as a proxy for closeness to others
-                        utility += this.city_culture*tile.culture[this.key];
+                        // Use influence value as a proxy for closeness to others
+                        utility += this.city_influence*tile.influence[this.key];
 
                         // Amount of resources around the city
                         var key = this.key;
@@ -100,12 +100,12 @@ class AIPlayer {
                     if((city.food_production()*this.wood_to_food_ratio) > (city.wood_production()+1)){
                         city.workers_food -= 1;
                         city.workers_wood += 1;
-                        console.log(this.name+": Add wood worker");
+                        console.log(this.name+": Add wood gatherer");
                     }
                     if(((city.food_production()+1)*this.wood_to_food_ratio) < city.wood_production()){
                         city.workers_food -= 1;
                         city.workers_wood += 1;
-                        console.log(this.name+": Add food worker");
+                        console.log(this.name+": Add farmer / fisher");
                     }
                 }
             }
@@ -135,8 +135,8 @@ class AIPlayer {
                         }
                     }
 
-                    // Use culture as a proxy for how central the area is
-                    utility += this.road_culture*city.tile.culture[this.key];
+                    // Use influence as a proxy for how central the area is
+                    utility += this.road_influence*city.tile.influence[this.key];
 
                     if(utility > road_utility){
                         road_x = x; road_y = y;
@@ -161,8 +161,8 @@ class AIPlayer {
                 if(tile.owner == this.key && tiles[x][y].is_field_allowed()){
                     var utility = this.field_utility;
 
-                    // Use culture as a proxy for how central the area is
-                    utility += this.field_culture*tile.culture[this.key];
+                    // Use influence as a proxy for how central the area is
+                    utility += this.field_influence*tile.influence[this.key];
 
                     // Check the level of a neighbouring city
                     var player = this;
@@ -193,7 +193,7 @@ class AIPlayer {
 
 var green_player = new AIPlayer('green','Green',"#00AA00","#00AA00",{
     city_utility: 0,
-    city_culture: 1,
+    city_influence: 1,
     city_food: 1,
     city_wood: 2.5,
     colony_base: -60,
@@ -203,9 +203,9 @@ var green_player = new AIPlayer('green','Green',"#00AA00","#00AA00",{
     road_utility: -2,
     road_to_own_cities: 1,
     road_to_other_cities: 1,
-    road_culture: 0,
+    road_influence: 0,
     field_utility: 1,
-    field_culture: 0,
+    field_influence: 0,
     field_city_level: 1,
     wood_to_food_ratio: 0,
     city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
@@ -214,7 +214,7 @@ var green_player = new AIPlayer('green','Green',"#00AA00","#00AA00",{
 
 var blue_player = new AIPlayer('blue','Blue',"#5555FF","#0000FF",{
     city_utility: 0,
-    city_culture: 1,
+    city_influence: 1,
     city_food: 1,
     city_wood: 2.5,
     colony_base: -210,
@@ -224,9 +224,9 @@ var blue_player = new AIPlayer('blue','Blue',"#5555FF","#0000FF",{
     road_utility: 0,
     road_to_own_cities: 2,
     road_to_other_cities: 2,
-    road_culture: 0,
+    road_influence: 0,
     field_utility: -5,
-    field_culture: 5,
+    field_influence: 5,
     field_city_level: 0,
     wood_to_food_ratio: 0.5,
     city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
@@ -236,7 +236,7 @@ var blue_player = new AIPlayer('blue','Blue',"#5555FF","#0000FF",{
 
 var red_player = new AIPlayer('red','Red',"#FF5555","#FF0000",{
     city_utility: 1000,
-    city_culture: -1,
+    city_influence: -1,
     city_food: 1,
     city_wood: 2.5,
     colony_base: -40,
@@ -246,9 +246,9 @@ var red_player = new AIPlayer('red','Red',"#FF5555","#FF0000",{
     road_utility: 0,
     road_to_own_cities: 0,
     road_to_other_cities: 1,
-    road_culture: 0,
+    road_influence: 0,
     field_utility: 100000,
-    field_culture: -1,
+    field_influence: -1,
     field_city_level: -10,
     wood_to_food_ratio: 0.2,
     city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath", "Arostagath",
@@ -259,7 +259,7 @@ var red_player = new AIPlayer('red','Red',"#FF5555","#FF0000",{
 
 var violet_player = new AIPlayer('violet','Violet',"#710193","#710193",{
     city_utility: 100000,
-    city_culture: -1,
+    city_influence: -1,
     city_food: 1,
     city_wood: 3,
     colony_base: -40,
@@ -269,9 +269,9 @@ var violet_player = new AIPlayer('violet','Violet',"#710193","#710193",{
     road_utility: 10000,
     road_to_own_cities: 0,
     road_to_other_cities: 0,
-    road_culture: -1,
+    road_influence: -1,
     field_utility: 100000,
-    field_culture: -1,
+    field_influence: -1,
     field_city_level: -2,
     wood_to_food_ratio: 0.2,
     city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta", "Odrila", "Ondara",

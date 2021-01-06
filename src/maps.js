@@ -110,8 +110,7 @@ var tutorial_1 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "You are a newly born god, worshipped in a small village in the middle of "+
-            "nowhere at the dawn of humanity. "+
+            text: "You are the god of the small settlement you see surrounded by white borders. "+
             "But you are ambitious and aspire to spread your influence to very corner of the world. "+
             "First, click on your home city on the map."
         });
@@ -132,13 +131,13 @@ var tutorial_1 = {
                 text: "You now control four tiles around your city. In the city panel you see that you have "+
                 "one worker, currently producing food. The worker can produce either food or wood, thanks "+
                 "to the field and forest tiles around the city. "+
-                "It is better to produce food in the beginning, since this helps the city grow and create"+
+                "It is better to produce food in the beginning, since this helps the city grow and get "+
                 "more workers.",
                 next: {
                     title: "Tutorial",
-                    text: "Once you have some food, you can start producing a colony. It is a good idea to"+
-                    "have some more workers first, since preparing a colony takes a lot of food." +
-                    "When you are ready, build a colony."
+                    text: "Once you have some food, you can start producing a colony. When building a colony, "+
+                    "all the cities food production goes towards the cost of the colony, "+items.colony_cost+
+                    " food, and the city does not grow. Any free workers will also contribute by 1 per turn."
                 }
 
             });
@@ -161,12 +160,13 @@ var tutorial_1 = {
                 next: {
                     title: "Tutorial",
                     text: "Wood is used to build improvements. Roads help you spread your influence "+
-                    "and fields help your cities grow faster and bigger. Next, gather 12 wood."
+                    "and fields help your cities grow faster and bigger. Next, gather "+items.field_cost+
+                    " wood."
                 }
             });
         }
-        if(this.wood_12 == undefined && game.player.wood >= 12){
-            this.wood_12 = true;
+        if(this.wood_for_field == undefined && game.player.wood >= items.field_cost){
+            this.wood_for_field = true;
             this.goal_next_turn = true;
             game.popup({
                 title: "Tutorial",
@@ -255,7 +255,7 @@ var tutorial_3 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "Green is the god of agriculture. "+
+            text: "Green is the god of agriinfluence. "+
             "It likes to build fields and grow large cities. "+
             "Remember that the god with the most influence wins after 200 turns. "+
             "It does not matter how many tiles you own then."
@@ -409,6 +409,7 @@ function random_map(size_x, size_y, water_amount, water_continuity, forest_amoun
                     }
                 }
             }
+            map.map[x][y] = 'g';
         }
     }
 
@@ -453,28 +454,21 @@ function draw_tile(map,x,y,size_x,size_y,water_amount, water_continuity, forest_
       }
     }
 
+    if(water < 2){
+      water = 0;
+    }
+
     var water_prob = water*water_continuity + water_amount;
     var choice = 0;
     choice = Math.floor(Math.random() * 100);
-    console.log(x,y, water, choice, water_prob);
     if(choice >= water_prob){
       choice -= water_prob;
-      var choice = Math.floor(Math.random() * 500 );
+      var choice = Math.floor(Math.random() * 100 );
       if(choice < mountains){
-        var n_mounts = Math.floor(Math.random() * 5 )+1;
         map.map[x][y] = 'm';
-        var a = x; var b = y;
-        for(var n=0; n<n_mounts;n++) if(map.map[a][b] == undefined){
-          map.map[a][b] = 'm';
-          if(Math.floor(Math.random() * 2 ) > 0){
-            a = (a+1)%size_x;
-          } else {
-            b = (b+1)%size_y;
-          }
-        }
       } else {
           var choice = Math.floor(Math.random() * 100 );
-          if(choice > (forest_amount)){
+          if(choice >= forest_amount){
             map.map[x][y] = 'g';
           } else {
             map.map[x][y] = 'f';

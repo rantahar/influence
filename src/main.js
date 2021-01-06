@@ -1,8 +1,8 @@
 
 var items = {
-  field_price: 12,
+  field_price: 10,
   road_price: 5,
-  colony_cost: 12,
+  colony_cost: 24,
 }
 
 
@@ -24,7 +24,7 @@ function gameboard(map){
             city_prefix: "Ala-",
             wood: 0,
             colonies: 0,
-            culture: 0,
+            influence: 0,
             cities: 0,
             owned_tiles: 1,
             take_turn(){}
@@ -58,7 +58,7 @@ function gameboard(map){
             this.x = x;
             this.y = y;
             this.owner = undefined;
-            this.culture = {};
+            this.influence = {};
             this.land = land;
 
             this.sprites = [];
@@ -112,7 +112,7 @@ function gameboard(map){
 
         describe(){
             var div = this.describe_short();
-            div.append(this.describe_culture());
+            div.append(this.describe_influence());
             return div;
         }
 
@@ -124,29 +124,29 @@ function gameboard(map){
             return div;
         }
 
-        describe_culture(){
+        describe_influence(){
             // Show owner if there is one
             var div = $("<div></div>");
             var first = true;
             if(this.owner != undefined){
-                var culture_p = $("<p></p>").text("Culture: ");
-                var text = $("<span></span>").text(" "+format_number(this.culture[this.owner]))
+                var influence_p = $("<p></p>").text("Influence: ");
+                var text = $("<span></span>").text(" "+format_number(this.influence[this.owner]))
                 .css('color', players[this.owner].text_color);
                 first = false
-                culture_p.append(text);
+                influence_p.append(text);
             }
-            for(var key in this.culture){
+            for(var key in this.influence){
                 if(first) {
-                    var culture_p = $("<p></p>").text("Culture: ");
+                    var influence_p = $("<p></p>").text("Influence: ");
                 }
                 first = false;
                 if(key != this.owner){
-                    var text = $("<span></span>").text(" "+format_number(this.culture[key]))
+                    var text = $("<span></span>").text(" "+format_number(this.influence[key]))
                     .css('color', players[key].text_color);
-                    culture_p.append(text);
+                    influence_p.append(text);
                 }
             }
-            div.append(culture_p);
+            div.append(influence_p);
             return div;
         }
 
@@ -269,22 +269,22 @@ function gameboard(map){
 
         decide_tile_owner(){
             this.owner = undefined;
-            var owner_culture = 0;
+            var owner_influence = 0;
             for(var player_key in players){
-                var player_culture = this.get_player_culture(player_key);
-                if( player_culture == owner_culture ) {
+                var player_influence = this.get_player_influence(player_key);
+                if( player_influence == owner_influence ) {
                     // No-one wins ties
                     this.owner = undefined;
-                } else if( player_culture > owner_culture ){
+                } else if( player_influence > owner_influence ){
                     this.owner = player_key;
-                    owner_culture = player_culture;
+                    owner_influence = player_influence;
                 }
             }
         }
 
-        get_player_culture(player){
-            if(this.culture[player]){
-                return this.culture[player];
+        get_player_influence(player){
+            if(this.influence[player]){
+                return this.influence[player];
             }
             return 0;
         }
@@ -314,7 +314,7 @@ function gameboard(map){
             this.name = this.next_name();
             this.workers_food = level;
             this.workers_wood = 0;
-            tiles[x][y].culture[this.owner()] = this.culture();
+            tiles[x][y].influence[this.owner()] = this.influence();
             tiles[x][y].road = true;
         }
 
@@ -330,9 +330,9 @@ function gameboard(map){
         }
 
 
-        // Calculate the culture production of the city
-        culture(){
-            return 12*Math.pow(2,this.level);
+        // Calculate the influence production of the city
+        influence(){
+            return 24*Math.pow(2,this.level);
         }
 
         owner(){
@@ -346,7 +346,6 @@ function gameboard(map){
         set_food_workers(n){
             var min = this.level - this.workers_wood;
             min = Math.min(this.food_tiles(), min);
-            console.log(this.food_tiles(), this.level - this.workers_wood);
             if(n >= 0 && n <= min){
                 this.workers_food = n;
             }
@@ -355,7 +354,6 @@ function gameboard(map){
         set_wood_workers(n){
             var min = this.level - this.workers_food;
             min = Math.min(this.wood_tiles(), min);
-            console.log(this.wood_tiles(), this.level - this.workers_food);
             if(n >= 0 && n <= min){
                 this.workers_wood = n;
             }
@@ -444,18 +442,12 @@ function gameboard(map){
 
             // Check buildings
             if(this.building != undefined){
-                if(this.owner()=='white'){
-                  console.log(this.building.food);
-                }
                 var workers = this.free_workers();
                 this.building.food -= Math.max(0, workers);
                 if(food > 0){
                   var food_diff = Math.min(food,this.building.food);
                   this.building.food -= food_diff;
                   food -= food_diff;
-                  if(this.owner()=='white'){
-                    console.log(this.building.food, workers, food_diff, food);
-                  }
                 }
                 if(this.building.food <= 0 ) {
                     this.building_done();
@@ -503,10 +495,11 @@ function gameboard(map){
             var div = $("<div></div>");
             div.append($("<h4></h4>").text(this.name));
             div.append("<p><b>Tile:</b> x="+this.x+", y="+this.y+"</p>");
-            div.append(this.tile.describe_culture());
+            div.append(this.tile.describe_influence());
             div.append($("<p></p>").html("<b>Level</b>: "+this.level));
             if(active_city.owner() == 'white'){
-                var food_text = $("<p></p>").html("<b>Food</b>: "+this.food+" (");
+                var food_text = $("<p></p>").html("<b>Food</b>: "+this.food+"/"+
+                                                  this.food_limit()+" (");
                 var food_prod = this.food_production() - this.food_consumption();
                 if(food_prod >= 0){
                     food_text.append($("<span></span>").text("+"+food_prod.toFixed(0)).css('color', 'green'));
@@ -517,7 +510,6 @@ function gameboard(map){
                 div.append(food_text);
                 div.append($("<p></p>").html("<b>Free workers</b>: "+this.free_workers()));
                 if(this.building){
-                    console.log(this.building.food);
                     div.append($("<p></p>").text("Building a "+this.building.type
                      + "("+this.building.food+")"));
                     var cancel_button = $("<span></span>").text("Cancel").addClass("btn btn-primary btn-vsm");
@@ -530,7 +522,7 @@ function gameboard(map){
 
                 if(this.food_tiles() > 0){
                     var max = Math.min(this.food_tiles(), this.level);
-                    var food_slider_div = $("<div></div>").html("Food workers:</br>");
+                    var food_slider_div = $("<div></div>").html("Farmers / Fishers:</br>");
                     var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
                     mbutton.click(function(){
                         city.set_food_workers(city.workers_food-1);
@@ -560,7 +552,7 @@ function gameboard(map){
 
                 if(this.wood_tiles() > 0){
                     var max = Math.min(this.wood_tiles(), this.level);
-                    var wood_slider_div = $("<div></div>").html("Wood workers:</br>");
+                    var wood_slider_div = $("<div></div>").html("Wood gatherer:</br>");
                     var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
                     mbutton.click(function(){
                         city.set_wood_workers(city.workers_wood-1);
@@ -651,6 +643,7 @@ function gameboard(map){
             this.tile_width = 31;
 
             this.click_time = 100000;
+            this.key_down = false;
         }
 
         preload (){
@@ -692,7 +685,7 @@ function gameboard(map){
             for(var player in map.start){
                 var start = map.start[player];
                 tiles[start.x][start.y].owner = player;
-                this.add_city(start.x,start.y, 3, 5);
+                this.add_city(start.x,start.y, 1, 0);
                 if(player == 'white'){
                     this.center_camera_on(start.x,start.y);
                     active_city = tiles[start.x][start.y].city;
@@ -704,6 +697,10 @@ function gameboard(map){
 
             this.cursors = this.input.keyboard.createCursorKeys();
             this.escape_key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+            this.key_f = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+            this.key_r = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+            this.key_n = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.N);
+            this.key_c = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
             this.cameras.main.removeBounds();
 
             if(map.at_start){
@@ -748,7 +745,7 @@ function gameboard(map){
             // Translate mouse location to tile xy coordinate
             var x = this.input.activePointer.x;
             var y = this.input.activePointer.y;
-            if(x > 0 && x<650 && y>0 && y<650){
+            if(x > 0 && x<600 && y>0 && y<600){
                 var width  = this.tile_scale*this.tile_width;
                 var height = this.tile_scale*this.tile_height
                 x = (x+this.cameras.main.scrollX)/width;
@@ -791,15 +788,47 @@ function gameboard(map){
                     this.previous_preview = undefined;
                 }
 
-                if (this.escape_key.isDown)
-                {
+                if (this.escape_key.isDown) {
                     this.remove_highlight();
                     this.preview = undefined;
                 }
 
+
+                if (this.key_r.isDown) {
+                  if(!this.key_down){
+                    start_build_road();
+                  }
+                  this.key_down = true;
+                }
+
+                if (this.key_f.isDown) {
+                  if(!this.key_down){
+                    start_build_field();
+                  }
+                  this.key_down = true;
+                }
+
+                if (this.key_c.isDown) {
+                  if(!this.key_down){
+                    start_build_city();
+                  }
+                  this.key_down = true;
+                }
+
+                if (this.key_n.isDown) {
+                  if(!this.key_down){
+                    next_turn(this);
+                  }
+                  this.key_down = true;
+                }
+
+                if (this.key_n.isUp && this.key_f.isUp &&
+                    this.key_r.isUp && this.key_c.isUp ){
+                  this.key_down = false;
+                }
+
                 if(this.input.activePointer.isDown){
                     if(this.click_time > 500){
-                        console.log('click', this.click_time);
                         tile_click(this, tiles[x][y]);
                         this.click_time = 0;
                     }
@@ -964,7 +993,6 @@ function gameboard(map){
         }
 
         add_field(x, y){
-            console.log("adding field at ",x,y);
             tiles[x][y].field = true;
             this.put_tile_at(x,y,3,'allToenstiles', 48);
         }
@@ -1167,35 +1195,35 @@ function gameboard(map){
     function persecute(player_key){
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
-                if(tiles[x][y].culture[player_key] > 0){
-                    var red_culture = tiles[x][y].culture[player_key];
+                if(tiles[x][y].influence[player_key] > 0){
+                    var red_influence = tiles[x][y].influence[player_key];
                     var n_others = 0;
-                    for(var player in tiles[x][y].culture) {
-                        if(player != player_key && tiles[x][y].culture[player] > 0){
+                    for(var player in tiles[x][y].influence) {
+                        if(player != player_key && tiles[x][y].influence[player] > 0){
                             n_others += 1;
                         }
                     }
-                    for(var n=0;n<10 && red_culture > 0 && n_others > 0; n+=1){
-                        var dc = red_culture/n_others;
-                        var new_red_culture = red_culture;
+                    for(var n=0;n<10 && red_influence > 0 && n_others > 0; n+=1){
+                        var dc = red_influence/n_others;
+                        var new_red_influence = red_influence;
                         n_others = 0;
-                        for(var player in tiles[x][y].culture) {
+                        for(var player in tiles[x][y].influence) {
                             if(player != player_key){
-                                if(tiles[x][y].culture[player] >= dc){
-                                    tiles[x][y].culture[player] -= dc;
-                                    new_red_culture -= dc;
+                                if(tiles[x][y].influence[player] >= dc){
+                                    tiles[x][y].influence[player] -= dc;
+                                    new_red_influence -= dc;
                                 } else {
-                                    new_red_culture -= tiles[x][y].culture[player];
-                                    tiles[x][y].culture[player] = 0;
+                                    new_red_influence -= tiles[x][y].influence[player];
+                                    tiles[x][y].influence[player] = 0;
                                 }
-                                if(tiles[x][y].culture[player] > 0){
+                                if(tiles[x][y].influence[player] > 0){
                                     n_others += 1;
                                 }
                             }
-                            red_culture = new_red_culture;
+                            red_influence = new_red_influence;
                         }
                     }
-                    tiles[x][y].culture[player_key] = red_culture;
+                    tiles[x][y].influence[player_key] = red_influence;
                 }
             }
         }
@@ -1213,17 +1241,17 @@ function gameboard(map){
             cities[city_key].update(map_scene);
         }
 
-        var new_culture_array = [];
+        var new_influence_array = [];
         for(var x = 0; x < tiles.map_size_x; x++) {
-            new_culture_array[x] = [];
+            new_influence_array[x] = [];
             for(var y = 0; y < tiles.map_size_y; y++) {
-                new_culture_array[x][y] = {};
+                new_influence_array[x][y] = {};
 
-                // Calculate culture
+                // Calculate influence
                 for(player in players){
                     var friction = 0.5;
                     var decay = 0.1;
-                    let c = tiles[x][y].get_player_culture(player);
+                    let c = tiles[x][y].get_player_influence(player);
 
                     // sum of difference to neighbours
                     let dc = 0;
@@ -1241,7 +1269,7 @@ function gameboard(map){
                         if(tile.road){
                             friction *=1.414;
                         }
-                        dc += friction*(tile.get_player_culture(player)-c);
+                        dc += friction*(tile.get_player_influence(player)-c);
                     });
 
                     if(tiles[x][y].land == 'f'){
@@ -1261,20 +1289,20 @@ function gameboard(map){
                     c*= 1-decay;
 
                     if(tiles[x][y].city && tiles[x][y].owner == player){
-                        c += tiles[x][y].city.culture();
+                        c += tiles[x][y].city.influence();
                     }
 
                     if(c>=1){
-                        new_culture_array[x][y][player] = c;
+                        new_influence_array[x][y][player] = c;
                     }
                 }
             }
         }
 
-        // Write new culture into the array
+        // Write new influence into the array
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
-                tiles[x][y].culture = new_culture_array[x][y];
+                tiles[x][y].influence = new_influence_array[x][y];
             }
         }
 
@@ -1287,9 +1315,9 @@ function gameboard(map){
         }
 
         // Calculate the number of tiles owned per player
-        // and the global sum of culture
+        // and the global sum of influence
         for(player in players){
-            players[player].culture = 0;
+            players[player].influence = 0;
             players[player].owned_tiles=0;
         }
 
@@ -1298,8 +1326,8 @@ function gameboard(map){
                 if(tiles[x][y].owner){
                     players[tiles[x][y].owner].owned_tiles += 1;
                 }
-                for(player in tiles[x][y].culture){
-                    players[player].culture += tiles[x][y].culture[player];
+                for(player in tiles[x][y].influence){
+                    players[player].influence += tiles[x][y].influence[player];
                 }
             }
         }
@@ -1313,11 +1341,11 @@ function gameboard(map){
         // Check for win conditions
         if(turn_counter == 201) {
             var winner;
-            var winner_culture = -1;
+            var winner_influence = -1;
             for(player_key in players){
-                if(players[player_key].culture > winner_culture){
+                if(players[player_key].influence > winner_influence){
                     winner = player_key;
-                    winner_culture = players[player_key].culture;
+                    winner_influence = players[player_key].influence;
                 }
                 announce_winner(winner);
             }
@@ -1329,6 +1357,8 @@ function gameboard(map){
                 announce_winner(player_key);
             }
         }
+
+        map_scene.draw_boundaries();
     }
 
 
@@ -1338,7 +1368,6 @@ function gameboard(map){
         e.preventDefault();
         mapscene = phaser_game.scene.scenes[0];
         next_turn(mapscene);
-        mapscene.draw_boundaries()
     });
 
 
@@ -1427,7 +1456,7 @@ function gameboard(map){
         var Title = $("<h4></h4>").html("Your empire:");
         $("#player_info").append(Title);
 
-        var info = $("<p></p>").text("Culture: " + format_number(player.culture));
+        var info = $("<p></p>").text("Influence: " + format_number(player.influence));
         $("#player_info").append(info);
         var info = $("<p></p>").text("Tiles controlled: " + player.owned_tiles +
                                      "/" + tiles.map_size_x*tiles.map_size_y);
@@ -1441,7 +1470,7 @@ function gameboard(map){
         var resource_text = $("<p></p>").text("colonies: " + player.colonies);
         $("#player_info").append(resource_text);
 
-        var road_button = $("<div></div>").text("Road ("+items.road_price+" wood)");
+        var road_button = $("<div></div>").html("<u>R</u>oad ("+items.road_price+" wood)");
         if(player.wood >= items.road_price){
             road_button.addClass("btn btn-success my-1");
             road_button.click(function(){ start_build_road(); });
@@ -1451,7 +1480,7 @@ function gameboard(map){
 
         $("#player_info").append(road_button);
 
-        var field_button = $("<div></div>").text("field ("+items.field_price+" wood)");
+        var field_button = $("<div></div>").html("<u>F</u>ield ("+items.field_price+" wood)");
         if(player.wood >= items.field_price){
             field_button.addClass("btn btn-success my-1");
             field_button.click(function(){ start_build_field(); });
@@ -1461,7 +1490,7 @@ function gameboard(map){
 
         $("#player_info").append(field_button);
 
-        var colony_button = $("<div></div>").text("City (1 colony)");
+        var colony_button = $("<div></div>").html("<u>C</u>ity (1 colony)");
         if(player.colonies >= 1){
             colony_button.addClass("btn btn-success my-1");
             colony_button.click(function(){ start_build_city(); });
@@ -1476,6 +1505,7 @@ function gameboard(map){
 
 
     function start_build_road(){
+      if(players['white'].wood >= items.road_price){
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.preview = 'road';
         mapscene.remove_highlight();
@@ -1486,9 +1516,11 @@ function gameboard(map){
                 }
             }
         }
+      }
     }
 
     function start_build_city(){
+      if(players['white'].colonies >= 1){
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.preview = 'city';
         mapscene.remove_highlight();
@@ -1499,9 +1531,11 @@ function gameboard(map){
                 }
             }
         }
+      }
     }
 
     function start_build_field(){
+      if(players['white'].wood >= items.field_price){
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.preview = 'field';
         mapscene.remove_highlight();
@@ -1512,6 +1546,7 @@ function gameboard(map){
                 }
             }
         }
+      }
     }
 
     function build_field(player_key,x,y){
@@ -1565,8 +1600,8 @@ function gameboard(map){
     var config = {
         type: Phaser.AUTO,
         parent: "Container",
-        width: 650,
-        height: 650,
+        width: 600,
+        height: 600,
         pixelArt: true,
         roundPixels: true,
         scene: [mapScene]
@@ -1622,7 +1657,6 @@ $("#popup_dismiss").mousedown(function(e){
 
 // Click on random map
 $("#random-map").click(function(e){
-    console.log("random clicked");
     $("#main-menu").fadeOut();
     $('#random-menu').fadeIn();
 });
@@ -1649,8 +1683,6 @@ $("#start").click(function(e){
     if( $("#violet").is(':checked') ){
       players.push('violet');
     }
-    console.log(size, water, water_continuity, forests, mountains, island);
-    console.log(players);
     game = gameboard(random_map(size, size, water, water_continuity, forests, mountains, island, players));
     $("#random-menu").hide();
     $('#scenario-div').fadeIn();
