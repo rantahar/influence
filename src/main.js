@@ -1354,7 +1354,6 @@ function gameboard(map){
         }
 
         turn_counter += 1;
-        $("#turn_number_text").text('Year '+turn_counter);
 
         update_panel();
         update_city_page();
@@ -1400,6 +1399,7 @@ function gameboard(map){
 
 
 
+    $( "#next_turn_button" ).unbind();
     $( "#next_turn_button" ).click(function(e) {
         e.preventDefault();
         mapscene = phaser_game.scene.scenes[0];
@@ -1481,6 +1481,8 @@ function gameboard(map){
 
     function update_panel(){
         player = players.white;
+
+        $("#turn_number_text").text('Year '+turn_counter);
 
         if(active_tile){
             $("#tile_info").empty();
@@ -1664,8 +1666,9 @@ function gameboard(map){
 
     function destroy(){
       console.log("destroy");
-      $("#game_container").html("<div class='pl-0' id='Container'></div>");
       phaser_game.destroy();
+      $("#game_container").empty();
+      $("#game_container").html("<div class='pl-0' id='Container'></div>");
     }
 
     return {
@@ -1679,7 +1682,7 @@ function gameboard(map){
 
 }
 
-var game;
+let game;
 
 
 

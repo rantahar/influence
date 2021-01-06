@@ -21,7 +21,7 @@
     padding-left: 5px;
 }
 
-.game_container {
+#game_container {
     height: 650px;
     width: 650px;
     position: fixed;
