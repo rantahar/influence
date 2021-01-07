@@ -1809,6 +1809,7 @@ $("#credits-back").click(function(e){
 
 $("#main_menu_button").click(function(e){
     $("#scenario-div").hide();
+    $("#popup").hide();
     $("#main-menu").fadeIn();
     $("#continue").fadeIn();
 });
