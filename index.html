@@ -81,6 +81,7 @@
         </div>
     </div>
 
+    <!-- The credits page -->
     <div class="card text-white bg-dark centered hidden" id="credits-page">
         <div class="card-header text-center">
             <h1>Credits</h1>
@@ -96,6 +97,7 @@
     </div>
 
 
+    <!-- A popup that appears in the lower half of the window and contains text and a dismiss button -->
     <div class="card text-white bg-dark" id="popup">
         <div class="card-header">
             <b id="popup_title"></b>
@@ -110,10 +112,15 @@
     </div>
 
 
+    <!-- The game itself. Like the menus, takes the full screen and starts hidden -->
     <div id="scenario-div" class="container-fluid fill">
+            <!-- The UI panel on the left side -->
             <div class="panel_column text-white flex-column bg-dark d-flex pr-0">
+                <!-- Display the turn count -->
                 <h1 id="turn_number_text">Year 1</h1>
+                <!-- Card containing the navigation tabs and the panels -->
                 <div class="card text-white h-100 bg-dark flex-column d-flex pr-0">
+                    <!-- The navigation tabs, home and city -->
                     <ul class="nav nav-tabs card-header-tabs" id="panel-tabs" role="tablist">
                         <li class="nav-item bg-dark" role="presentation">
                             <a class="nav-link bg-dark active" data-toggle="tab" href="#home" id="home-tab">Home</a>
@@ -122,32 +129,42 @@
                             <a class="nav-link bg-dark" data-toggle="tab" href="#city" id="city-tab">City</a>
                         </li>
                     </ul>
+                    <!-- The main content of the panel in a card body -->
                     <div class="card-body h-100 flex-column d-flex pl-0">
 
+                        <!-- The content of the tabs. Only the active one is displayed -->
                         <div class="tab-content pl-0" id="panel-content">
+                            <!-- The home panel, contains tile and player info, which are filled in by the game -->
                             <div class="tab-pane active text-white" id="home" role="tabpanel">
                                 <div class="card bg-dark"><div class="card-body bg-dark" id="tile_info"></div></div>
                                 <div class="card bg-dark"><div class="card-body bg-dark" id="player_info"></div></div>
                             </div>
 
+                            <!-- The city panel, filled in by the game -->
                             <div class="tab-pane text-white1" id="city" role="tabpanel">
                                 <div class="card bg-dark"><div class="card-body bg-dark" id="city_card"></div></div>
                             </div>
                         </div>
 
+                        <!-- Include next turn and main menu buttons, which are constant -->
                         <button id="next_turn_button" type="button" class="btn btn-success"><u>N</u>ext Turn</button>
                         <button id="main_menu_button" type="button" class="btn btn-primary">Main Menu</button>
                     </div>
                 </div>
             </div>
+            <!-- Container for the phaser game. Phaser will add the canvas. -->
             <div id="game_container" class="pl-0 pr-0">
+                <!-- This is useful for cleanly destroying the Phaser game -->
               <div class='pl-0' id='Container'></div>
             </div>
     </div>
 
 
+    <!-- Predefined maps and random map generator -->
     <script src="src/maps.js"></script>
+    <!-- AI players and script -->
     <script src="src/ai.js"></script>
+    <!-- Everything else... -->
     <script src="src/main.js"></script>
 
 </body>
