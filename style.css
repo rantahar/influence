@@ -1,17 +1,19 @@
 
-
+/* Set the right margin to zero in the game container and the panel column */
 .pr-0 {
     padding-right: 0 !important;
     margin-right: 0 !important;
 }
 
+/* Set the left margin to zero in the game container and the panel card */
 .pl-0 {
     padding-left: 0 !important;
     margin-left: 0 !important;
 }
 
-
-.panel_column {
+/* Set the location and size of the panel column manually. This is the easiest
+   way of getting it right in a fixed size frame */
+#panel_column {
     height: 650px;
     width: 300px;
     position: fixed;
@@ -21,6 +23,7 @@
     padding-left: 5px;
 }
 
+/* Set the location and size of the Phaser game manually as well */
 #game_container {
     height: 650px;
     width: 650px;
@@ -30,21 +33,24 @@
     left: 300px;
 }
 
-.btn-vsm {
-    margin: 0 !important;
-    padding: 5px !important;
+/* The input fields in the random map menu */
+.random_map_input {
     vertical-align: middle;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+    padding:1px;
+    margin:1px;
+    width: 60px;
+    padding-left: 20 !important;
 }
 
-div input{
-    vertical-align: middle;
-    width: 50%;
-    padding:0px;
-    margin:0px;
+/* The labels for the random menu input fields */
+label {
+  display: inline-block;
+  width: 180px;
+  text-align: right;
+  padding-right: 20 !important;
 }
 
+/* Center menu cards in frame */
 .centered {
     position: fixed;
     top: 50%;
@@ -52,10 +58,12 @@ div input{
     transform: translate(-50%, -50%);
 }
 
+/* Container for the full game, panel and Phaser game */
 #scenario-div {
     display: none;
 }
 
+/* A popup that can be displayed in the lower part of the game */
 #popup {
     display: none;
     position: fixed;
@@ -65,10 +73,7 @@ div input{
     z-index: 10;
 }
 
-.hidden {
-    display: none;
-}
-
+/* The next turn button */
 #next_turn_button{
   display:inline-block;
   position: absolute;
@@ -76,21 +81,27 @@ div input{
   width: 280px;
 }
 
-#main_menu_button{
+/* Buttons in the menus */
+#main_menu_button {
   display:inline-block;
   position: absolute;
   top: 550px;
   width: 280px;
 }
 
-label {
-  display: inline-block;
-  width: 180px;
-  text-align: right;
-  padding-right: 20 !important;
+
+
+/* Start a menu hidden */
+.hidden {
+    display: none;
 }
 
-.random_map_input {
-    width: 80px;
-    padding-left: 20 !important;
+
+/* Very small button, for incrementing and decrementing worker amounts */
+.btn-vsm {
+    margin: 0 !important;
+    padding: 5px !important;
+    vertical-align: middle;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
 }
