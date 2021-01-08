@@ -54,10 +54,10 @@ class AIPlayer {
                         var food = 0;
                         var wood = 0;
                         tiles[x][y].neighbours().forEach(function(tile){
-                            if(tile.owner == key && tile.is_food_tile() ){
+                            if(tile.is_food_tile() ){
                                 food += 1;
                             }
-                            if(tile.owner == key && tile.is_wood_tile() ){
+                            if(tile.is_wood_tile() ){
                                 wood += 1;
                             }
                         });
@@ -119,7 +119,7 @@ class AIPlayer {
                 var tile = tiles[x][y];
                 if(tile.owner == this.key && tiles[x][y].is_road_allowed()){
                     // Found a tile where you can build a road
-                    var utility = this.road_utility;
+                    var utility = this.road_utility + this.wood;
 
                     // Modify by distance to close by cities
                     var player = this;
@@ -136,7 +136,7 @@ class AIPlayer {
                     }
 
                     // Use influence as a proxy for how central the area is
-                    utility += this.road_influence*city.tile.influence[this.key];
+                    utility += this.road_influence*tile.influence[this.key];
 
                     if(utility > road_utility){
                         road_x = x; road_y = y;
@@ -146,7 +146,7 @@ class AIPlayer {
             }
         }
 
-        console.log(this.name+": best place for a road is at "+road_x+","+road_y+" (utility "+utility+")");
+        console.log(this.name+": best place for a road is at "+road_x+","+road_y+" (utility "+road_utility+")");
         if(this.wood >= items.road_price && road_utility > 0){
             build_road(this.key, road_x,road_y);
             console.log(this.name+" builds a road at "+road_x+","+road_y);
@@ -159,7 +159,7 @@ class AIPlayer {
             for (var y = 0; y < tiles.map_size_y; y++) {
                 var tile = tiles[x][y];
                 if(tile.owner == this.key && tiles[x][y].is_field_allowed()){
-                    var utility = this.field_utility;
+                    var utility = this.field_utility + this.wood;
 
                     // Use influence as a proxy for how central the area is
                     utility += this.field_influence*tile.influence[this.key];
@@ -193,18 +193,18 @@ class AIPlayer {
 
 var green_player = new AIPlayer('green','Green player',"#00AA00","#00AA00",{
     city_utility: 0,
-    city_influence: 1,
+    city_influence: 0.1,
     city_food: 1,
-    city_wood: 2.5,
+    city_wood: 1.5,
     colony_base: -60,
     colony_food:  1,
     colony_level: 10,
     max_colonies: 1,
-    road_utility: -2,
+    road_utility: -15,
     road_to_own_cities: 1,
     road_to_other_cities: 1,
     road_influence: 0,
-    field_utility: 1,
+    field_utility: -10,
     field_influence: 0,
     field_city_level: 1,
     wood_to_food_ratio: 0,
@@ -214,19 +214,19 @@ var green_player = new AIPlayer('green','Green player',"#00AA00","#00AA00",{
 
 var blue_player = new AIPlayer('blue','Blue player',"#5555FF","#0000FF",{
     city_utility: 0,
-    city_influence: 1,
+    city_influence: 0.1,
     city_food: 1,
-    city_wood: 2.5,
+    city_wood: 2,
     colony_base: -210,
     colony_food: 10,
     colony_level: -1,
     max_colonies: 5,
-    road_utility: 0,
-    road_to_own_cities: 2,
-    road_to_other_cities: 2,
+    road_utility: -5,
+    road_to_own_cities: 5,
+    road_to_other_cities: 5,
     road_influence: 0,
-    field_utility: -5,
-    field_influence: 5,
+    field_utility: -15,
+    field_influence: 1,
     field_city_level: 0,
     wood_to_food_ratio: 0.5,
     city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
@@ -243,7 +243,7 @@ var red_player = new AIPlayer('red','Red player',"#FF5555","#FF0000",{
     colony_food: 1,
     colony_level: 10,
     max_colonies: 5,
-    road_utility: 0,
+    road_utility: -5,
     road_to_own_cities: 0,
     road_to_other_cities: 1,
     road_influence: 0,
@@ -259,7 +259,7 @@ var red_player = new AIPlayer('red','Red player',"#FF5555","#FF0000",{
 
 var violet_player = new AIPlayer('violet','Violet player',"#710193","#710193",{
     city_utility: 100000,
-    city_influence: -1,
+    city_influence: -2,
     city_food: 1,
     city_wood: 3,
     colony_base: -40,

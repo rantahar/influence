@@ -332,7 +332,7 @@ function gameboard(map){
 
         // Calculate the influence production of the city
         influence(){
-            return 24*Math.pow(2,this.level);
+            return 2.5+0.5*this.level;
         }
 
         owner(){
@@ -1265,51 +1265,46 @@ function gameboard(map){
             new_influence_array[x][y] = {};
             friction[x][y] = 1;
             if(tiles[x][y].land == 'f'){
-                friction[x][y] /= 2;
+                friction[x][y] *= 2;
             }
             if(tiles[x][y].land == 'm'){
-                friction[x][y] =0;
+                friction[x][y] = 100000; // Essentially impossible to spread to mountains
             }
             if(tiles[x][y].land == 'w'){
-                friction[x][y] /= 2;
+                friction[x][y] *= 2;
             }
             if(tiles[x][y].road){
-                friction[x][y] *= 2;
+                friction[x][y] /= 2;
+            }
+            if(tiles[x][y].city){
+                friction[x][y] = 0;
             }
           }
         }
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
                 for(player in players){
-                    let c = tiles[x][y].get_player_influence(player);
-
-                    // First we need a full sum of neighbour differences
-                    let dc = 1; // One additional unit, causes loss on each turn
+                    // Influence on this tile is usually the maximum of neighbours - friction
+                    let c = 0; // max neighbour
                     tiles[x][y].neighbours().forEach(function(tile){
-                        var x = tile.x; var y = tile.y;
-                        var diff = friction[x][y];
-                        if(diff > 0){
-                          dc += diff;
+                        let x = tile.x; let y = tile.y;
+                        let cnb = tiles[x][y].get_player_influence(player);
+                        if(cnb > c){ // new max found
+                          c = cnb;
                         }
                     });
 
-                    // Now spread the full amount to the neighbours
-                    tiles[x][y].neighbours().forEach(function(tile){
-                        var x = tile.x; var y = tile.y;
-                        if(new_influence_array[x][y][player] == undefined){
-                          new_influence_array[x][y][player] = friction[x][y] * c / dc;
-                        } else {
-                          new_influence_array[x][y][player] += friction[x][y] * c / dc;
-                        }
-                    });
+                    c -= friction[x][y];
 
                     if(tiles[x][y].city && tiles[x][y].owner == player){
-                      if(new_influence_array[x][y][player] == undefined){
-                        new_influence_array[x][y][player] = tiles[x][y].city.influence();
-                      } else {
-                        new_influence_array[x][y][player] += tiles[x][y].city.influence();
+                      // There is a city here. Check if it's culture dominates.
+                      let city_c = tiles[x][y].city.influence();
+                      if(city_c > c){
+                        // The city dominates and sets the influence level.
+                        c = city_c;
                       }
                     }
+                    new_influence_array[x][y][player] = c;
                 }
             }
         }
@@ -1320,7 +1315,7 @@ function gameboard(map){
             tiles[x][y].influence = {};
             for(player in players){
               var c = decay*new_influence_array[x][y][player];
-              if(c >= 1){
+              if(c > 0){
                 tiles[x][y].influence[player] = c;
               }
             }
@@ -1354,9 +1349,6 @@ function gameboard(map){
         }
 
         turn_counter += 1;
-
-        update_panel();
-        update_city_page();
 
         // Check for win conditions
         if(turn_counter == 200) {
@@ -1393,6 +1385,9 @@ function gameboard(map){
             cities[city_key].update(map_scene);
         }
 
+        // Update UI
+        update_panel();
+        update_city_page();
         map_scene.draw_boundaries();
     }
 
