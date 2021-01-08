@@ -110,8 +110,8 @@ var tutorial_1 = {
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "You are the god of the small settlement you see surrounded by white borders. "+
-            "But you are ambitious and aspire to spread your influence to very corner of the world. "+
+            text: "You are the god of the small settlement surrounded by white borders. "+
+            "You are ambitious and aspire to spread your influence to every corner of the world. "+
             "First, click on your home city on the map."
         });
     },
@@ -121,23 +121,30 @@ var tutorial_1 = {
             game.popup({
                 title: "Tutorial",
                 text: "The city panel has opened on the left. Your first city starts from level 1, but it "+
-                "grows as it produces more food. The city also produces influence for you. Your influence "+ "spreads at the end of each turn. Click 'Next Turn' to see it spread."
+                "grows as it produces more food. The city has 3 influence, and this will grow by 0.5 for each "+ "level. Your influence will spread from the city once you click 'Next Turn'."
             });
         }
         if(this.turn_2 == undefined && game.turn > 1){
             this.turn_2 = true;
             game.popup({
                 title: "Tutorial",
-                text: "You now control four tiles around your city. In the city panel you see that you have "+
-                "one worker, currently producing food. The worker can produce either food or wood, thanks "+
-                "to the field and forest tiles around the city. "+
-                "It is better to produce food in the beginning, since this helps the city grow and get "+
-                "more workers.",
-                next: {
+                text: "You now control the tiles around your city. As your influence spreads, it is reduced "+
+                "a bit. On grass tiles it is reduced by 1 and on forest and water tiles by 2. You cannot "+
+                "influence mountain tiles.",
+                next:{
+                  title: "Tutorial",
+                  text: "In the city panel you see that you have "+
+                  "one worker, currently producing food. The worker can produce either food or wood, thanks "+
+                  "to the field and forest tiles around the city. "+
+                  "It is better to produce food in the beginning, since this helps the city grow and get "+
+                  "more workers.",
+                  next: {
                     title: "Tutorial",
-                    text: "Once you have some food, you can start producing a colony. When building a colony, "+
-                    "all the cities food production goes towards the cost of the colony, "+items.colony_cost+
-                    " food, and the city does not grow. Any free workers will also contribute by 1 per turn."
+                    text: "Once you have a few workers, you should start producing a colony. When building "+
+                    "a colony, all the city's food production goes towards the cost of the colony "+
+                    "and the city does not grow. The colony costs is "+items.colony_cost+" food. "+
+                    "Any free workers will also contribute by 1 food per turn."
+                  }
                 }
 
             });
@@ -159,7 +166,7 @@ var tutorial_1 = {
                 text: "Your second city will take a few turns to flourish, but rest assured it will.",
                 next: {
                     title: "Tutorial",
-                    text: "Wood is used to build improvements. Roads help you spread your influence "+
+                    text: "Wood is used to build roads and fields. Roads help you spread your influence "+
                     "and fields help your cities grow faster and bigger. Next, gather "+items.field_price+
                     " wood."
                 }
@@ -170,9 +177,10 @@ var tutorial_1 = {
             this.goal_next_turn = true;
             game.popup({
                 title: "Tutorial",
-                text: "Now you can build a field in the home screen. Each field allows a worker to produce "+
-                "one more food per turn. Roads allow your influence to flow more quickly, but they do not "+
-                "increase the overall amount.",
+                text: "Now you can build a field or a road in the home screen. Each field allows one worker "+
+                "to produce one more food per turn. "+
+                "Roads allow influence to spread more easily. The reduction in "+
+                "influence is halved.",
                 next: {
                     title: "Tutorial",
                     text: "Your goal is to spread your influence as far as you can. Since there are "+
@@ -219,7 +227,14 @@ var tutorial_2 = {
             "belong to it or to someone else.",
             next: {
                 title: "Tutorial",
-                text: "Other gods have the same win conditions as you."
+                text: "Any tile, including cities, belong to whoever has the highest influence "+
+                "there. You can take over enemy cities by building a bigger city close by. You can "+
+                "also lose cities. When you take over a city, remember to check that the workers "+
+                "are doing something useful.",
+                next: {
+                    title: "Tutorial",
+                    text: "Other gods have the same win conditions as you."
+                }
             }
         });
     }
