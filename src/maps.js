@@ -160,12 +160,12 @@ var tutorial_1 = {
                 next: {
                     title: "Tutorial",
                     text: "Wood is used to build improvements. Roads help you spread your influence "+
-                    "and fields help your cities grow faster and bigger. Next, gather "+items.field_cost+
+                    "and fields help your cities grow faster and bigger. Next, gather "+items.field_price+
                     " wood."
                 }
             });
         }
-        if(this.wood_for_field == undefined && game.player.wood >= items.field_cost){
+        if(this.wood_for_field == undefined && game.player.wood >= items.field_price){
             this.wood_for_field = true;
             this.goal_next_turn = true;
             game.popup({
@@ -215,7 +215,7 @@ var tutorial_2 = {
         game.popup({
             title: "Tutorial",
             text: "Now you have competition. Blue is the messenger. "+
-            "Where it has control, it will build roads to connect cities, whether the cities"+
+            "Where it has control, it will build roads to connect cities, whether the cities "+
             "belong to it or to someone else.",
             next: {
                 title: "Tutorial",
@@ -250,12 +250,12 @@ var tutorial_3 = {
         ],
     start: {
         white: {x: 2, y:4},
-        green: {x: 6, y:7}
+        green: {x: 7, y:4}
     },
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "Green is the god of agriinfluence. "+
+            text: "Green is the god of agriculture. "+
             "It likes to build fields and grow large cities. "+
             "Remember that the god with the most influence wins after 200 turns. "+
             "It does not matter how many tiles you own then."
@@ -323,7 +323,7 @@ var tutorial_5 = {
         ],
     start: {
         white: {x: 2, y:4},
-        purple:  {x: 5, y:5}
+        violet:  {x: 5, y:5}
     },
     at_start: function(){
         game.popup({
