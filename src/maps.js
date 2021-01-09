@@ -147,7 +147,7 @@ var tutorial_1 = {
                     title: "Tutorial",
                     text: "Once you have a few workers, you should start producing a colony. When building "+
                     "a colony, all the city's food production goes towards the cost of the colony "+
-                    "and the city does not grow. The colony costs is "+items.colony_cost+" food. "+
+                    "and the city does not grow. The colony costs is "+items.colony_price+" food. "+
                     "Any free workers will also contribute by 1 food per turn."
                   }
                 }
