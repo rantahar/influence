@@ -1,6 +1,9 @@
 
-
+// The player class. AI players have a number of parameters related to their
+// preferred actions. The take_turn() function is the actual AI script and is
+// shared between all players
 class AIPlayer {
+    // Take the AI configuration and create a player
     constructor(key, name, text_color, map_color, aiconfig) {
         this.key = key;
         this.name = name;
@@ -32,6 +35,7 @@ class AIPlayer {
         this.cities = 0;
     }
 
+    // The ai script, run at every turn
     take_turn(tiles, cities, build_road, build_city, build_field) {
         if(this.colonies > 0){
             // Check all tiles to find the best places to build
@@ -190,7 +194,7 @@ class AIPlayer {
 }
 
 
-
+// The green player prefers to build high level cities close to each other.
 var green_player = new AIPlayer('green','Green player',"#00AA00","#00AA00",{
     city_utility: 0,
     city_influence: 0.1,
@@ -212,6 +216,7 @@ var green_player = new AIPlayer('green','Green player',"#00AA00","#00AA00",{
     city_prefix: "Am"
 })
 
+// The blue player also likes to build cities close, but prefers to build roads
 var blue_player = new AIPlayer('blue','Blue player',"#5555FF","#0000FF",{
     city_utility: 0,
     city_influence: 0.1,
@@ -234,6 +239,8 @@ var blue_player = new AIPlayer('blue','Blue player',"#5555FF","#0000FF",{
     city_prefix: "Aka-"
 })
 
+// The red players influence doesn't mix with others. It likes to spread toward
+// other players
 var red_player = new AIPlayer('red','Red player',"#FF5555","#FF0000",{
     city_utility: 1000,
     city_influence: -1,
@@ -257,6 +264,7 @@ var red_player = new AIPlayer('red','Red player',"#FF5555","#FF0000",{
     city_prefix: "Dre-"
 })
 
+// The violet player likes to spread quickly.
 var violet_player = new AIPlayer('violet','Violet player',"#710193","#710193",{
     city_utility: 100000,
     city_influence: -2,
@@ -265,7 +273,7 @@ var violet_player = new AIPlayer('violet','Violet player',"#710193","#710193",{
     colony_base: -40,
     colony_food: 1,
     colony_level: 10,
-    max_colonies: 3,
+    max_colonies: 5,
     road_utility: 10000,
     road_to_own_cities: 0,
     road_to_other_cities: 0,

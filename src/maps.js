@@ -16,7 +16,8 @@ var map_descriptions = {
 
 
 // Maps contain the actual list of map elements and the starting places for
-// players
+// the players
+// They may also have an at_start function and an on_update function.
 
 // Test map, all grass
 var map_0 = {
@@ -82,28 +83,32 @@ var map_1 = {
     },
 }
 
-// Shows basic elements on an empty map
+
+/// A small island map for the tutorials
+var tutorial_map = [
+['w','w','w','w','w','w','g','w','w','w','w','w','w'],
+['w','w','w','g','m','f','g','g','g','w','w','w','w'],
+['w','w','g','f','m','g','g','g','w','w','w','w','w'],
+['w','g','g','g','m','g','g','f','w','w','w','w','w'],
+['w','g','g','g','m','g','g','g','w','w','w','w','w'],
+['w','g','f','g','g','g','g','w','w','w','w','w','w'],
+['w','g','f','g','f','g','g','w','w','w','w','w','w'],
+['w','g','g','g','g','g','g','w','w','w','w','w','w'],
+['w','g','f','g','g','f','g','g','w','w','w','w','w'],
+['w','g','g','g','g','g','g','g','w','w','w','w','w'],
+['w','w','w','w','w','w','w','w','w','w','w','w','w'],
+['w','w','w','w','w','w','w','w','w','w','w','w','w'],
+['w','w','w','w','w','w','w','w','w','w','w','w','w'],
+['w','w','w','w','w','w','w','w','w','w','w','w','w'],
+['w','w','w','w','w','w','w','w','w','w','w','w','w'],
+['w','w','w','w','w','w','w','w','w','w','w','w','w'],
+];
+
+
+
+// SHows the elements and explains the rules
 var tutorial_1 = {
-    map: [
-    ['w','w','w','w','w','w','g','w','w','w','w','w','w','w'],
-    ['w','w','w','g','m','f','g','g','g','w','w','w','w','w'],
-    ['w','w','g','f','m','g','g','g','w','w','w','w','w','w'],
-    ['w','g','g','g','m','g','g','f','w','w','w','w','w','w'],
-    ['w','g','g','g','m','g','g','g','w','w','w','w','w','w'],
-    ['w','g','f','g','g','g','g','w','w','w','w','w','w','w'],
-    ['w','g','f','g','f','g','g','w','w','w','w','w','w','w'],
-    ['w','g','g','g','g','g','g','w','w','w','w','w','w','w'],
-    ['w','g','f','g','g','f','g','g','w','w','w','w','w','w'],
-    ['w','g','g','g','g','g','g','g','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-    ['w','w','w','w','w','w','w','w','w','w','w','w','w','w']
-    ],
+    map: tutorial_map,
     start: {
         white: {x: 2, y:4}
     },
@@ -193,29 +198,10 @@ var tutorial_1 = {
     }
 }
 
-// Shows basic elements on an empty map
+// Introduces other players in general and the blue player specifically
 var tutorial_2 = {
-    map: [
-        ['w','w','w','w','w','w','g','w','w','w','w','w','w','w'],
-        ['w','w','w','g','m','f','g','g','g','w','w','w','w','w'],
-        ['w','w','g','f','m','g','g','g','w','w','w','w','w','w'],
-        ['w','g','g','g','m','g','g','f','w','w','w','w','w','w'],
-        ['w','g','g','g','m','g','g','g','w','w','w','w','w','w'],
-        ['w','g','f','g','g','g','g','w','w','w','w','w','w','w'],
-        ['w','g','f','g','f','g','g','w','w','w','w','w','w','w'],
-        ['w','g','g','g','g','g','g','w','w','w','w','w','w','w'],
-        ['w','g','f','g','g','f','g','g','w','w','w','w','w','w'],
-        ['w','g','g','g','g','g','g','g','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w']
-        ],
-        start: {
+    map: tutorial_map,
+    start: {
         white: {x: 2, y:4},
         blue:  {x: 6, y:1}
     },
@@ -241,7 +227,7 @@ var tutorial_2 = {
 }
 
 
-// Shows basic elements on an empty map
+// Introduces the green player
 var tutorial_3 = {
     map: [
         ['w','w','w','w','w','w','g','w','w','w','w','w','w','w'],
@@ -278,7 +264,7 @@ var tutorial_3 = {
     }
 }
 
-// Shows basic elements on an empty map
+// Introduces the red player
 var tutorial_4 = {
     map: [
         ['w','w','w','w','w','w','g','w','w','w','w','w','w','w'],
@@ -314,28 +300,9 @@ var tutorial_4 = {
     }
 }
 
-// Shows basic elements on an empty map
+// Introduces the violet player
 var tutorial_5 = {
-    map: [
-        ['w','w','w','w','w','w','g','w','w','w','w','w','w','w'],
-        ['w','w','w','g','m','f','g','g','g','w','w','w','w','w'],
-        ['w','w','g','f','m','g','g','g','w','w','w','w','w','w'],
-        ['w','g','g','g','m','g','g','f','w','w','w','w','w','w'],
-        ['w','g','g','g','m','g','g','g','w','w','w','w','w','w'],
-        ['w','g','f','g','g','g','g','w','w','w','w','w','w','w'],
-        ['w','g','f','g','f','g','g','w','w','w','w','w','w','w'],
-        ['w','g','g','g','g','g','g','w','w','w','w','w','w','w'],
-        ['w','g','f','g','g','f','g','g','w','w','w','w','w','w'],
-        ['w','g','g','g','g','g','g','g','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-        ['w','w','w','w','w','w','w','w','w','w','w','w','w','w']
-        ],
+    map: tutorial_map,
     start: {
         white: {x: 2, y:4},
         violet:  {x: 5, y:5}
