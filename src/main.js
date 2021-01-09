@@ -451,6 +451,7 @@ function gameboard(map){
               this.workers_wood = this.max_wood_workers();
             }
 
+
             // Gather food
             var food = this.food_production();
 
@@ -631,7 +632,9 @@ function gameboard(map){
 
         building_done(){
             if(this.building.type == 'colony'){
-                players[this.owner()].colonies += 1;
+                if(this.owner()){}
+                    players[this.owner()].colonies += 1;
+                }
             }
             this.building = undefined;
         }
