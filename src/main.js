@@ -632,7 +632,7 @@ function gameboard(map){
 
         building_done(){
             if(this.building.type == 'colony'){
-                if(this.owner()){}
+                if(this.owner()){
                     players[this.owner()].colonies += 1;
                 }
             }
