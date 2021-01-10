@@ -9,7 +9,7 @@ var map_sprites = {
 // The description printed in the side panel
 var map_descriptions = {
     'w': 'water',
-    'g': 'field',
+    'g': 'grassland',
     'f': 'forest',
     'm': 'mountain'
 }
