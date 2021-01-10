@@ -30,7 +30,9 @@ var home_items = {
             });
             return allowed;
         },
-
+        on_build(tile){
+            tiles[x][y].field = true;
+        }
 
     }
 }
@@ -829,7 +831,12 @@ function gameboard(map){
             // Get key and mouse
             this.cursors = this.input.keyboard.createCursorKeys();
             this.escape_key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-            this.key_f = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+            for(item_key in home_items){
+                var item = home_items[item_key];
+                if(item.quick_key){
+                    item.key_object = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes[item.quick_key]);
+                }
+            }
             this.key_r = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
             this.key_n = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.N);
             this.key_c = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
@@ -958,11 +965,14 @@ function gameboard(map){
             }
 
             // F for field
-            if (this.key_f.isDown) {
-              if(!this.key_down){
-                start_build('field');
-              }
-              this.key_down = true;
+            for(item_key in home_items){
+                var item = home_items[item_key];
+                if(item.key_object && item.key_object.isDown){
+                    if(!this.key_down){
+                        start_build(item_key);
+                    }
+                    this.key_down = true;
+                }
             }
 
             // C for city
@@ -982,9 +992,15 @@ function gameboard(map){
             }
 
             // If no key is down, make note. This avoids repeated clicks
-            if (this.key_n.isUp && this.key_f.isUp &&
-                this.key_r.isUp && this.key_c.isUp ){
-              this.key_down = false;
+            if (this.key_n.isUp && this.key_r.isUp && this.key_c.isUp ){
+                var isdown = false;
+                for(item_key in home_items){
+                    var item = home_items[item_key];
+                    if(item.key_object && !item.key_object.isUp){
+                        isdown = true;
+                    }
+                }
+                this.key_down = isdown;
             }
 
             // Finally, if the map defines an on_update function, run it
@@ -1611,12 +1627,14 @@ function gameboard(map){
             return;
         }
 
-        if( map_scene.preview == 'field'){
-            build('field','white',x,y);
-            map_scene.preview = undefined;
-            map_scene.remove_highlight();
-            update_home_page();
-            return;
+        for(item_key in home_items){
+            if( map_scene.preview == item_key){
+                build(item_key,'white',x,y);
+                map_scene.preview = undefined;
+                map_scene.remove_highlight();
+                update_home_page();
+                return;
+            }
         }
 
         if( map_scene.preview == 'city'){
@@ -1693,16 +1711,19 @@ function gameboard(map){
 
         $("#player_info").append(road_button);
 
-        var item = home_items['field'];
-        var field_button = $("<div></div>").html("<u>F</u>ield ("+item.price.wood+" wood)");
-        if(player.wood >= item.price.wood){
-            field_button.addClass("btn btn-success my-1");
-            field_button.click(function(){ start_build('field'); });
-        } else {
-            field_button.addClass("btn btn-secondary my-1");
+        for(item_key in home_items){
+            var item = home_items[item_key];
+            var button = $("<div></div>").html(item.button_text+" ("+item.price.wood+" wood)");
+            if(player.wood >= item.price.wood){
+                button.addClass("btn btn-success my-1");
+                button.click(function(){ start_build(item_key); });
+            } else {
+                button.addClass("btn btn-secondary my-1");
+            }
+
+            $("#player_info").append(button);
         }
 
-        $("#player_info").append(field_button);
 
         var colony_button = $("<div></div>").html("<u>C</u>ity (1 colony)");
         if(player.colonies >= 1){
@@ -1796,9 +1817,9 @@ function gameboard(map){
                 // OK, add the field on the map and subtract the price
                 var mapscene = phaser_game.scene.scenes[0];
                 // add it to the tile object
-                tiles[x][y].field = true;
+                on_build(tile);
                 // and the map
-                mapscene.add_item('field', x, y);
+                mapscene.add_item(item_key, x, y);
                 players[player_key].wood -= item.price.wood;
             }
         }
