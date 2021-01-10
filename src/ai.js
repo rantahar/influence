@@ -162,7 +162,8 @@ class AIPlayer {
         for (var x = 0; x < tiles.map_size_x; x++) {
             for (var y = 0; y < tiles.map_size_y; y++) {
                 var tile = tiles[x][y];
-                if(tile.owner == this.key && tiles[x][y].is_field_allowed()){
+                var item = home_items['field'];
+                if(tile.owner == this.key && item.can_build_at(tiles[x][y])){
                     var utility = this.field_utility + this.wood;
 
                     // Use influence as a proxy for how central the area is

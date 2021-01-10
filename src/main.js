@@ -14,6 +14,8 @@ var home_items = {
         button_text: '<u>f</u>ield', // Underline the 'f'
         quick_key: 'F',
         price: {wood: 10},
+        spritesheet: 'allToenstiles',
+        sprite: 48,
         can_build_at(tile){ // Checks if a field is allowed on a tile
             if( tile.city != undefined || tile.field ||
                 tile.land != 'g' ){
@@ -28,6 +30,7 @@ var home_items = {
             });
             return allowed;
         },
+
 
     }
 }
@@ -908,10 +911,11 @@ function gameboard(map){
                     this.previous_preview = {x: x, y: y, z: 5};
                 }
                 if(this.preview == 'field'){
+                    var item = home_items['field'];
                     if(this.previous_preview){
                         this.destroy_sprite(this.previous_preview.x,this.previous_preview.y,this.previous_preview.z);
                     }
-                    this.replace_tile_at(x, y, 5, 'allToenstiles', 48);
+                    this.replace_tile_at(x, y, 5, item.spritesheet, item.sprite);
                     this.previous_preview = {x: x, y: y, z: 5};
                 }
                 if(this.preview == 'road'){
@@ -1167,8 +1171,9 @@ function gameboard(map){
         }
 
         // Add a field
-        add_field(x, y){
-            this.replace_tile_at(x,y,3,'allToenstiles', 48);
+        add_item(key, x, y){
+            var item = home_items[key];
+            this.replace_tile_at(x,y,3,item.spritesheet, item.sprite);
         }
 
         // Update road sprite at location
@@ -1793,7 +1798,7 @@ function gameboard(map){
                 // add it to the tile object
                 tiles[x][y].field = true;
                 // and the map
-                mapscene.add_field(x,y);
+                mapscene.add_item('field', x, y);
                 players[player_key].wood -= item.price.wood;
             }
         }
