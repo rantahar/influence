@@ -172,12 +172,13 @@ var tutorial_1 = {
                 next: {
                     title: "Tutorial",
                     text: "Wood is used to build roads and fields. Roads help you spread your influence "+
-                    "and fields help your cities grow faster and bigger. Next, gather "+items.field_price+
+                    "and fields help your cities grow faster and bigger. Next, gather "+
+                    home_items.field.price.wood+
                     " wood."
                 }
             });
         }
-        if(this.wood_for_field == undefined && game.player.wood >= items.field_price){
+        if(this.wood_for_field == undefined && game.player.wood >= home_items.field.price.wood){
             this.wood_for_field = true;
             this.goal_next_turn = true;
             game.popup({

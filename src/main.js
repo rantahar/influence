@@ -3,9 +3,33 @@
 // In the end should have an object at least for each thing that
 // can be built on a tile
 var items = {
-  field_price: 10,
   road_price: 5,
   colony_price: 24,
+}
+
+// items in the home panel
+var home_items = {
+    field: {
+        name: 'field',
+        button_text: '<u>f</u>ield', // Underline the 'f'
+        quick_key: 'F',
+        price: {wood: 10},
+        can_build_at(tile){ // Checks if a field is allowed on a tile
+            if( tile.city != undefined || tile.field ||
+                tile.land != 'g' ){
+                return false;
+            }
+            // Check that one of the neighbour tiles has a city
+            var allowed = false;
+            tile.neighbours().forEach(function(tile){
+                if( tile.city != undefined ){
+                    return allowed = true;
+                }
+            });
+            return allowed;
+        },
+
+    }
 }
 
 
@@ -270,23 +294,6 @@ function gameboard(map){
             this.neighbours().forEach(function(tile){
                 if(tile.road != undefined ||
                    tile.city != undefined ){
-                    return allowed = true;
-                }
-            });
-            return allowed;
-        }
-
-        // Checks if a field can be built here
-        is_field_allowed(){
-            if( this.city != undefined || this.field != undefined){
-                return false;
-            }
-            if( this.land != 'g' ){
-                return false;
-            }
-            var allowed = false;
-            this.neighbours().forEach(function(tile){
-                if( tile.city != undefined ){
                     return allowed = true;
                 }
             });
@@ -949,7 +956,7 @@ function gameboard(map){
             // F for field
             if (this.key_f.isDown) {
               if(!this.key_down){
-                start_build_field();
+                start_build('field');
               }
               this.key_down = true;
             }
@@ -1161,9 +1168,6 @@ function gameboard(map){
 
         // Add a field
         add_field(x, y){
-            // add it to the tile object
-            tiles[x][y].field = true;
-            // Update the sprite
             this.replace_tile_at(x,y,3,'allToenstiles', 48);
         }
 
@@ -1427,7 +1431,7 @@ function gameboard(map){
 
         // AI players take their turns
         for(player in players){
-            players[player].take_turn(tiles, cities, build_road, build_city, build_field);
+            players[player].take_turn(tiles, cities, build_road, build_city, build);
         }
 
         // Spread influence
@@ -1603,7 +1607,7 @@ function gameboard(map){
         }
 
         if( map_scene.preview == 'field'){
-            build_field('white',x,y);
+            build('field','white',x,y);
             map_scene.preview = undefined;
             map_scene.remove_highlight();
             update_home_page();
@@ -1684,10 +1688,11 @@ function gameboard(map){
 
         $("#player_info").append(road_button);
 
-        var field_button = $("<div></div>").html("<u>F</u>ield ("+items.field_price+" wood)");
-        if(player.wood >= items.field_price){
+        var item = home_items['field'];
+        var field_button = $("<div></div>").html("<u>F</u>ield ("+item.price.wood+" wood)");
+        if(player.wood >= item.price.wood){
             field_button.addClass("btn btn-success my-1");
-            field_button.click(function(){ start_build_field(); });
+            field_button.click(function(){ start_build('field'); });
         } else {
             field_button.addClass("btn btn-secondary my-1");
         }
@@ -1755,17 +1760,19 @@ function gameboard(map){
     }
 
     // Higlight allowed places for a field and start preview
-    function start_build_field(){
+    function start_build(item_key){
+      var item = home_items[item_key];
       // Check the player is allowed to build
-      if(players['white'].wood >= items.field_price){
+      if(players['white'].wood >= item.price.wood){
         // Set the preview
         var mapscene = phaser_game.scene.scenes[0];
-        mapscene.preview = 'field';
+        mapscene.preview = item.name;
         // Highlight the allowed tiles
         mapscene.remove_highlight();
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
-                if(tiles[x][y].owner == 'white' && tiles[x][y].is_field_allowed()){
+                if(tiles[x][y].owner == 'white' &&
+                   item.can_build_at(tiles[x][y])){
                     mapscene.highlight_allowed_tile(x,y);
                 }
             }
@@ -1774,15 +1781,20 @@ function gameboard(map){
     }
 
     // Player builds a field at given location. This is also the interface the AI uses
-    function build_field(player_key,x,y){
+    function build(item_key, player_key,x,y){
         // check that we can afford
-        if(players[player_key].wood >= items.field_price){
+        var item = home_items[item_key];
+        if(players[player_key].wood >= item.price.wood){
             // Is allowed
-            if(tiles[x][y].owner == player_key && tiles[x][y].is_field_allowed()){
+            if(tiles[x][y].owner == player_key &&
+              item.can_build_at(tiles[x][y])){
                 // OK, add the field on the map and subtract the price
                 var mapscene = phaser_game.scene.scenes[0];
+                // add it to the tile object
+                tiles[x][y].field = true;
+                // and the map
                 mapscene.add_field(x,y);
-                players[player_key].wood -= items.field_price;
+                players[player_key].wood -= item.price.wood;
             }
         }
     }

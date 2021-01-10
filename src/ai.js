@@ -36,7 +36,7 @@ class AIPlayer {
     }
 
     // The ai script, run at every turn
-    take_turn(tiles, cities, build_road, build_city, build_field) {
+    take_turn(tiles, cities, build_road, build_city, build) {
         if(this.colonies > 0){
             // Check all tiles to find the best places to build
             var city_utility = -1000;
@@ -186,7 +186,7 @@ class AIPlayer {
 
         console.log(this.name+": best place for a field is at "+field_x+","+field_y+" (utility "+utility+")");
         if(this.wood >= 12 && field_utility > 0){
-            build_field(this.key, field_x,field_y);
+            build('field', this.key, field_x, field_y);
             console.log(this.name+" builds a field at "+field_x+","+field_y);
         }
     }
