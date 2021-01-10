@@ -134,8 +134,8 @@ var tutorial_1 = {
             game.popup({
                 title: "Tutorial",
                 text: "You now control the tiles around your city. As your influence spreads, it is reduced "+
-                "a bit. On grass tiles it is reduced by 1 and on forest and water tiles by 2. You cannot "+
-                "influence mountain tiles.",
+                "a bit. On grass tiles it is reduced by 1 and on forest and water tiles by 2. Spreading to a "+
+                "city is free, there is no reduction. You cannot influence mountain tiles.",
                 next:{
                   title: "Tutorial",
                   text: "In the city panel you see that you have "+

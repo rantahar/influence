@@ -317,6 +317,29 @@ function gameboard(map){
             }
             return 0;
         }
+
+        // Return the amount influence is reduced when spreading to this tile
+        influence_friction(){
+            var friction = 1;
+            if(this.land == 'f'){
+                friction *= 2;
+            }
+            if(this.land == 'm'){
+                // Essentially impossible to spread to mountains
+                friction = 100000;
+            }
+            if(this.land == 'w'){
+                friction *= 2;
+            }
+            if(this.road){
+                friction /= 2;
+            }
+            if(this.city){
+                // Cities are free
+                friction = 0;
+            }
+            return friction;
+        }
     } // End class Tile
 
 
@@ -788,7 +811,6 @@ function gameboard(map){
                     // Center camera on the players town
                     this.center_camera_on(start.x,start.y);
                     active_city = tiles[start.x][start.y].city;
-                    update_city_page();
                     active_tile = tiles[start.x][start.y];
                     update_panel();
                 }
@@ -1350,11 +1372,15 @@ function gameboard(map){
 
     }
 
-
+    // Uses the influence of a player to reduce the influence of all other players
+    // at all tiles
     function persecute(player_key){
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
+                // This is a fully local operation so just run on each tile
                 if(tiles[x][y].influence[player_key] > 0){
+                    // The player has nonzero influence here
+                    // Count other players
                     var red_influence = tiles[x][y].influence[player_key];
                     var n_others = 0;
                     for(var player in tiles[x][y].influence) {
@@ -1362,23 +1388,30 @@ function gameboard(map){
                             n_others += 1;
                         }
                     }
+                    // Now loop over a number of times, each time subtracting the
+                    // minimum of the influence of other players until none are
+                    // left or the player has no more influence
                     for(var n=0;n<10 && red_influence > 0 && n_others > 0; n+=1){
-                        var dc = red_influence/n_others;
-                        var new_red_influence = red_influence;
-                        n_others = 0;
+                        var dc = red_influence/n_others; // maximum we can subtract
+                        var new_red_influence = red_influence; // keep subtracting also from this
+                        n_others = 0; // count again for next iteration
                         for(var player in tiles[x][y].influence) {
                             if(player != player_key){
                                 if(tiles[x][y].influence[player] >= dc){
+                                    // other player has enough influence, subtract from both
                                     tiles[x][y].influence[player] -= dc;
                                     new_red_influence -= dc;
                                 } else {
+                                    // The other player will run out. Subtract the remaining amount
                                     new_red_influence -= tiles[x][y].influence[player];
                                     tiles[x][y].influence[player] = 0;
                                 }
+                                // Count those with influence left
                                 if(tiles[x][y].influence[player] > 0){
                                     n_others += 1;
                                 }
                             }
+                            // Finally set the player influence in the end
                             red_influence = new_red_influence;
                         }
                     }
@@ -1389,42 +1422,23 @@ function gameboard(map){
     }
 
 
+    // Update the game between turns
     function next_turn(map_scene){
 
+        // AI players take their turns
         for(player in players){
             players[player].take_turn(tiles, cities, build_road, build_city, build_field);
         }
 
-        // Influence spreads to neighbours from this tile to the neighbour
-        // weighed by the difference and friction from tile type
+        // Spread influence
+        // Influence is the maximum of neighbour tiles - friction,
+        // where friction depends on the tile type
         var decay = 1; // no decay
         var new_influence_array = [];
-        var friction = [];
         for(var x = 0; x < tiles.map_size_x; x++) {
-          new_influence_array[x] = [];
-          friction[x] = [];
-          for(var y = 0; y < tiles.map_size_y; y++) {
-            new_influence_array[x][y] = {};
-            friction[x][y] = 1;
-            if(tiles[x][y].land == 'f'){
-                friction[x][y] *= 2;
-            }
-            if(tiles[x][y].land == 'm'){
-                friction[x][y] = 100000; // Essentially impossible to spread to mountains
-            }
-            if(tiles[x][y].land == 'w'){
-                friction[x][y] *= 2;
-            }
-            if(tiles[x][y].road){
-                friction[x][y] /= 2;
-            }
-            if(tiles[x][y].city){
-                friction[x][y] = 0;
-            }
-          }
-        }
-        for(var x = 0; x < tiles.map_size_x; x++) {
+            new_influence_array[x] = []
             for(var y = 0; y < tiles.map_size_y; y++) {
+                new_influence_array[x][y] = {}
                 for(player in players){
                     // Influence on this tile is usually the maximum of neighbours - friction
                     let c = 0; // max neighbour
@@ -1436,7 +1450,8 @@ function gameboard(map){
                         }
                     });
 
-                    c -= friction[x][y];
+                    // Subtract friction from the max found
+                    c -= tiles[x][y].influence_friction();
 
                     if(tiles[x][y].city && tiles[x][y].owner == player){
                       // There is a city here. Check if it's culture dominates.
@@ -1446,7 +1461,9 @@ function gameboard(map){
                         c = city_c;
                       }
                     }
-                    new_influence_array[x][y][player] = c;
+                    if(c > 0){
+                      new_influence_array[x][y][player] = c;
+                    }
                 }
             }
         }
@@ -1454,23 +1471,26 @@ function gameboard(map){
         // Write new influence into the array
         for(var x = 0; x < tiles.map_size_x; x++) {
           for(var y = 0; y < tiles.map_size_y; y++) {
-            tiles[x][y].influence = {};
-            for(player in players){
-              var c = decay*new_influence_array[x][y][player];
-              if(c > 0){
-                tiles[x][y].influence[player] = c;
-              }
-            }
+            tiles[x][y].influence = new_influence_array[x][y];
           }
         }
 
+        // Red influence does not mix with others. This will use up red
+        // influence to reduce the others
         persecute('red');
 
+        // Now decide the owners of each tile
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
                 tiles[x][y].decide_tile_owner();
             }
         }
+
+        // Update the cities
+        for(city_key in cities){
+            cities[city_key].update(map_scene);
+        }
+
 
         // Calculate the number of tiles owned per player
         // and the global sum of influence
@@ -1490,9 +1510,8 @@ function gameboard(map){
             }
         }
 
-        turn_counter += 1;
-
         // Check for win conditions
+        // On turn 200, the player with most influence wins
         if(turn_counter == 200) {
             var winner;
             var winner_influence = -1;
@@ -1510,6 +1529,8 @@ function gameboard(map){
               });
 
         }
+
+        // If any player controls half the map, they win
         for(player_key in players){
             var player = players[player_key];
             if(player.owned_tiles > 0.5*tiles.map_size_x*tiles.map_size_y){
@@ -1522,20 +1543,25 @@ function gameboard(map){
             }
         }
 
-        // Update the cities
-        for(city_key in cities){
-            cities[city_key].update(map_scene);
-        }
+        // Increment the turn counter
+        turn_counter += 1;
 
         // Update UI
         update_panel();
-        update_city_page();
         map_scene.draw_boundaries();
     }
 
 
 
+    //////////////////////////////////
+    // The panel
 
+    // The tile currently shown on the panel
+    var active_tile;
+    // The city currently shown on the panel
+    var active_city;
+
+    // Bind the next turn button to the next_turn function
     $( "#next_turn_button" ).unbind();
     $( "#next_turn_button" ).click(function(e) {
         e.preventDefault();
@@ -1544,6 +1570,7 @@ function gameboard(map){
     });
 
 
+    // switch to the given tab
     function show_tab(id) {
         $('#panel-tabs li a').removeClass("active");
         $(id+"-tab").addClass("active");
@@ -1551,6 +1578,7 @@ function gameboard(map){
         $(id).show();
     }
 
+    // Bind the tab buttons to the show_tab function
     $('#panel-tabs a').click(function (e) {
         e.preventDefault();
         var id = $(this).attr('href');
@@ -1558,17 +1586,19 @@ function gameboard(map){
     })
 
 
-    var active_tile;
+    // Handle a click in a tile. This will either build something
+    // or display the tile in the panel
     function tile_click(map_scene, tile) {
         var x = tile.x;
         var y = tile.y;
 
-        // If building, try here and do nothing else
+        // If the players is building something, try placign it here
+        // and do nothing else
         if( map_scene.preview == 'road'){
             build_road('white', x, y);
             map_scene.preview = undefined;
             map_scene.remove_highlight();
-            update_panel();
+            update_home_page();
             return;
         }
 
@@ -1576,7 +1606,7 @@ function gameboard(map){
             build_field('white',x,y);
             map_scene.preview = undefined;
             map_scene.remove_highlight();
-            update_panel();
+            update_home_page();
             return;
         }
 
@@ -1584,40 +1614,39 @@ function gameboard(map){
             build_city('white', x, y);
             map_scene.preview = undefined;
             map_scene.remove_highlight();
-            update_panel();
+            update_home_page();
             return;
         }
 
-        // Describe the selected tile
-        active_tile = tiles[x][y];
-        update_panel();
 
-        // Now check for a city and update
+        // Did not build. Make the tile active and update the panel
+        active_tile = tiles[x][y];
+
+        // If there is a city, make it active and update the panel
         if(active_tile.city){
             active_city = active_tile.city;
             update_city_page();
             show_tab("#city");
         } else {
+            // If there is not city, switch to the home panel
             show_tab("#home");
         }
+        update_panel();
     }
 
-    var active_city;
     function update_city_page(){
+        // Remove previous content
         $("#city_card").empty();
-        // Describe the tile
+        // Add the div created by the city object
         var div = active_city.describe();
         $("#city_card").append(div);
-
-        //var back_button = $("<span></span>").text("Back");
-        //back_button.addClass("btn btn-primary");
-        //back_button.click(function(){ show_tab("#home"); });
-        //$("#city_card").append(back_button);
     }
 
-
-    function update_panel(){
+    // Update the home page of the panel
+    function update_home_page(){
+        // Set the human player (for future...)
         player = players.white;
+
 
         $("#turn_number_text").text('Year '+turn_counter);
 
@@ -1676,14 +1705,26 @@ function gameboard(map){
 
     }
 
+    // Update both city and home page
+    function update_panel(){
+        if(active_tile){
+            update_home_page();
+        }
+        if(active_city){
+            update_city_page();
+        }
+    }
 
-
-
+    // Highlight allowed tiles for a road and set the preview
     function start_build_road(){
+      // First check if the player can build it
       if(players['white'].wood >= items.road_price){
+        // Set the preview
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.preview = 'road';
+        // Remove previous higlight
         mapscene.remove_highlight();
+        // Check each tile and highlight
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
                 if(tiles[x][y].owner == 'white' && tiles[x][y].is_road_allowed()){
@@ -1694,10 +1735,14 @@ function gameboard(map){
       }
     }
 
+    // Same for cities, highlight and preview
     function start_build_city(){
+      // First check if the player can build it
       if(players['white'].colonies >= 1){
+        // Set the preview
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.preview = 'city';
+        // Check each tile and highlight
         mapscene.remove_highlight();
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
@@ -1709,10 +1754,14 @@ function gameboard(map){
       }
     }
 
+    // Higlight allowed places for a field and start preview
     function start_build_field(){
+      // Check the player is allowed to build
       if(players['white'].wood >= items.field_price){
+        // Set the preview
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.preview = 'field';
+        // Highlight the allowed tiles
         mapscene.remove_highlight();
         for(var x = 0; x < tiles.map_size_x; x++) {
             for(var y = 0; y < tiles.map_size_y; y++) {
@@ -1724,10 +1773,13 @@ function gameboard(map){
       }
     }
 
+    // Player builds a field at given location. This is also the interface the AI uses
     function build_field(player_key,x,y){
-        // check for neighbouring cities
+        // check that we can afford
         if(players[player_key].wood >= items.field_price){
+            // Is allowed
             if(tiles[x][y].owner == player_key && tiles[x][y].is_field_allowed()){
+                // OK, add the field on the map and subtract the price
                 var mapscene = phaser_game.scene.scenes[0];
                 mapscene.add_field(x,y);
                 players[player_key].wood -= items.field_price;
@@ -1735,56 +1787,46 @@ function gameboard(map){
         }
     }
 
+    // Player builds a city at given location. This is also the interface the AI uses
     function build_city(player_key,x,y){
-        // check for neighbouring cities
+        // check that we can afford
         if(players[player_key].colonies > 0){
+            // Is allowed
             if(tiles[x][y].owner == player_key && tiles[x][y].is_city_allowed()){
+                // OK, add the city on the map and subtract the price
                 var mapscene = phaser_game.scene.scenes[0];
                 mapscene.add_city(x,y);
                 players[player_key].colonies -= 1;
-                if(player_key == "white"){
-                    active_city = tiles[x][y].city;
-                    update_city_page();
-                }
             }
         }
     }
 
-    // Build a road
+    // Player builds a city at given location. This is also the interface the AI uses
     function build_road(player_key, x, y){
+        // check that we can afford
         if(players[player_key].wood >= items.road_price){
+            // Is allowed
             if(tiles[x][y].owner == player_key && tiles[x][y].is_road_allowed()){
+                // OK, add the city on the map and subtract the price
                 var mapscene = phaser_game.scene.scenes[0];
                 mapscene.add_road(x,y);
                 players[player_key].wood -= items.road_price;
-                tiles[x][y].road = true;
             }
         }
     }
 
 
-    var config = {
-        type: Phaser.AUTO,
-        parent: "Container",
-        width: 650,
-        height: 650,
-        pixelArt: true,
-        roundPixels: true,
-        scene: [mapScene]
-    };
-
-
-    var phaser_game = new Phaser.Game(config);
-
-    update_panel()
-
+    // Show a popup with text and title given by content
     function popup(content){
+        // Set the title
         if(content.title){
             $("#popup_title").text(content.title);
         }
+        // Set the text
         if(content.text){
             $("#popup_content").text(content.text);
         }
+        // If there is another popup, add a next button with the content
         if(content.next){
             $("#popup_next").show();
             $("#popup_next").click(function(e){
@@ -1801,6 +1843,7 @@ function gameboard(map){
         $("#popup").show();
     }
 
+    // Remove the game and any related elements
     function destroy(){
       console.log("destroy");
       phaser_game.destroy();
@@ -1808,6 +1851,19 @@ function gameboard(map){
       $("#game_container").html("<div class='pl-0' id='Container'></div>");
     }
 
+
+    // Create the phaser game object. Builds the map
+    var phaser_game = new Phaser.Game({
+        type: Phaser.AUTO,
+        parent: "Container",
+        width: 650,
+        height: 650,
+        pixelArt: true,
+        roundPixels: true,
+        scene: [mapScene]
+    });
+
+    // Build and return the interface
     return {
         phaser_game: phaser_game,
         cities, cities,
