@@ -1,4 +1,9 @@
 
+/* Set the font size. Needed since the game size is set in pixels */
+body{
+    font-size: 14px;
+}
+
 /* Set the right margin to zero in the game container and the panel column */
 .pr-0 {
     padding-right: 0 !important;
@@ -47,7 +52,6 @@ label {
   display: inline-block;
   width: 180px;
   text-align: right;
-  padding-right: 20 !important;
 }
 
 /* Center menu cards in frame */
@@ -89,6 +93,10 @@ label {
   width: 280px;
 }
 
+/* Buttons in the random menu. There are 2 side by side */
+.random-menu-button{
+    width: 45%
+}
 
 
 /* Start a menu hidden */

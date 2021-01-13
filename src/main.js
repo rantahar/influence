@@ -31,7 +31,7 @@ var home_items = {
             return allowed;
         },
         on_build(tile){
-            tiles[x][y].field = true;
+            tile.field = true;
         }
 
     }
@@ -1817,7 +1817,7 @@ function gameboard(map){
                 // OK, add the field on the map and subtract the price
                 var mapscene = phaser_game.scene.scenes[0];
                 // add it to the tile object
-                on_build(tile);
+                item.on_build(tiles[x][y]);
                 // and the map
                 mapscene.add_item(item_key, x, y);
                 players[player_key].wood -= item.price.wood;
