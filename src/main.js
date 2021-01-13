@@ -1,13 +1,65 @@
 
-// Started writing down a list of commonly used items here.
-// In the end should have an object at least for each thing that
-// can be built on a tile
-var items = {
-  colony_price: 24,
+// Items buildable in the ciy screen
+var city_items = {
+  colony: {
+      price: 24
+  }
 }
 
 // items in the home panel
 var home_items = {
+    city: {
+        name: 'city',
+        button_text: '<u>c</u>ity', // Underline the 'c'
+        quick_key: 'C',
+        price: {colony: 1},
+        spritesheet: 'city_tiles', // Only the preview, otherwise special case
+        sprite: 1,
+        can_build_at(tile){ // Checks if a road is allowed on a tile
+            // check for neighbouring cities
+            if( !(tile.is_empty()) ){
+                return false;
+            }
+            var allowed = true;
+            tile.neighbour_2_tiles().forEach(function(tile){
+                if(tile.city != undefined ||
+                   tile.building != undefined){
+                     allowed = false;
+                 }
+            });
+            return allowed;
+        },
+        on_build(tile){
+
+        }
+    },
+    road: {
+        name: 'road',
+        button_text: '<u>r</u>oad', // Underline the 'f'
+        quick_key: 'R',
+        price: {wood: 5},
+        spritesheet: 'roadtiles', // Only the preview, otherwise special case
+        sprite: 0,
+        can_build_at(tile){ // Checks if a road is allowed on a tile
+            if( tile.city != undefined || tile.road != undefined){
+                return false;
+            }
+            if( !( tile.land == 'g' || tile.land == 'f') ){
+                return false;
+            }
+            var allowed = false;
+            tile.neighbours().forEach(function(tile){
+                if(tile.road != undefined ||
+                   tile.city != undefined ){
+                    return allowed = true;
+                }
+            });
+            return allowed;
+        },
+        on_build(tile){
+            tile.road = true;
+        }
+    },
     field: {
         name: 'field',
         button_text: '<u>f</u>ield', // Underline the 'f'
@@ -32,33 +84,6 @@ var home_items = {
         on_build(tile){
             tile.field = true;
         }
-    },
-    road: {
-        name: 'road',
-        button_text: '<u>r</u>oad', // Underline the 'f'
-        quick_key: 'R',
-        price: {wood: 5},
-        spritesheet: 'roadtiles',
-        sprite: 0,
-        can_build_at(tile){ // Checks if a road is allowed on a tile
-            if( tile.city != undefined || tile.road != undefined){
-                return false;
-            }
-            if( !( tile.land == 'g' || tile.land == 'f') ){
-                return false;
-            }
-            var allowed = false;
-            tile.neighbours().forEach(function(tile){
-                if(tile.road != undefined ||
-                   tile.city != undefined ){
-                    return allowed = true;
-                }
-            });
-            return allowed;
-        },
-        on_build(tile){
-            tile.road = true;
-        }
     }
 }
 
@@ -82,7 +107,7 @@ function gameboard(map){
                          "Omnal", "Eftala", "Alran", "Leran", "Sulona"],
             city_prefix: "Ala-",
             wood: 0,
-            colonies: 0,
+            colony: 0,
             influence: 0,
             cities: 0,
             owned_tiles: 1,
@@ -294,22 +319,6 @@ function gameboard(map){
                 }
             }
             return r;
-        }
-
-        // Checks if a city can be built here
-        is_city_allowed(){
-            // check for neighbouring cities
-            if( !(this.is_empty()) ){
-                return false;
-            }
-            var allowed = true;
-            this.neighbour_2_tiles().forEach(function(tile){
-                if(tile.city != undefined ||
-                   tile.building != undefined){
-                     allowed = false;
-                 }
-            });
-            return allowed;
         }
 
         // Check which player controls this tile
@@ -715,7 +724,7 @@ function gameboard(map){
                 var build_per_turn = (this.food_production() + this.free_workers() - this.food_consumption());
                 if(build_per_turn > 0){
                   // Only add it if the city can ever finish a colony
-                  var turns_left = Math.ceil(items.colony_price / build_per_turn);
+                  var turns_left = Math.ceil(city_items.colony.price / build_per_turn);
                   if( turns_left < Infinity ) {
                     var colony_button = $("<span></span>").text("Colony ("+turns_left+" turns)");
                     colony_button.addClass("btn btn-success my-1");
@@ -734,7 +743,7 @@ function gameboard(map){
         // Start building a colony
         queue_colony(){
             if(this.building==undefined){
-                this.building = {'food': items.colony_price, 'type': 'colony'};
+                this.building = {'food': city_items.colony.price, 'type': 'colony'};
             }
         }
 
@@ -750,7 +759,7 @@ function gameboard(map){
             if(this.building.type == 'colony'){
                 // add colony to the current owner
                 if(this.owner()){
-                    players[this.owner()].colonies += 1;
+                    players[this.owner()].colony += 1;
                 }
             }
             this.building = undefined;
@@ -962,7 +971,7 @@ function gameboard(map){
                 this.preview = undefined;
             }
 
-            // F for field
+            // Set item shortcuts
             for(item_key in home_items){
                 var item = home_items[item_key];
                 if(item.key_object && item.key_object.isDown){
@@ -971,14 +980,6 @@ function gameboard(map){
                     }
                     this.key_down = true;
                 }
-            }
-
-            // C for city
-            if (this.key_c.isDown) {
-              if(!this.key_down){
-                start_build_city();
-              }
-              this.key_down = true;
             }
 
             // N for next turn
@@ -990,7 +991,7 @@ function gameboard(map){
             }
 
             // If no key is down, make note. This avoids repeated clicks
-            if (this.key_n.isUp && this.key_r.isUp && this.key_c.isUp ){
+            if (this.key_n.isUp ){
                 var isdown = false;
                 for(item_key in home_items){
                     var item = home_items[item_key];
@@ -1142,8 +1143,29 @@ function gameboard(map){
             this.add_tile_at(x,y,z,sheet,key,angle);
         }
 
+
+        // Add an item
+        add_item(key, x, y){
+            if(key == "road"){
+                // unfortunately this roads are a special case.
+                // We need to redraw neighbour tiles, not just this one
+                this.add_road(x, y);
+            } else if(key == "city") {
+                // Cities are also a special case. Need to update roads
+                this.add_city(x, y);
+            } else {
+                var item = home_items[key];
+                this.replace_tile_at(x,y,3,item.spritesheet, item.sprite);
+            }
+            update_panel();
+        }
+
         // Add a city at given coordinate
         add_city(x, y, level = 0, food = 0){
+            // The next three lines should be in home_times,
+            // but that would require moving cities outside the
+            // map class. So do this later...
+            
             // create the city
             var city = new City(x, y, level, food);
             // add it to the tile object
@@ -1169,18 +1191,6 @@ function gameboard(map){
             if(level < 20){
                 var key = Math.floor((level+1)/2);
                 this.replace_tile_at(x,y,3,'citytiles', key);
-            }
-        }
-
-        // Add a field
-        add_item(key, x, y){
-            if(key == "road"){
-                // unfortunately this roads are a special case.
-                // We need to redraw neighbour tiles, not just this one
-                this.add_road(x, y);
-            } else {
-                var item = home_items[key];
-                this.replace_tile_at(x,y,3,item.spritesheet, item.sprite);
             }
         }
 
@@ -1454,7 +1464,7 @@ function gameboard(map){
 
         // AI players take their turns
         for(player in players){
-            players[player].take_turn(tiles, cities, build_city, build);
+            players[player].take_turn(tiles, cities, build);
         }
 
         // Spread influence
@@ -1629,15 +1639,6 @@ function gameboard(map){
             }
         }
 
-        if( map_scene.preview == 'city'){
-            build_city('white', x, y);
-            map_scene.preview = undefined;
-            map_scene.remove_highlight();
-            update_home_page();
-            return;
-        }
-
-
         // Did not build. Make the tile active and update the panel
         active_tile = tiles[x][y];
 
@@ -1690,13 +1691,24 @@ function gameboard(map){
         $("#player_info").append(resource_title);
         var resource_text = $("<div></div>").text("Wood: " + player.wood);
         $("#player_info").append(resource_text);
-        var resource_text = $("<div></div>").text("colonies: " + player.colonies);
+        var resource_text = $("<div></div>").text("colonies: " + player.colony);
         $("#player_info").append(resource_text);
 
         for(item_key in home_items){
             var item = home_items[item_key];
-            var button = $("<div></div>").html(item.button_text+" ("+item.price.wood+" wood)");
-            if(player.wood >= item.price.wood){
+            var text = item.button_text + " (";
+            for(key in item.price){
+                text += item.price[key] + " " + key;
+            }
+            text += ")";
+            var button = $("<div></div>").html(text);
+            var can_afford = true;
+            for(key in item.price){
+                if(players['white'][key] < item.price[key]){
+                    can_afford = false;
+                }
+            }
+            if(can_afford){
                 button.addClass("btn btn-success my-1");
                 button.click(function(){ start_build(item_key); });
             } else {
@@ -1705,17 +1717,6 @@ function gameboard(map){
 
             $("#player_info").append(button);
         }
-
-
-        var colony_button = $("<div></div>").html("<u>C</u>ity (1 colony)");
-        if(player.colonies >= 1){
-            colony_button.addClass("btn btn-success my-1");
-            colony_button.click(function(){ start_build_city(); });
-        } else {
-            colony_button.addClass("btn btn-secondary my-1");
-        }
-        $("#player_info").append(colony_button);
-
     }
 
     // Update both city and home page
@@ -1728,30 +1729,17 @@ function gameboard(map){
         }
     }
 
-    // Same for cities, highlight and preview
-    function start_build_city(){
-      // First check if the player can build it
-      if(players['white'].colonies >= 1){
-        // Set the preview
-        var mapscene = phaser_game.scene.scenes[0];
-        mapscene.preview = 'city';
-        // Check each tile and highlight
-        mapscene.remove_highlight();
-        for(var x = 0; x < tiles.map_size_x; x++) {
-            for(var y = 0; y < tiles.map_size_y; y++) {
-                if(tiles[x][y].owner == 'white' && tiles[x][y].is_city_allowed()){
-                    mapscene.highlight_allowed_tile(x,y);
-                }
-            }
-        }
-      }
-    }
-
     // Higlight allowed places for a field and start preview
     function start_build(item_key){
       var item = home_items[item_key];
       // Check the player is allowed to build
-      if(players['white'].wood >= item.price.wood){
+      var can_afford = true;
+      for(key in item.price){
+          if(players['white'][key] < item.price[key]){
+              can_afford = false;
+          }
+      }
+      if(can_afford){
         // Set the preview
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.preview = item.name;
@@ -1772,7 +1760,13 @@ function gameboard(map){
     function build(item_key, player_key,x,y){
         // check that we can afford
         var item = home_items[item_key];
-        if(players[player_key].wood >= item.price.wood){
+        var can_afford = true;
+        for(key in item.price){
+            if(players[player_key][key] < item.price[key]){
+                can_afford = false;
+            }
+        }
+        if(can_afford){
             // Is allowed
             if(tiles[x][y].owner == player_key &&
                item.can_build_at(tiles[x][y])){
@@ -1782,21 +1776,9 @@ function gameboard(map){
                 item.on_build(tiles[x][y]);
                 // and the map
                 mapscene.add_item(item_key, x, y);
-                players[player_key].wood -= item.price.wood;
-            }
-        }
-    }
-
-    // Player builds a city at given location. This is also the interface the AI uses
-    function build_city(player_key,x,y){
-        // check that we can afford
-        if(players[player_key].colonies > 0){
-            // Is allowed
-            if(tiles[x][y].owner == player_key && tiles[x][y].is_city_allowed()){
-                // OK, add the city on the map and subtract the price
-                var mapscene = phaser_game.scene.scenes[0];
-                mapscene.add_city(x,y);
-                players[player_key].colonies -= 1;
+                for(key in item.price){
+                    players[player_key][key] -= item.price[key];
+                }
             }
         }
     }

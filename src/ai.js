@@ -30,23 +30,24 @@ class AIPlayer {
         this.city_prefix = aiconfig.city_prefix;
 
         this.wood = 0;
-        this.colonies = 0;
+        this.colony = 0;
         this.influence = 0;
         this.owned_tiles = 1;
         this.cities = 0;
     }
 
     // The ai script, run at every turn
-    take_turn(tiles, cities, build_city, build) {
-        if(this.colonies > 0){
+    take_turn(tiles, cities, build) {
+        if(this.colony > 0){
             // Check all tiles to find the best places to build
             var city_utility = -1000;
             var city_x; var city_y;
+            var item = home_items['city'];
             for (var x = 0; x < tiles.map_size_x; x++) {
                 for (var y = 0; y < tiles.map_size_y; y++) {
-                    if(tiles[x][y].is_city_allowed() && tiles[x][y].owner == this.key){
+                    var tile = tiles[x][y];
+                    if(tile.owner == this.key && item.can_build_at(tiles[x][y])){
                         // Found a tile where cities are allowed
-                        var tile = tiles[x][y];
 
                         // Calculate the utility. There is a base value and some
                         // modifiers
@@ -81,7 +82,7 @@ class AIPlayer {
             if(city_x != undefined && city_y != undefined){
                 if( city_utility > 0 ){
                     console.log(this.name+" builds a city at "+city_x+","+city_y);
-                    build_city(this.key,city_x,city_y);
+                    build('city', this.key, city_x, city_y);
                 }
             }
         }
@@ -91,7 +92,7 @@ class AIPlayer {
             var city = cities[key];
             if(city.owner() == this.key){
                 // Check if it makes sense to build a colony
-                if(this.colonies < this.max_colonies){
+                if(this.colony < this.max_colonies){
                     var utility = this.colony_base +
                                   this.colony_food*city.food +
                                   this.colony_level*city.level;
