@@ -24,6 +24,7 @@ class AIPlayer {
         this.field_utility = aiconfig.field_utility;
         this.field_influence = aiconfig.field_influence;
         this.field_city_level = aiconfig.field_city_level;
+        this.field_city_food_tiles = aiconfig.field_city_food_tiles;
 
         this.city_names = aiconfig.city_names;
         this.city_prefix = aiconfig.city_prefix;
@@ -36,7 +37,7 @@ class AIPlayer {
     }
 
     // The ai script, run at every turn
-    take_turn(tiles, cities, build_road, build_city, build) {
+    take_turn(tiles, cities, build_city, build) {
         if(this.colonies > 0){
             // Check all tiles to find the best places to build
             var city_utility = -1000;
@@ -118,10 +119,11 @@ class AIPlayer {
         /// Check for good places for a road
         var road_utility = -1000;
         var road_x; var road_y;
+        var item = home_items['road'];
         for (var x = 0; x < tiles.map_size_x; x++) {
             for (var y = 0; y < tiles.map_size_y; y++) {
                 var tile = tiles[x][y];
-                if(tile.owner == this.key && tiles[x][y].is_road_allowed()){
+                if(tile.owner == this.key && item.can_build_at(tiles[x][y])){
                     // Found a tile where you can build a road
                     var utility = this.road_utility + this.wood;
 
@@ -151,18 +153,18 @@ class AIPlayer {
         }
 
         console.log(this.name+": best place for a road is at "+road_x+","+road_y+" (utility "+road_utility+")");
-        if(this.wood >= items.road_price && road_utility > 0){
-            build_road(this.key, road_x,road_y);
+        if(this.wood >= item.price.wood && road_utility > 0){
+            build('road', this.key, road_x,road_y);
             console.log(this.name+" builds a road at "+road_x+","+road_y);
         }
 
         /// Check for good places for a field
         var field_utility = -1000;
         var field_x; var field_y;
+        var item = home_items['field'];
         for (var x = 0; x < tiles.map_size_x; x++) {
             for (var y = 0; y < tiles.map_size_y; y++) {
                 var tile = tiles[x][y];
-                var item = home_items['field'];
                 if(tile.owner == this.key && item.can_build_at(tiles[x][y])){
                     var utility = this.field_utility + this.wood;
 
@@ -174,6 +176,7 @@ class AIPlayer {
                     tiles[x][y].neighbours().forEach(function(tile){
                         if(tile.city){
                             utility += player.field_city_level*tile.city.level;
+                            utility += player.field_city_food_tiles*tile.city.food_tiles();
                         }
                     });
 
@@ -186,7 +189,7 @@ class AIPlayer {
         }
 
         console.log(this.name+": best place for a field is at "+field_x+","+field_y+" (utility "+utility+")");
-        if(this.wood >= 12 && field_utility > 0){
+        if(this.wood >= item.price.wood && field_utility > 0){
             build('field', this.key, field_x, field_y);
             console.log(this.name+" builds a field at "+field_x+","+field_y);
         }
@@ -205,13 +208,14 @@ var green_player = new AIPlayer('green','Green player',"#00AA00","#00AA00",{
     colony_food:  1,
     colony_level: 10,
     max_colonies: 1,
-    road_utility: -15,
+    road_utility: -25,
     road_to_own_cities: 1,
     road_to_other_cities: 1,
     road_influence: 0,
-    field_utility: -10,
+    field_utility: 0,
     field_influence: 0,
     field_city_level: 1,
+    field_city_food_tiles: 2,
     wood_to_food_ratio: 0,
     city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
     city_prefix: "Am"
@@ -234,6 +238,7 @@ var blue_player = new AIPlayer('blue','Blue player',"#5555FF","#0000FF",{
     field_utility: -15,
     field_influence: 1,
     field_city_level: 0,
+    field_city_food_tiles: 1,
     wood_to_food_ratio: 0.5,
     city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
                  "Kolma", "Enta", "Aflan", "Ylman", "Umilla", "Wenna", "Tornal", "Kilman" ],
@@ -258,6 +263,7 @@ var red_player = new AIPlayer('red','Red player',"#FF5555","#FF0000",{
     field_utility: 100000,
     field_influence: -1,
     field_city_level: -10,
+    field_city_food_tiles: 0,
     wood_to_food_ratio: 0.2,
     city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath", "Arostagath",
                  "Ungoth", "Tramath", "Etrukrol", "Dimrasta", "Igratas", "Fedrath", "Brastagrath",
@@ -282,6 +288,7 @@ var violet_player = new AIPlayer('violet','Violet player',"#710193","#710193",{
     field_utility: 100000,
     field_influence: -1,
     field_city_level: -2,
+    field_city_food_tiles: 0,
     wood_to_food_ratio: 0.2,
     city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta", "Odrila", "Ondara",
                  "Okra", "Omrana", "Otria", "Oula", "Ogra", "Onderasta", "Omudira", "Owdamas",
