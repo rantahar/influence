@@ -119,27 +119,33 @@ var tutorial_1 = {
             "You are ambitious and aspire to spread your influence to every corner of the world. "+
             "First, click on your home city on the map."
         });
+        $('#panel-tabs li a').removeClass("active");
+        $("#home-tab").addClass("active");
     },
     on_update: function(){
         if(this.city_click == undefined && $("#city-tab").hasClass("active")){
             this.city_click = true;
             game.popup({
                 title: "Tutorial",
-                text: "The city panel has opened on the left. Your first city starts from level 1, but it "+
-                "grows as it produces more food. The city has 3 influence, and this will grow by 0.5 for each "+ "level. Your influence will spread from the city once you click 'Next Turn'."
+                text: "The city panel has opened on the left. Your first city starts from level 1, "+
+                "but it grows as it produces surplus food. The city's influence starts at 3 and " +
+                "grows by 1 every 3 levels. "+
+                "Your influence will spread from the city once you click 'Next Turn'."
             });
         }
         if(this.turn_2 == undefined && game.turn > 1){
             this.turn_2 = true;
             game.popup({
                 title: "Tutorial",
-                text: "You now control the tiles around your city. As your influence spreads, it is reduced "+
-                "a bit. On grass tiles it is reduced by 1 and on forest and water tiles by 2. Spreading to a "+
-                "city is free, there is no reduction. You cannot influence mountain tiles.",
+                text: "The cities influence has spread to the neighbouring tiles. Naturally your influence "+
+                "on the neighbour tiles is naturally a bit less than on the city. After each turn the "+
+                "your influence on grass tiles is the maximum of it's neighbours minus 1. For forest "+
+                "and water tiles the reduction is 2 and for cities there is no reduction. "+
+                "You cannot influence mountain tiles.",
                 next:{
                   title: "Tutorial",
-                  text: "In the city panel you see that you have "+
-                  "one worker, currently producing food. The worker can produce either food or wood, thanks "+
+                  text: "In the city panel you see that you have one worker producing food. "+
+                  "The worker can produce either food or wood, thanks "+
                   "to the field and forest tiles around the city. "+
                   "It is better to produce food in the beginning, since this helps the city grow and get "+
                   "more workers.",
@@ -168,11 +174,12 @@ var tutorial_1 = {
             this.goal_next_turn = true;
             game.popup({
                 title: "Tutorial",
-                text: "Your second city will take a few turns to flourish, but rest assured it will.",
+                text: "Your second city will take a few turns to flourish, but rest assured it will. "+
+                "When you have many cities, the influence from the biggest often dominates over several "+
+                "smaller ones. The small cities don't add to your influence, but the can produce wood.",
                 next: {
                     title: "Tutorial",
-                    text: "Wood is used to build roads and fields. Roads help you spread your influence "+
-                    "and fields help your cities grow faster and bigger. Next, gather "+
+                    text: "Next, gather "+
                     home_items.field.price.wood+
                     " wood."
                 }

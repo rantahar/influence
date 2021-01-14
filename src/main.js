@@ -414,7 +414,7 @@ function gameboard(map){
 
         // Calculate the base influence of the city
         influence(){
-            return 2.5+0.5*this.level;
+            return 3+Math.floor(this.level/3);
         }
 
         // return the owner of the city, which is the owner of the tile
@@ -617,7 +617,9 @@ function gameboard(map){
             // Print the amount of influence each player has here
             div.append(this.tile.describe_influence());
             // The city level
-            div.append($("<div></div>").html("<b>Level</b>: "+this.level));
+            div.append($("<div></div>").html("<b>Population</b>: "+this.level));
+            // It's influence level
+            div.append($("<div></div>").html("<b>Influence level</b>: "+this.influence()));
 
             // For the human player show more details and controls
             if(active_city.owner() == 'white'){
@@ -689,7 +691,7 @@ function gameboard(map){
                     // Wood can be collected. Add a similar slider
                     // A lot of this is repeated from above, should combine
                     var max = Math.min(this.wood_tiles(), this.level);
-                    var wood_slider_div = $("<div></div>").html("Wood gatherer:</br>");
+                    var wood_slider_div = $("<div></div>").html("Wood gatherers:</br>");
                     var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
                     // remove worker button
                     mbutton.click(function(){
@@ -1165,7 +1167,7 @@ function gameboard(map){
             // The next three lines should be in home_times,
             // but that would require moving cities outside the
             // map class. So do this later...
-            
+
             // create the city
             var city = new City(x, y, level, food);
             // add it to the tile object
