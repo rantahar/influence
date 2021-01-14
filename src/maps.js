@@ -137,10 +137,9 @@ var tutorial_1 = {
             this.turn_2 = true;
             game.popup({
                 title: "Tutorial",
-                text: "The cities influence has spread to the neighbouring tiles. Naturally your influence "+
-                "on the neighbour tiles is naturally a bit less than on the city. After each turn the "+
-                "your influence on grass tiles is the maximum of it's neighbours minus 1. For forest "+
-                "and water tiles the reduction is 2 and for cities there is no reduction. "+
+                text: "The city's influence has spread to the neighbouring tiles. when influence spreads "+
+                "it gets reduced a bit. On grass tiles, it gets reduced by 1. On forest "+
+                "and water tiles the reduction is 2 and on cities there is no reduction. "+
                 "You cannot influence mountain tiles.",
                 next:{
                   title: "Tutorial",
@@ -175,8 +174,9 @@ var tutorial_1 = {
             game.popup({
                 title: "Tutorial",
                 text: "Your second city will take a few turns to flourish, but rest assured it will. "+
-                "When you have many cities, the influence from the biggest often dominates over several "+
-                "smaller ones. The small cities don't add to your influence, but the can produce wood.",
+                "Your influence on a city tile is at least the city's influence level, but it can be "+
+                "higher second city has more influence there. Even then the smaller city is not useless, "
+                "it can still produce resources for you. And it might grow big enough to make a difference.",
                 next: {
                     title: "Tutorial",
                     text: "Next, gather "+
