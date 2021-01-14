@@ -175,7 +175,7 @@ var tutorial_1 = {
                 title: "Tutorial",
                 text: "Your second city will take a few turns to flourish, but rest assured it will. "+
                 "Your influence on a city tile is at least the city's influence level, but it can be "+
-                "higher second city has more influence there. Even then the smaller city is not useless, "
+                "higher second city has more influence there. Even then the smaller city is not useless, "+
                 "it can still produce resources for you. And it might grow big enough to make a difference.",
                 next: {
                     title: "Tutorial",
