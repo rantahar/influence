@@ -127,9 +127,9 @@ var tutorial_1 = {
             this.city_click = true;
             game.popup({
                 title: "Tutorial",
-                text: "The city panel has opened on the left. Your first city starts from level 1, "+
+                text: "The city panel has opened on the left. Your first city starts with population 1, "+
                 "but it grows as it produces surplus food. The city's influence starts at 3 and " +
-                "grows by 1 every 3 levels. "+
+                "grows by 1 every 3 population points. "+
                 "Your influence will spread from the city once you click 'Next Turn'."
             });
         }
