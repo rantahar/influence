@@ -849,7 +849,7 @@ function gameboard(map){
             // Get key and mouse
             this.cursors = this.input.keyboard.createCursorKeys();
             this.escape_key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-            for(item_key in home_items){
+            for(let item_key in home_items){
                 var item = home_items[item_key];
                 if(item.quick_key){
                     item.key_object = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes[item.quick_key]);
@@ -974,7 +974,7 @@ function gameboard(map){
             }
 
             // Set item shortcuts
-            for(item_key in home_items){
+            for(let item_key in home_items){
                 var item = home_items[item_key];
                 if(item.key_object && item.key_object.isDown){
                     if(!this.key_down){
@@ -995,7 +995,7 @@ function gameboard(map){
             // If no key is down, make note. This avoids repeated clicks
             if (this.key_n.isUp ){
                 var isdown = false;
-                for(item_key in home_items){
+                for(let item_key in home_items){
                     var item = home_items[item_key];
                     if(item.key_object && !item.key_object.isUp){
                         isdown = true;
@@ -1696,7 +1696,7 @@ function gameboard(map){
         var resource_text = $("<div></div>").text("colonies: " + player.colony);
         $("#player_info").append(resource_text);
 
-        for(item_key in home_items){
+        for(let item_key in home_items){
             var item = home_items[item_key];
             var text = item.button_text + " (";
             for(key in item.price){
