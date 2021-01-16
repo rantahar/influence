@@ -385,7 +385,7 @@ class City {
                 looter_button.addClass("btn btn-success my-1");
                 var city = this;
                 looter_button.click(function(){
-                    game.start_send_looters(this);
+                    game.start_send_looters(city);
                 });
                 div.append(looter_button);
             }
@@ -428,7 +428,7 @@ class City {
                 delete loot_list[i];
             }
         }
-        loot_list.append([this,destination]);
+        loot_list.push([this, destination]);
     }
 
 
@@ -436,20 +436,53 @@ class City {
     run_loot(){
         // Make a list of cities looting this one
         var my_looters = [];
+        var n_looters = 0;
         // and count looters per player
         var armies = {};
         armies[this.owner()] = this.defenders;
         for(var i in loot_list) {
             if(loot_list[i][1] == this){
-                my_looters.append(loot_list[i][0])
-                armies[loot_list[i][0].owner()] = loot_list[i][0].looters;
-                delete loot_list[i];
+                my_looters.push(loot_list[i][0])
+                if(armies[loot_list[i][0].owner()]){
+                    armies[loot_list[i][0].owner()] += loot_list[i][0].looters;
+                } else {
+                    armies[loot_list[i][0].owner()] = loot_list[i][0].looters;
+                }
+                n_looters = loot_list[i][0].looters;
             }
         }
-        // Defenders change of dying is (looters - defenders) * 10
+        // Defenders change of dying is (looters - defenders) * 0.1
+        var prop = 0.1 * (n_looters - armies[this.owner()]);
+        for(var i=0; i<this.defenders; i++ ){
+            if( Math.random() < prop){
+                this.defenders -= 1;
+                this.population -= 1;
+            }
+            console.log("a defender died at "+this.name);
+        }
+
         // Looters change of dying is (defenders - looters) * 20
         // Looters change of success is (defenders - looters) * 50
-
+        for(var i in my_looters) {
+            console.log(my_looters[i].name + " looting " + this.name);
+            var player = my_looters[i].owner();
+            var success_prop = 0.5;
+            var death_prop = 0.2*(armies[this.owner()] - armies[player]);
+            console.log(player, armies[player], armies[this.owner()], success_prop, death_prop);
+            for(var j=0; j<my_looters[i].looters; j++ ){
+                var r = Math.random();
+                if( r < death_prop ){
+                    my_looters[i].looters -= 1;
+                    my_looters[i].population -= 1;
+                    console.log("a looter from " + my_looters[i].name + " died at "+this.name);
+                }
+                if(r > (1-success_prop)){
+                    my_looters[i].food +=1;
+                    this.food -= 1;
+                    console.log("a looter from " + my_looters[i].name + " stole food from "+this.name);
+                }
+            }
+        }
     }
 }
 

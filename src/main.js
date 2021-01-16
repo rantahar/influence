@@ -1054,7 +1054,7 @@ function gameboard(map){
 
         // First run trough the looters in each city
         for(city_key in cities){
-            cities[city_key]run_loot());
+            cities[city_key].run_loot();
         }
 
 
@@ -1391,6 +1391,8 @@ function gameboard(map){
     // Display cities available for looting and setup mouse clicks to select
     var loot_from_city;
     function start_send_looters(city){
+        loot_from_city = city;
+        console.log(city);
         // Highlight the allowed tiles
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.remove_highlight();
@@ -1398,7 +1400,6 @@ function gameboard(map){
             var city = cities[key];
             mapscene.highlight_allowed_tile(city.x, city.y);
         }
-        loot_from_city = city;
     }
 
     // Show a popup with text and title given by content
