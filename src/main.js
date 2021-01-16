@@ -553,6 +553,7 @@ function gameboard(map){
             if (this.escape_key.isDown) {
                 this.remove_highlight();
                 this.preview = undefined;
+                loot_from_city = undefined;
             }
 
             // Set item shortcuts
@@ -1051,6 +1052,12 @@ function gameboard(map){
             players[player].take_turn(tiles, cities, build);
         }
 
+        // First run trough the looters in each city
+        for(city_key in cities){
+            cities[city_key]run_loot());
+        }
+
+
         // Spread influence
         // Influence is the maximum of neighbour tiles - friction,
         // where friction depends on the tile type
@@ -1217,10 +1224,24 @@ function gameboard(map){
             if( map_scene.preview == item_key){
                 build(item_key,'white',x,y);
                 map_scene.preview = undefined;
+                loot_from_city = undefined;
                 map_scene.remove_highlight();
                 update_home_page();
                 return;
             }
+        }
+
+        if(loot_from_city){
+            // Choosing a city to send looters
+            // Call back to the city's send_looters function and
+            // remove highligh
+            if(tile.city){
+                loot_from_city.send_looters(tile.city)
+            }
+            loot_from_city = undefined;
+            map_scene.remove_highlight();
+            update_home_page();
+            return;
         }
 
         // Did not build. Make the tile active and update the panel
@@ -1367,6 +1388,19 @@ function gameboard(map){
         }
     }
 
+    // Display cities available for looting and setup mouse clicks to select
+    var loot_from_city;
+    function start_send_looters(city){
+        // Highlight the allowed tiles
+        var mapscene = phaser_game.scene.scenes[0];
+        mapscene.remove_highlight();
+        for(var key in cities ){
+            var city = cities[key];
+            mapscene.highlight_allowed_tile(city.x, city.y);
+        }
+        loot_from_city = city;
+    }
+
     // Show a popup with text and title given by content
     function popup(content){
         // Set the title
@@ -1421,6 +1455,7 @@ function gameboard(map){
         update_city_page: update_city_page,
         update_home_page: update_home_page,
         war: true,
+        start_send_looters: start_send_looters,
         cities, cities,
         destroy: destroy,
         popup: popup,

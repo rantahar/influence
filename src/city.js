@@ -378,6 +378,17 @@ class City {
                 div.append(colony_button);
               }
             }
+
+            // Send looters button
+            if(this.looters > 0){
+                var looter_button = $("<span></span>").text("Send looters");
+                looter_button.addClass("btn btn-success my-1");
+                var city = this;
+                looter_button.click(function(){
+                    game.start_send_looters(this);
+                });
+                div.append(looter_button);
+            }
         }
 
         return div;
@@ -407,4 +418,40 @@ class City {
         }
         this.building = undefined;
     }
+
+
+    // Send looters to a city
+    send_looters(destination){
+        for(var i in loot_list) {
+            var src = loot_list[i][0];
+            if(src == this){
+                delete loot_list[i];
+            }
+        }
+        loot_list.append([this,destination]);
+    }
+
+
+    // Loot this city
+    run_loot(){
+        // Make a list of cities looting this one
+        var my_looters = [];
+        // and count looters per player
+        var armies = {};
+        armies[this.owner()] = this.defenders;
+        for(var i in loot_list) {
+            if(loot_list[i][1] == this){
+                my_looters.append(loot_list[i][0])
+                armies[loot_list[i][0].owner()] = loot_list[i][0].looters;
+                delete loot_list[i];
+            }
+        }
+        // Defenders change of dying is (looters - defenders) * 10
+        // Looters change of dying is (defenders - looters) * 20
+        // Looters change of success is (defenders - looters) * 50
+
+    }
 }
+
+
+var loot_list = [];
