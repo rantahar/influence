@@ -95,6 +95,7 @@ function gameboard(map){
     // List of all possible players. They are all active in the sense that
     // they all take their turn each round. If they don't control any tiles,
     // this will be quick
+    make_players();
     var players = {
         'white': {
             human: true,

@@ -199,100 +199,109 @@ class AIPlayer {
 }
 
 
-// The green player prefers to build high level cities close to each other.
-var green_player = new AIPlayer('green','Green player',"#00AA00","#00AA00",{
-    city_utility: 0,
-    city_influence: 0.1,
-    city_food: 1,
-    city_wood: 1.5,
-    colony_base: -60,
-    colony_food:  1,
-    colony_level: 10,
-    max_colonies: 1,
-    road_utility: -25,
-    road_to_own_cities: 1,
-    road_to_other_cities: 1,
-    road_influence: 0,
-    field_utility: 0,
-    field_influence: 0,
-    field_city_level: 1,
-    field_city_food_tiles: 2,
-    wood_to_food_ratio: 0,
-    city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
-    city_prefix: "Am"
-})
+var green_player;
+var blue_player;
+var red_player;
+var violet_player;
 
-// The blue player also likes to build cities close, but prefers to build roads
-var blue_player = new AIPlayer('blue','Blue player',"#5555FF","#0000FF",{
-    city_utility: 0,
-    city_influence: 0.1,
-    city_food: 1,
-    city_wood: 2,
-    colony_base: -210,
-    colony_food: 10,
-    colony_level: -1,
-    max_colonies: 5,
-    road_utility: -5,
-    road_to_own_cities: 5,
-    road_to_other_cities: 5,
-    road_influence: 0,
-    field_utility: -15,
-    field_influence: 1,
-    field_city_level: 0,
-    field_city_food_tiles: 1,
-    wood_to_food_ratio: 0.5,
-    city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
-                 "Kolma", "Enta", "Aflan", "Ylman", "Umilla", "Wenna", "Tornal", "Kilman" ],
-    city_prefix: "Aka-"
-})
+// Create (or reset) the AI players
+function make_players(){
+    // The green player prefers to build high level cities close to each other.
+    green_player = new AIPlayer('green','Green player',"#00AA00","#00AA00",{
+        city_utility: 0,
+        city_influence: 0.1,
+        city_food: 1,
+        city_wood: 1.5,
+        colony_base: -60,
+        colony_food:  1,
+        colony_level: 10,
+        max_colonies: 1,
+        road_utility: -25,
+        road_to_own_cities: 1,
+        road_to_other_cities: 1,
+        road_influence: 0,
+        field_utility: 0,
+        field_influence: 0,
+        field_city_level: 1,
+        field_city_food_tiles: 2,
+        wood_to_food_ratio: 0,
+        city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
+        city_prefix: "Am"
+    });
 
-// The red players influence doesn't mix with others. It likes to spread toward
-// other players
-var red_player = new AIPlayer('red','Red player',"#FF5555","#FF0000",{
-    city_utility: 1000,
-    city_influence: -1,
-    city_food: 1,
-    city_wood: 2.5,
-    colony_base: -40,
-    colony_food: 1,
-    colony_level: 10,
-    max_colonies: 5,
-    road_utility: -5,
-    road_to_own_cities: 0,
-    road_to_other_cities: 1,
-    road_influence: 0,
-    field_utility: 100000,
-    field_influence: -1,
-    field_city_level: -10,
-    field_city_food_tiles: 0,
-    wood_to_food_ratio: 0.2,
-    city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath", "Arostagath",
-                 "Ungoth", "Tramath", "Etrukrol", "Dimrasta", "Igratas", "Fedrath", "Brastagrath",
-                 "Olrath", "Amdaras", "Edrukostarath", "Ostregtha"],
-    city_prefix: "Dre-"
-})
+    // The blue player also likes to build cities close, but prefers to build roads
+    blue_player = new AIPlayer('blue','Blue player',"#5555FF","#0000FF",{
+        city_utility: 0,
+        city_influence: 0.1,
+        city_food: 1,
+        city_wood: 2,
+        colony_base: -210,
+        colony_food: 10,
+        colony_level: -1,
+        max_colonies: 5,
+        road_utility: -5,
+        road_to_own_cities: 5,
+        road_to_other_cities: 5,
+        road_influence: 0,
+        field_utility: -15,
+        field_influence: 1,
+        field_city_level: 0,
+        field_city_food_tiles: 1,
+        wood_to_food_ratio: 0.5,
+        city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
+                    "Kolma", "Enta", "Aflan", "Ylman", "Umilla", "Wenna", "Tornal", "Kilman" ],
+        city_prefix: "Aka-"
+    });
 
-// The violet player likes to spread quickly.
-var violet_player = new AIPlayer('violet','Violet player',"#710193","#710193",{
-    city_utility: 100000,
-    city_influence: -2,
-    city_food: 1,
-    city_wood: 3,
-    colony_base: -40,
-    colony_food: 1,
-    colony_level: 10,
-    max_colonies: 5,
-    road_utility: 10000,
-    road_to_own_cities: 0,
-    road_to_other_cities: 0,
-    road_influence: -1,
-    field_utility: 100000,
-    field_influence: -1,
-    field_city_level: -2,
-    field_city_food_tiles: 0,
-    wood_to_food_ratio: 0.2,
-    city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta", "Odrila", "Ondara",
-                 "Okra", "Omrana", "Otria", "Oula", "Ogra", "Onderasta", "Omudira", "Owdamas",
-                 "Omkorsta"],
-    city_prefix: "Dral"
-})
+
+    // The red players influence doesn't mix with others. It likes to spread toward
+    // other players
+    red_player = new AIPlayer('red','Red player',"#FF5555","#FF0000",{
+        city_utility: 1000,
+        city_influence: -1,
+        city_food: 1,
+        city_wood: 2.5,
+        colony_base: -40,
+        colony_food: 1,
+        colony_level: 10,
+        max_colonies: 5,
+        road_utility: -5,
+        road_to_own_cities: 0,
+        road_to_other_cities: 1,
+        road_influence: 0,
+        field_utility: 100000,
+        field_influence: -1,
+        field_city_level: -10,
+        field_city_food_tiles: 0,
+        wood_to_food_ratio: 0.2,
+        city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath", "Arostagath",
+            "Ungoth", "Tramath", "Etrukrol", "Dimrasta", "Igratas", "Fedrath", "Brastagrath",
+            "Olrath", "Amdaras", "Edrukostarath", "Ostregtha"],
+        city_prefix: "Dre-"
+    });
+
+    // The violet player likes to spread quickly.
+    violet_player = new AIPlayer('violet','Violet player',"#710193","#710193",{
+        city_utility: 100000,
+        city_influence: -2,
+        city_food: 1,
+        city_wood: 3,
+        colony_base: -40,
+        colony_food: 1,
+        colony_level: 10,
+        max_colonies: 5,
+        road_utility: 10000,
+        road_to_own_cities: 0,
+        road_to_other_cities: 0,
+        road_influence: -1,
+        field_utility: 100000,
+        field_influence: -1,
+        field_city_level: -2,
+        field_city_food_tiles: 0,
+        wood_to_food_ratio: 0.2,
+        city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta", "Odrila", "Ondara",
+                    "Okra", "Omrana", "Otria", "Oula", "Ogra", "Onderasta", "Omudira", "Owdamas",
+                    "Omkorsta"],
+        city_prefix: "Dral"
+    });
+}
