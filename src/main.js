@@ -274,33 +274,26 @@ function gameboard(map){
 
         // Returns neighbours up to 2 tile away
         neighbour_2_tiles(){
-            var msx = tiles.map_size_x; var msy = tiles.map_size_y;
-
-            // These are always the same
-            var r = [];
-
-            for( var dx = -1; dx < 2; dx++){
-                r.push(tiles[(this.x+dx+msx)%msx][(this.y+2)%msy]);
-                r.push(tiles[(this.x+dx+msx)%msx][(this.y-2+msy)%msy]);
-            }
-
-            for( var dx = -2; dx < 3; dx++){
-                r.push(tiles[(this.x+dx+msx)%msx][this.y]);
-            }
-
-            // The x-values at dy=+-1 depend on y
-            if(this.y%2==1){
-                for( var dx = -1; dx < 3; dx++){
-                    r.push(tiles[(this.x+dx+msx)%msx][(this.y-1+msy)%msy]);
-                    r.push(tiles[(this.x+dx+msx)%msx][(this.y+1+msy)%msy]);
-                }
-            } else {
-                for( var dx = -2; dx < 2; dx++){
-                    r.push(tiles[(this.x+dx+msx)%msx][(this.y-1+msy)%msy]);
-                    r.push(tiles[(this.x+dx+msx)%msx][(this.y+1+msy)%msy]);
-                }
-            }
-            return r;
+            return [
+                this.xup(),
+                this.xup().xup(),
+                this.xup().ydnright(),
+                this.ydnright(),
+                this.ydnright().ydnright(),
+                this.ydnright().ydnleft(),
+                this.ydnleft(),
+                this.ydnleft().ydnleft(),
+                this.ydnleft().xdn(),
+                this.xdn(),
+                this.xdn().xdn(),
+                this.xdn().yupleft(),
+                this.yupleft(),
+                this.yupleft().yupleft(),
+                this.yupleft().yupright(),
+                this.yupright(),
+                this.yupright().yupright(),
+                this.yupright().xup(),
+            ]
         }
 
         // Check which player controls this tile
