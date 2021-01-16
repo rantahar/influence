@@ -199,10 +199,13 @@ class AIPlayer {
 }
 
 
+var white_player;
 var green_player;
 var blue_player;
 var red_player;
 var violet_player;
+// A  list of all existing players
+var players = {};
 
 // Create (or reset) the AI players
 function make_players(){
@@ -304,4 +307,31 @@ function make_players(){
                     "Omkorsta"],
         city_prefix: "Dral"
     });
+
+
+    white_player = {
+            human: true,
+            key: 'white',
+            name: "White",
+            text_color: '#FFFFFF',
+            map_color: '#FFFFFF',
+            city_names: ["Aztola", "Sivola", "Thokas", "Loran", "Sinala", "Umdela", "Wendu", "Umar",
+                         "Ava-Umar","Atala","Ashtal Emal", "Lordan", "Ulanith", "Thelenula", "Astu",
+                         "Omnal", "Eftala", "Alran", "Leran", "Sulona"],
+            city_prefix: "Ala-",
+            wood: 0,
+            colony: 0,
+            influence: 0,
+            cities: 0,
+            owned_tiles: 1,
+            take_turn(){}
+    };
+
+    players = {
+        'white': white_player,
+        'green': green_player,
+        'blue': blue_player,
+        'red': red_player,
+        'violet': violet_player
+    }
 }
