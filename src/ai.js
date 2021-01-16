@@ -114,6 +114,10 @@ class AIPlayer {
                         console.log(this.name+": Add farmer / fisher");
                     }
                 }
+                if(city.food_tiles() > city.workers_food && city.free_workers() > 0){
+                    city.workers_food += Math.min(city.food_tiles()-city.workers_food, city.free_workers());
+                    console.log(this.name+": Assign farmers / fishers");
+                }
             }
         }
 
