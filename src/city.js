@@ -451,8 +451,8 @@ class City {
                 n_looters = loot_list[i][0].looters;
             }
         }
-        // Defenders change of dying is (looters - defenders) * 0.1
-        var prop = 0.1 * (n_looters - armies[this.owner()]);
+        // Defenders change of dying is (looters / defenders) * 0.1
+        var prop = 0.1 * (n_looters / armies[this.owner()]);
         for(var i=0; i<this.defenders; i++ ){
             if( Math.random() < prop){
                 this.defenders -= 1;
@@ -461,13 +461,11 @@ class City {
             console.log("a defender died at "+this.name);
         }
 
-        // Looters change of dying is (defenders - looters) * 20
-        // Looters change of success is (defenders - looters) * 50
+        // Looters change of dying is (looters / defenders) * 20
         for(var i in my_looters) {
             console.log(my_looters[i].name + " looting " + this.name);
             var player = my_looters[i].owner();
-            var success_prop = 0.5;
-            var death_prop = 0.2*(armies[this.owner()] - armies[player]);
+            var death_prop = 0.2*(armies[this.owner()] / armies[player]);
             console.log(player, armies[player], armies[this.owner()], success_prop, death_prop);
             for(var j=0; j<my_looters[i].looters; j++ ){
                 var r = Math.random();
@@ -475,8 +473,7 @@ class City {
                     my_looters[i].looters -= 1;
                     my_looters[i].population -= 1;
                     console.log("a looter from " + my_looters[i].name + " died at "+this.name);
-                }
-                if(r > (1-success_prop)){
+                } else {
                     my_looters[i].food +=1;
                     this.food -= 1;
                     console.log("a looter from " + my_looters[i].name + " stole food from "+this.name);
