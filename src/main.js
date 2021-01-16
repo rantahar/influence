@@ -1420,6 +1420,7 @@ function gameboard(map){
         update_panel: update_panel,
         update_city_page: update_city_page,
         update_home_page: update_home_page,
+        war: true,
         cities, cities,
         destroy: destroy,
         popup: popup,

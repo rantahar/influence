@@ -11,6 +11,8 @@ class City {
         this.name = this.next_name();
         this.workers_food = level;
         this.workers_wood = 0;
+        this.defenders = 0;
+        this.looters = 0;
         tile.influence[this.owner()] = this.influence();
         tile.road = true;
     }
@@ -40,7 +42,8 @@ class City {
 
     // Calculate the number of free workers
     free_workers() {
-        return this.level - this.workers_wood - this.workers_food;
+        return this.level - this.workers_wood - this.workers_food -
+               this.defenders - this.looters;
     }
 
     // Find the maximum amount of food workers possible. This is the
@@ -49,7 +52,7 @@ class City {
     // Note: if there will be more city resources, the food and wood functions
     // should be combined and the possible resources separely
     max_food_workers(){
-        var max = this.level - this.workers_wood;
+        var max = this.free_workers() + this.workers_food;
         max = Math.min(this.food_tiles(), max);
         return max;
     }
@@ -64,7 +67,7 @@ class City {
     // Find the maximum possible number of wood gatherers. Similar to
     // the max_food_workers()
     max_wood_workers(){
-        var max = this.level - this.workers_food;
+        var max = this.free_workers() + this.workers_wood;
         max = Math.min(this.wood_tiles(), max);
         return max;
     }
@@ -73,6 +76,20 @@ class City {
     set_wood_workers(n){
       if(n >= 0 && n <= this.max_wood_workers()){
             this.workers_wood = n;
+        }
+    }
+
+    // Set the number of defenders. Similar to set_food_workers(n)
+    set_defenders(n){
+      if(n >= 0 && n <= this.defenders + this.free_workers()){
+            this.defenders = n;
+        }
+    }
+
+    // Set the number of looters. Similar to set_food_workers(n)
+    set_looters(n){
+      if(n >= 0 && n <= this.looters + this.free_workers()){
+            this.looters = n;
         }
     }
 
@@ -222,6 +239,42 @@ class City {
     }
 
 
+    // Make a slider for adjusting workers in the city panel
+    panel_slider(current, max, description, setter){
+        var city = this;
+        var slider_div = $("<div></div>").html(description + "</br>");
+        var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
+        // remove worker button
+        mbutton.click(function(){
+            setter(current-1);
+            game.update_city_page();
+        });
+        // Slider to adjust more quickly (not sure if this is necessary or useful)
+        slider_div.append(mbutton);
+        var slider = $('<input>').attr({
+            type: "range",
+            min: 0,
+            max: max,
+            value: current,
+            class: "slider"
+        }).appendTo(slider_div);
+        slider.change(function(){
+            // The slider was adjusted. Run the setter function.
+            setter(parseInt($(this).val()));
+            game.update_city_page();
+        });
+        // add worker button
+        var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
+        pbutton.click(function(){
+            setter(current+1);
+            game.update_city_page();
+        });
+        slider_div.append(pbutton);
+        // Also print the number of workers
+        slider_div.append(" "+current+"/"+max);
+        return slider_div;
+    }
+
     // Describe the city in a div element
     describe(){
         var city = this;
@@ -267,75 +320,46 @@ class City {
             }
 
             // Worker controls
+            var city = this;
             if(this.food_tiles() > 0){
                 // Food can be collected. Show food worker control
                 var max = Math.min(this.food_tiles(), this.level);
-                var food_slider_div = $("<div></div>").html("Farmers / Fishers:</br>");
-                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
-                // remove worker button
-                mbutton.click(function(){
-                    city.set_food_workers(city.workers_food-1);
-                    game.update_city_page();
-                });
-                // Slider to adjust more quickly (not sure if this is necessary or useful)
-                food_slider_div.append(mbutton);
-                var food_slider = $('<input>').attr({
-                    type: "range",
-                    min: 0,
-                    max: max,
-                    value: this.workers_food,
-                    class: "slider"
-                }).appendTo(food_slider_div);
-                food_slider.change(function(){
-                    // Food slider was adjusted. Run the set_food_workers function.
-                    city.set_food_workers(parseInt($(this).val()));
-                    game.update_city_page();
-                });
-                // add worker button
-                var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
-                pbutton.click(function(){
-                    city.set_food_workers(city.workers_food+1);
-                    game.update_city_page();
-                });
-                food_slider_div.append(pbutton);
-                // Also print the number of workers
-                food_slider_div.append(" "+this.workers_food+"/"+max);
+                var food_slider_div = this.panel_slider(
+                    this.workers_food,
+                    max, "Farmers / Fishers:",
+                    function(n){city.set_food_workers(n)},
+                );
                 div.append(food_slider_div);
             }
 
             if(this.wood_tiles() > 0){
-                // Wood can be collected. Add a similar slider
-                // A lot of this is repeated from above, should combine
+                // Wood can be collected. Show wood worker control
                 var max = Math.min(this.wood_tiles(), this.level);
-                var wood_slider_div = $("<div></div>").html("Wood gatherers:</br>");
-                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
-                // remove worker button
-                mbutton.click(function(){
-                    city.set_wood_workers(city.workers_wood-1);
-                    game.update_city_page();
-                });
-                wood_slider_div.append(mbutton);
-                // The slider
-                var wood_slider = $('<input>').attr({
-                    type: "range",
-                    min: 0,
-                    max: max,
-                    value: this.workers_wood,
-                    class: "slider"
-                }).appendTo(wood_slider_div);
-                wood_slider.change(function(){
-                    city.set_wood_workers(parseInt($(this).val()));
-                    game.update_city_page();
-                });
-                // Add worker button
-                var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
-                pbutton.click(function(){
-                    city.set_wood_workers(city.workers_wood+1);
-                    game.update_city_page();
-                });
-                wood_slider_div.append(pbutton);
-                wood_slider_div.append(" "+this.workers_wood+"/"+max);
+                var wood_slider_div = this.panel_slider(
+                    this.workers_wood,
+                    max, "Wood gatherers:",
+                    function(n){city.set_wood_workers(n)},
+                );
                 div.append(wood_slider_div);
+            }
+
+            if(game.war && city.level > 0){
+                // Wood can be collected. Show wood worker control
+                var max = this.level;
+                var defender_slider_div = this.panel_slider(
+                    this.defenders,
+                    max, "Defenders:",
+                    function(n){city.set_defenders(n)},
+                );
+                div.append(defender_slider_div);
+
+                // Wood can be collected. Show wood worker control
+                var looter_slider_div = this.panel_slider(
+                    this.looters,
+                    max, "Looters:",
+                    function(n){city.set_looters(n)},
+                );
+                div.append(looter_slider_div);
             }
 
             // Build colony button
