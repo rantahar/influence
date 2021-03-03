@@ -11,6 +11,8 @@ class City {
         this.name = this.next_name();
         this.workers_food = level;
         this.workers_wood = 0;
+        this.priests = 0;
+        this.merchants = 0;
         tile.influence[this.owner()] = this.influence();
         tile.road = true;
     }
@@ -30,7 +32,8 @@ class City {
 
     // Calculate the base influence of the city
     influence(){
-        return 3+Math.floor(this.level/3);
+        //return 3+Math.floor(this.level/3);
+        return 4 + this.priests;
     }
 
     // return the owner of the city, which is the owner of the tile
@@ -40,11 +43,12 @@ class City {
 
     // Calculate the number of free workers
     free_workers() {
-        return this.level - this.workers_wood - this.workers_food;
+        return this.level - this.workers_wood - this.workers_food
+               - this.merchants - this.priests;
     }
 
     // Find the maximum amount of food workers possible. This is the
-    // minimum of the numver of food tiles and the number of workers not
+    // minimum of the number of food tiles and the number of workers not
     // working on food
     // Note: if there will be more city resources, the food and wood functions
     // should be combined and the possible resources separely
@@ -74,6 +78,22 @@ class City {
       if(n >= 0 && n <= this.max_wood_workers()){
             this.workers_wood = n;
         }
+    }
+
+    // Set the number of priests. The maximum number of priests and merchants
+    // is just the current number + free workers
+    set_priests(n){
+       if(n >= 0 && n <= this.priests + this.free_workers()){
+           this.priests = n;
+       }
+    }
+
+    // Set the number of merchants. The maximum number of priests and merchants
+    // is just the current number + free workers
+    set_merchants(n){
+       if(n >= 0 && n <= this.merchants + this.free_workers()){
+           this.merchants = n;
+       }
     }
 
     // Count food producing tiles around the city
@@ -270,25 +290,13 @@ class City {
             if(this.food_tiles() > 0){
                 // Food can be collected. Show food worker control
                 var max = Math.min(this.food_tiles(), this.level);
-                var food_slider_div = $("<div></div>").html("Farmers / Fishers:</br>");
-                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
+                var food_worker_div = $("<div></div>").html("Farmers / Fishers: ");
+                // Also print the number of workers
+                food_worker_div.append(" "+this.workers_food+"/"+max+" ");
                 // remove worker button
+                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
                 mbutton.click(function(){
                     city.set_food_workers(city.workers_food-1);
-                    game.update_city_page();
-                });
-                // Slider to adjust more quickly (not sure if this is necessary or useful)
-                food_slider_div.append(mbutton);
-                var food_slider = $('<input>').attr({
-                    type: "range",
-                    min: 0,
-                    max: max,
-                    value: this.workers_food,
-                    class: "slider"
-                }).appendTo(food_slider_div);
-                food_slider.change(function(){
-                    // Food slider was adjusted. Run the set_food_workers function.
-                    city.set_food_workers(parseInt($(this).val()));
                     game.update_city_page();
                 });
                 // add worker button
@@ -297,34 +305,21 @@ class City {
                     city.set_food_workers(city.workers_food+1);
                     game.update_city_page();
                 });
-                food_slider_div.append(pbutton);
-                // Also print the number of workers
-                food_slider_div.append(" "+this.workers_food+"/"+max);
-                div.append(food_slider_div);
+                food_worker_div.append(pbutton);
+                food_worker_div.append(mbutton);
+                div.append(food_worker_div);
             }
 
             if(this.wood_tiles() > 0){
                 // Wood can be collected. Add a similar slider
                 // A lot of this is repeated from above, should combine
                 var max = Math.min(this.wood_tiles(), this.level);
-                var wood_slider_div = $("<div></div>").html("Wood gatherers:</br>");
-                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
+                var wood_worker_div = $("<div></div>").html("Wood gatherers: ");
+                wood_worker_div.append(" "+this.workers_wood+"/"+max+" ");
                 // remove worker button
+                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
                 mbutton.click(function(){
                     city.set_wood_workers(city.workers_wood-1);
-                    game.update_city_page();
-                });
-                wood_slider_div.append(mbutton);
-                // The slider
-                var wood_slider = $('<input>').attr({
-                    type: "range",
-                    min: 0,
-                    max: max,
-                    value: this.workers_wood,
-                    class: "slider"
-                }).appendTo(wood_slider_div);
-                wood_slider.change(function(){
-                    city.set_wood_workers(parseInt($(this).val()));
                     game.update_city_page();
                 });
                 // Add worker button
@@ -333,9 +328,50 @@ class City {
                     city.set_wood_workers(city.workers_wood+1);
                     game.update_city_page();
                 });
-                wood_slider_div.append(pbutton);
-                wood_slider_div.append(" "+this.workers_wood+"/"+max);
-                div.append(wood_slider_div);
+                wood_worker_div.append(pbutton);
+                wood_worker_div.append(mbutton);
+                div.append(wood_worker_div);
+            }
+
+            if(this.level > 3){
+                // Now priests and merchants are allowed
+                var max = Math.min(this.wood_tiles(), this.level);
+                var priest_div = $("<div></div>").html("Priests: ");
+                priest_div.append(" "+this.priests+" ");
+                // remove worker button
+                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
+                mbutton.click(function(){
+                    city.set_priests(city.priests-1);
+                    game.update_city_page();
+                });
+                // Add worker button
+                var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
+                pbutton.click(function(){
+                    city.set_priests(city.priests+1);
+                    game.update_city_page();
+                });
+                priest_div.append(pbutton);
+                priest_div.append(mbutton);
+                div.append(priest_div);
+
+                var max = Math.min(this.wood_tiles(), this.level);
+                var merchant_div = $("<div></div>").html("Mercants: ");
+                merchant_div.append(" "+this.merchants+" ");
+                // remove worker button
+                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
+                mbutton.click(function(){
+                    city.set_merchants(city.merchants-1);
+                    game.update_city_page();
+                });
+                // Add worker button
+                var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
+                pbutton.click(function(){
+                    city.set_merchants(city.merchants+1);
+                    game.update_city_page();
+                });
+                merchant_div.append(pbutton);
+                merchant_div.append(mbutton);
+                div.append(merchant_div);
             }
 
             // Build colony button
