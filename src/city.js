@@ -12,9 +12,26 @@ class City {
         this.workers_food = level;
         this.workers_wood = 0;
         this.priests = 0;
-        this.merchants = 0;
-        tile.influence[this.owner()] = this.influence();
+        tile.influence[this.owner()] = this.influence(this.owner());
+        this.merchant_list = [];
         tile.road = true;
+    }
+
+    get merchants() {
+        return this.merchant_list.length;
+    }
+
+    get foreign_merchants() {
+        var number = 0;
+        var this_city = this;
+        game.cities.forEach(function(city){
+            city.merchant_list.forEach(function(destination){
+                if(destination == this_city){
+                    number += 1;
+                }
+            });
+        });
+        return number;
     }
 
     // Draw a new name from the owners list of names
@@ -31,9 +48,31 @@ class City {
 
 
     // Calculate the base influence of the city
-    influence(){
+    influence(player){
         //return 3+Math.floor(this.level/3);
-        return 4 + this.priests;
+        var this_city = this;
+        var influence = 0;
+        if(player == this.owner()){
+            influence += 4 + this.priests - this.foreign_merchants;
+        }
+        // Check for influence from other cities
+        game.cities.forEach(function(city){
+            if(city != this_city && city.owner() == player){
+                influence += this_city.influence_from(city);
+            }
+        });
+        return influence;
+    }
+
+    // How much another city excerts on this one
+    influence_from(other_city, player){
+        var influence = 0;
+        other_city.merchant_list.forEach(function(destination){
+            if(destination == this){
+                influence += 1;
+            }
+        });
+        return influence;
     }
 
     // return the owner of the city, which is the owner of the tile
@@ -44,7 +83,7 @@ class City {
     // Calculate the number of free workers
     free_workers() {
         return this.level - this.workers_wood - this.workers_food
-               - this.merchants - this.priests;
+               - this.priests - this.merchants;
     }
 
     // Find the maximum amount of food workers possible. This is the
@@ -88,11 +127,11 @@ class City {
        }
     }
 
-    // Set the number of merchants. The maximum number of priests and merchants
-    // is just the current number + free workers
-    set_merchants(n){
-       if(n >= 0 && n <= this.merchants + this.free_workers()){
-           this.merchants = n;
+    // Send a merchant
+    send_merchant(){
+       if(this.free_workers() > 0){
+           // Highlight allowed cities and set next click to send the merchant
+           game.send_worker(this, 'merchant')
        }
     }
 
@@ -241,6 +280,42 @@ class City {
         }
     }
 
+    // Build a display line for a worker type
+    make_worker_div(current, max, description, send, setter){
+        var city = this;
+        var worker_div = $("<div></div>").html(description + " ");
+        // Also print the number of workers
+        if(max){
+            worker_div.append(" "+current+"/"+max);
+        } else{
+            worker_div.append(" "+current);
+        }
+        if(!send){
+            // add worker button
+            var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
+            pbutton.click(function(){
+                setter(current+1);
+                game.update_city_page();
+            });
+            // remove worker button
+            var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
+            mbutton.click(function(){
+                setter(current-1);
+                game.update_city_page();
+            });
+            worker_div.append(pbutton);
+            worker_div.append(mbutton);
+        } else {
+            // Send a new worker of this type to another city
+            var sendbutton = $("<span></span>").text("send").addClass("btn btn-primary btn-vsm");
+            sendbutton.click(function(){
+                setter();
+            });
+            worker_div.append(sendbutton);
+        }
+        return worker_div;
+    }
+
 
     // Describe the city in a div element
     describe(){
@@ -255,7 +330,7 @@ class City {
         // The city level
         div.append($("<div></div>").html("<b>Population</b>: "+this.level));
         // It's influence level
-        div.append($("<div></div>").html("<b>Influence level</b>: "+this.influence()));
+        div.append($("<div></div>").html("<b>City influence</b>: "+this.influence(this.owner())));
 
         // For the human player show more details and controls
         if(this.owner() == 'white'){
@@ -289,89 +364,47 @@ class City {
             // Worker controls
             if(this.food_tiles() > 0){
                 // Food can be collected. Show food worker control
-                var max = Math.min(this.food_tiles(), this.level);
-                var food_worker_div = $("<div></div>").html("Farmers / Fishers: ");
-                // Also print the number of workers
-                food_worker_div.append(" "+this.workers_food+"/"+max+" ");
-                // remove worker button
-                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
-                mbutton.click(function(){
-                    city.set_food_workers(city.workers_food-1);
-                    game.update_city_page();
-                });
-                // add worker button
-                var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
-                pbutton.click(function(){
-                    city.set_food_workers(city.workers_food+1);
-                    game.update_city_page();
-                });
-                food_worker_div.append(pbutton);
-                food_worker_div.append(mbutton);
-                div.append(food_worker_div);
+                var worker_div = this.make_worker_div(
+                    city.workers_food,
+                    Math.min(this.food_tiles(), this.level),
+                    "Farmers / Fishers:",
+                    false,
+                    function(n){city.set_food_workers(n)}
+                );
+                div.append(worker_div);
             }
 
             if(this.wood_tiles() > 0){
                 // Wood can be collected. Add a similar slider
-                // A lot of this is repeated from above, should combine
-                var max = Math.min(this.wood_tiles(), this.level);
-                var wood_worker_div = $("<div></div>").html("Wood gatherers: ");
-                wood_worker_div.append(" "+this.workers_wood+"/"+max+" ");
-                // remove worker button
-                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
-                mbutton.click(function(){
-                    city.set_wood_workers(city.workers_wood-1);
-                    game.update_city_page();
-                });
-                // Add worker button
-                var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
-                pbutton.click(function(){
-                    city.set_wood_workers(city.workers_wood+1);
-                    game.update_city_page();
-                });
-                wood_worker_div.append(pbutton);
-                wood_worker_div.append(mbutton);
-                div.append(wood_worker_div);
+                var worker_div = this.make_worker_div(
+                    city.workers_wood,
+                    Math.min(this.wood_tiles(), this.level),
+                    "Wood gatherers:",
+                    false,
+                    function(n){city.set_wood_workers(n)}
+                );
+                div.append(worker_div);
             }
 
             if(this.level > 3){
                 // Now priests and merchants are allowed
-                var max = Math.min(this.wood_tiles(), this.level);
-                var priest_div = $("<div></div>").html("Priests: ");
-                priest_div.append(" "+this.priests+" ");
-                // remove worker button
-                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
-                mbutton.click(function(){
-                    city.set_priests(city.priests-1);
-                    game.update_city_page();
-                });
-                // Add worker button
-                var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
-                pbutton.click(function(){
-                    city.set_priests(city.priests+1);
-                    game.update_city_page();
-                });
-                priest_div.append(pbutton);
-                priest_div.append(mbutton);
-                div.append(priest_div);
+                var worker_div = this.make_worker_div(
+                    city.priests,
+                    0,
+                    "Priests:",
+                    false,
+                    function(n){city.set_priests(n)}
+                );
+                div.append(worker_div);
 
-                var max = Math.min(this.wood_tiles(), this.level);
-                var merchant_div = $("<div></div>").html("Mercants: ");
-                merchant_div.append(" "+this.merchants+" ");
-                // remove worker button
-                var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
-                mbutton.click(function(){
-                    city.set_merchants(city.merchants-1);
-                    game.update_city_page();
-                });
-                // Add worker button
-                var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
-                pbutton.click(function(){
-                    city.set_merchants(city.merchants+1);
-                    game.update_city_page();
-                });
-                merchant_div.append(pbutton);
-                merchant_div.append(mbutton);
-                div.append(merchant_div);
+                var worker_div = this.make_worker_div(
+                    city.merchants,
+                    0,
+                    "Merchants:",
+                    true,
+                    function(n){city.send_merchant()}
+                );
+                div.append(worker_div);
             }
 
             // Build colony button
@@ -392,6 +425,31 @@ class City {
             }
         }
 
+        return div;
+    }
+
+    // Build and return a div containing a list of merchants and controls for
+    // deleting and sending them
+    worker_panel(){
+        var div = $("<div></div>");
+        // Name as an h4 tag
+        div.append($("<h4></h4>").text(this.name));
+        // title for the list of merchants
+        div.append($("<div></div>").html("<b>Merchants</b>:"));
+        // the list is a table
+        var merchant_list = $("<table></table>")
+        this.merchant_list.forEach(function(destination, i, list){
+            var row = $("<tr></tr>");
+            row.append($("<td></td>").html(destination.name));
+            var deletebutton = $("<span></span>").text("remove").addClass("btn btn-primary btn-vsm");
+            deletebutton.click(function(){
+                list.splice(i, 1);
+                game.update_city_page();
+            });
+            row.append($("<td></td>").append(deletebutton));
+            merchant_list.append(row);
+        });
+        div.append(merchant_list);
         return div;
     }
 

@@ -417,6 +417,7 @@ function gameboard(map){
             // Add towns at starting positions
             for(var player in map.start){
                 var start = map.start[player];
+                var tile = tiles[start.x][start.y];
                 tiles[start.x][start.y].owner = player;
                 this.add_city(start.x,start.y, 1, 0);
                 if(player == 'white'){
@@ -1074,9 +1075,9 @@ function gameboard(map){
                     // Subtract friction from the max found
                     c -= tiles[x][y].influence_friction();
 
-                    if(tiles[x][y].city && tiles[x][y].owner == player){
+                    if(tiles[x][y].city){
                       // There is a city here. Check if it's culture dominates.
-                      let city_c = tiles[x][y].city.influence();
+                      let city_c = tiles[x][y].city.influence(player);
                       if(city_c > c){
                         // The city dominates and sets the influence level.
                         c = city_c;
@@ -1223,6 +1224,12 @@ function gameboard(map){
             }
         }
 
+        if(map_scene.on_next_click != undefined){
+            map_scene.on_next_click(x,y);
+            map_scene.on_next_click = undefined;
+            return;
+        }
+
         // Did not build. Make the tile active and update the panel
         active_tile = tiles[x][y];
 
@@ -1244,6 +1251,12 @@ function gameboard(map){
         // Add the div created by the city object
         var div = active_city.describe();
         $("#city_card").append(div);
+
+        // Also the workers pane
+        $("#worker_card").empty();
+        // Add the div created by the city object
+        var div = active_city.worker_panel();
+        $("#worker_card").append(div);
     }
 
     // Update the home page of the panel
@@ -1313,6 +1326,11 @@ function gameboard(map){
         }
     }
 
+    // Green highlight for tiles matching a criterion
+    function highlight_tile(tile){
+        mapscene.highlight_allowed_tile(tile.x,tile.y);
+    }
+
     // Higlight allowed places for a field and start preview
     function start_build(item_key){
       var item = home_items[item_key];
@@ -1364,6 +1382,39 @@ function gameboard(map){
                     players[player_key][key] -= item.price[key];
                 }
             }
+        }
+    }
+
+    // View for sending a worker to another city. Highlight any city where
+    // the owner has influence and set up the next click to choose a city.
+    var sending_worker_info = {};
+    function send_worker(city, worker_type){
+       // Highlight the allowed tiles
+       var mapscene = phaser_game.scene.scenes[0];
+       mapscene.remove_highlight();
+       var owner = city.owner();
+       cities.forEach(function(other_city){
+           var tile = other_city.tile;
+           if(tile.influence[owner] > 0){
+               mapscene.highlight_allowed_tile(tile.x,tile.y);
+           }
+       });
+       mapscene.on_next_click = function(x,y){
+           set_worker(x,y,city,worker_type);
+       }
+    }
+
+    function set_worker(x,y,city,worker_type){
+        var mapscene = phaser_game.scene.scenes[0];
+        mapscene.remove_highlight();
+        mapscene.on_next_click = false;
+
+        var other_city = tiles[x][y].city;
+        var owner = city.owner();
+        console.log(tiles[x][y]);
+        if( (other_city != undefined) && (tiles[x][y].influence[owner] > 0) ){
+            city[worker_type+'_list'].push(other_city);
+            update_city_page();
         }
     }
 
@@ -1420,6 +1471,7 @@ function gameboard(map){
         update_panel: update_panel,
         update_city_page: update_city_page,
         update_home_page: update_home_page,
+        send_worker: send_worker,
         cities, cities,
         destroy: destroy,
         popup: popup,
