@@ -101,6 +101,8 @@ class AIPlayer {
                         city.queue_colony();
                     }
                 }
+                // Remove one priest to give room for adjusting
+                city.priests = Math.max(city.priests-1, 0);
                 // Add wood or food workers if it makes sense
                 if(city.wood_tiles() > city.workers_wood){
                     if((city.food_production()*this.wood_to_food_ratio) > (city.wood_production()+1)){
@@ -117,6 +119,11 @@ class AIPlayer {
                 if(city.food_tiles() > city.workers_food && city.free_workers() > 0){
                     city.workers_food += Math.min(city.food_tiles()-city.workers_food, city.free_workers());
                     console.log(this.name+": Assign farmers / fishers");
+                }
+                // Anyone left over is a priest
+                if(city.free_workers()){
+                    city.priests += city.free_workers();
+                    console.log(this.name+": Assigned priests");
                 }
             }
         }
