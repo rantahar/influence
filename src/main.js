@@ -1237,7 +1237,10 @@ function gameboard(map){
         if(active_tile.city){
             active_city = active_tile.city;
             update_city_page();
-            show_tab("#city");
+            // If the home tab is active, move to the city tab
+            if($("#home-tab").hasClass("active")){
+                show_tab("#city");
+            }
         } else {
             // If there is not city, switch to the home panel
             show_tab("#home");
