@@ -12,11 +12,13 @@ class City {
         this.workers_food = level;
         this.workers_wood = 0;
         this.priests = 0;
-        tile.influence[this.owner()] = this.influence(this.owner());
 
         // workers sent to other cities
         this.merchant_list = [];
         this.tribute_list = [];
+
+        // Change tile properties
+        tile.influence[this.owner()] = this.influence(this.owner());
         tile.road = true;
     }
 
@@ -37,11 +39,11 @@ class City {
         return number;
     }
 
-    get tributories() {
+    get tributes() {
         return this.tribute_list.length;
     }
 
-    get foreign_tributories() {
+    get foreign_tributes() {
         var number = 0;
         var this_city = this;
         game.cities.forEach(function(city){
@@ -73,8 +75,8 @@ class City {
         var this_city = this;
         var influence = 0;
         if(player == this.owner()){
-            influence += 4 + this.priests - this.foreign_merchants
-                      + this.foreign_tributories;
+            influence += 4 + 0.5*this.priests - this.foreign_merchants
+                      + this.foreign_tributes - this.tributes;
         }
         // Check for influence from other cities
         game.cities.forEach(function(city){
@@ -104,7 +106,7 @@ class City {
     // Calculate the number of free workers
     free_workers() {
         return this.level - this.workers_wood - this.workers_food
-               - this.priests - this.merchants - this.tributories;
+               - this.priests - this.merchants - this.tributes;
     }
 
     // Find the maximum amount of food workers possible. This is the
@@ -203,7 +205,7 @@ class City {
         food += Math.min(workers, fields);
 
         // Tribute
-        food += this.foreign_tributories - this.tributories;
+        food += this.foreign_tributes - this.tributes;
         return food;
     }
 
@@ -276,7 +278,7 @@ class City {
             map_scene.update_city_sprite(x,y,this.level);
         }
         // Or if the city shrinks
-        if(this.food < 0 && this.level > 0){
+        if(this.food < 0){
             this.level -= 1;
             this.food = this.food_limit()/4;
             if(this.free_workers() == 0){
@@ -402,7 +404,6 @@ class City {
                 div.append(worker_div);
             }
 
-            if(this.level > 1){
                 // Now priests and merchants are allowed
                 var worker_div = this.make_worker_div(
                     city.priests,
@@ -427,9 +428,9 @@ class City {
                 div.append(worker_div);
 
                 var worker_div = this.make_worker_div(
-                    city.tributories,
+                    city.tributes,
                     0,
-                    "Tributories:",
+                    "Tributes:",
                     true,
                     function(n){
                         if(city.free_workers() > 0){
@@ -438,7 +439,6 @@ class City {
                     }
                 );
                 div.append(worker_div);
-            }
 
             // Build colony button
             var build_per_turn = (this.food_production() + this.free_workers() - this.food_consumption());
@@ -484,7 +484,7 @@ class City {
         });
         div.append(merchant_list);
 
-        div.append($("<div></div>").html("<b>Tributories</b>:"));
+        div.append($("<div></div>").html("<b>Tributes</b>:"));
         // the list is a table
         var tribute_list = $("<table></table>")
         this.tribute_list.forEach(function(destination, i, list){
