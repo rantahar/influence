@@ -13,7 +13,10 @@ class City {
         this.workers_wood = 0;
         this.priests = 0;
         tile.influence[this.owner()] = this.influence(this.owner());
+
+        // workers sent to other cities
         this.merchant_list = [];
+        this.tribute_list = [];
         tile.road = true;
     }
 
@@ -26,6 +29,23 @@ class City {
         var this_city = this;
         game.cities.forEach(function(city){
             city.merchant_list.forEach(function(destination){
+                if(destination == this_city){
+                    number += 1;
+                }
+            });
+        });
+        return number;
+    }
+
+    get tributories() {
+        return this.tribute_list.length;
+    }
+
+    get foreign_tributories() {
+        var number = 0;
+        var this_city = this;
+        game.cities.forEach(function(city){
+            city.tribute_list.forEach(function(destination){
                 if(destination == this_city){
                     number += 1;
                 }
@@ -53,7 +73,8 @@ class City {
         var this_city = this;
         var influence = 0;
         if(player == this.owner()){
-            influence += 4 + this.priests - this.foreign_merchants;
+            influence += 4 + this.priests - this.foreign_merchants
+                      + this.foreign_tributories;
         }
         // Check for influence from other cities
         game.cities.forEach(function(city){
@@ -83,7 +104,7 @@ class City {
     // Calculate the number of free workers
     free_workers() {
         return this.level - this.workers_wood - this.workers_food
-               - this.priests - this.merchants;
+               - this.priests - this.merchants - this.tributories;
     }
 
     // Find the maximum amount of food workers possible. This is the
@@ -92,7 +113,7 @@ class City {
     // Note: if there will be more city resources, the food and wood functions
     // should be combined and the possible resources separely
     max_food_workers(){
-        var max = this.level - this.workers_wood;
+        var max = this.free_workers() + this.workers_food;
         max = Math.min(this.food_tiles(), max);
         return max;
     }
@@ -107,7 +128,7 @@ class City {
     // Find the maximum possible number of wood gatherers. Similar to
     // the max_food_workers()
     max_wood_workers(){
-        var max = this.level - this.workers_food;
+        var max = this.free_workers() + this.workers_wood;
         max = Math.min(this.wood_tiles(), max);
         return max;
     }
@@ -124,14 +145,6 @@ class City {
     set_priests(n){
        if(n >= 0 && n <= this.priests + this.free_workers()){
            this.priests = n;
-       }
-    }
-
-    // Send a merchant
-    send_merchant(){
-       if(this.free_workers() > 0){
-           // Highlight allowed cities and set next click to send the merchant
-           game.send_worker(this, 'merchant')
        }
     }
 
@@ -188,6 +201,9 @@ class City {
 
         // +1 extra for fields
         food += Math.min(workers, fields);
+
+        // Tribute
+        food += this.foreign_tributories - this.tributories;
         return food;
     }
 
@@ -386,7 +402,7 @@ class City {
                 div.append(worker_div);
             }
 
-            if(this.level > 3){
+            if(this.level > 1){
                 // Now priests and merchants are allowed
                 var worker_div = this.make_worker_div(
                     city.priests,
@@ -402,7 +418,24 @@ class City {
                     0,
                     "Merchants:",
                     true,
-                    function(n){city.send_merchant()}
+                    function(n){
+                        if(city.free_workers() > 0){
+                            game.send_worker(city, 'merchant')
+                        }
+                    }
+                );
+                div.append(worker_div);
+
+                var worker_div = this.make_worker_div(
+                    city.tributories,
+                    0,
+                    "Tributories:",
+                    true,
+                    function(n){
+                        if(city.free_workers() > 0){
+                            game.send_worker(city, 'tribute')
+                        }
+                    }
                 );
                 div.append(worker_div);
             }
@@ -450,6 +483,22 @@ class City {
             merchant_list.append(row);
         });
         div.append(merchant_list);
+
+        div.append($("<div></div>").html("<b>Tributories</b>:"));
+        // the list is a table
+        var tribute_list = $("<table></table>")
+        this.tribute_list.forEach(function(destination, i, list){
+            var row = $("<tr></tr>");
+            row.append($("<td></td>").html(destination.name));
+            var deletebutton = $("<span></span>").text("remove").addClass("btn btn-primary btn-vsm");
+            deletebutton.click(function(){
+                list.splice(i, 1);
+                game.update_city_page();
+            });
+            row.append($("<td></td>").append(deletebutton));
+            tribute_list.append(row);
+        });
+        div.append(tribute_list);
         return div;
     }
 
