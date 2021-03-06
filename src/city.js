@@ -72,30 +72,36 @@ class City {
     // Calculate the base influence of the city
     influence(player){
         //return 3+Math.floor(this.level/3);
-        var this_city = this;
         var influence = 0;
         if(player == this.owner()){
-            influence += 4 + 0.5*this.priests - this.foreign_merchants
-                      + this.foreign_tributes - this.tributes;
+            // base influence of a city
+            influence += 10;
+            // Foreign and local workers
+            influence += this.priests;
+            influence += -2*this.merchants - 2*this.foreign_merchants;
+            influence += this.foreign_tributes - this.tributes;
         }
         // Check for influence from other cities
+        var this_city = this;
         game.cities.forEach(function(city){
-            if(city != this_city && city.owner() == player){
-                influence += this_city.influence_from(city);
+            if(city.owner() == player){
+                influence += 2 * city.merchants_to(this_city);
+                influence += 2 * this_city.merchants_to(city);
             }
         });
+        influence = Math.max(influence, 0)
         return influence;
     }
 
-    // How much another city excerts on this one
-    influence_from(other_city, player){
-        var influence = 0;
-        other_city.merchant_list.forEach(function(destination){
-            if(destination == this){
-                influence += 1;
+    // Count merchants to a given city
+    merchants_to(other_city){
+        var merchants = 0;
+        this.merchant_list.forEach(function(destination){
+            if(destination == other_city){
+                merchants += 1;
             }
         });
-        return influence;
+        return merchants;
     }
 
     // return the owner of the city, which is the owner of the tile
