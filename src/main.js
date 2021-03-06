@@ -323,23 +323,22 @@ function gameboard(map){
 
         // Return the amount influence is reduced when spreading to this tile
         influence_friction(){
-            var friction = 1;
+            var friction = 3;
             if(this.land == 'f'){
-                friction *= 2;
+                friction += 1;
             }
             if(this.land == 'm'){
                 // Essentially impossible to spread to mountains
-                friction = 100000;
+                friction = 100;
             }
             if(this.land == 'w'){
-                friction *= 2;
+                friction += 1;
             }
             if(this.road){
-                friction /= 2;
+                friction -= 1;
             }
             if(this.city){
-                // Cities are free
-                friction = 0;
+                friction = 1;
             }
             return friction;
         }
