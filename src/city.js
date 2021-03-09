@@ -256,8 +256,9 @@ class City {
 
         // Check buildings
         if(this.building != undefined){
-            var workers = this.free_workers();
-            this.building.food -= Math.max(0, workers);
+            // Free workers have no positive effect now
+            //var workers = this.free_workers();
+            //this.building.food -= Math.max(0, workers);
             if(food > 0){
               var food_diff = Math.min(food,this.building.food);
               this.building.food -= food_diff;
@@ -410,41 +411,40 @@ class City {
                 div.append(worker_div);
             }
 
-                // Now priests and merchants are allowed
-                var worker_div = this.make_worker_div(
-                    city.priests,
-                    0,
-                    "Priests:",
-                    false,
-                    function(n){city.set_priests(n)}
-                );
-                div.append(worker_div);
+            var worker_div = this.make_worker_div(
+                city.priests,
+                0,
+                "Priests:",
+                false,
+                function(n){city.set_priests(n)}
+            );
+            div.append(worker_div);
 
-                var worker_div = this.make_worker_div(
-                    city.merchants,
-                    0,
-                    "Merchants:",
-                    true,
-                    function(n){
-                        if(city.free_workers() > 0){
-                            game.send_worker(city, 'merchant')
-                        }
+            var worker_div = this.make_worker_div(
+                city.merchants,
+                0,
+                "Merchants:",
+                true,
+                function(n){
+                    if(city.free_workers() > 0){
+                        game.send_worker(city, 'merchant')
                     }
-                );
-                div.append(worker_div);
+                }
+            );
+            div.append(worker_div);
 
-                var worker_div = this.make_worker_div(
-                    city.tributes,
-                    0,
-                    "Tributes:",
-                    true,
-                    function(n){
-                        if(city.free_workers() > 0){
-                            game.send_worker(city, 'tribute')
-                        }
+            var worker_div = this.make_worker_div(
+                city.tributes,
+                0,
+                "Tributes:",
+                true,
+                function(n){
+                    if(city.free_workers() > 0){
+                        game.send_worker(city, 'tribute')
                     }
-                );
-                div.append(worker_div);
+                }
+            );
+            div.append(worker_div);
 
             // Build colony button
             var build_per_turn = (this.food_production() + this.free_workers() - this.food_consumption());
@@ -467,33 +467,40 @@ class City {
         return div;
     }
 
+    // Button for sending a worker
+    create_send_button(type){
+        // Send a new worker of this type to another city
+        var sendbutton = $("<span></span>").text("send").addClass("btn btn-primary btn-vsm");
+        var city = this;
+        sendbutton.click(function(){
+            if(city.free_workers() > 0){
+                game.send_worker(city, type)
+            }
+        });
+        return sendbutton;
+    }
+
     // Build and return a div containing a list of merchants and controls for
     // deleting and sending them
     worker_panel(){
         var div = $("<div></div>");
         // Name as an h4 tag
         div.append($("<h4></h4>").text(this.name));
-        // title for the list of merchants
-        div.append($("<div></div>").html("<b>Merchants</b>:"));
-        // the list is a table
-        var merchant_list = $("<table></table>")
-        this.merchant_list.forEach(function(destination, i, list){
-            var row = $("<tr></tr>");
-            row.append($("<td></td>").html(destination.name));
-            var deletebutton = $("<span></span>").text("remove").addClass("btn btn-primary btn-vsm");
-            deletebutton.click(function(){
-                list.splice(i, 1);
-                game.update_city_page();
-            });
-            row.append($("<td></td>").append(deletebutton));
-            merchant_list.append(row);
-        });
-        div.append(merchant_list);
 
-        div.append($("<div></div>").html("<b>Tributes</b>:"));
-        // the list is a table
-        var tribute_list = $("<table></table>")
-        this.tribute_list.forEach(function(destination, i, list){
+        if(this.owner() == 'white'){
+            // Lists of each worker type sent to cities
+            div.append($("<div></div>").html("<b>Merchants</b>:").append(this.create_send_button('merchant')));
+            div.append(this.worker_list(this.merchant_list));
+            div.append($("<div></div>").html("<b>Tributes:</b>:").append(this.create_send_button('tribute')));
+            div.append(this.worker_list(this.tribute_list));
+        }
+        return div;
+    }
+
+    // List workers in a given list
+    worker_list(list){
+        var list_div = $("<table></table>")
+        list.forEach(function(destination, i, list){
             var row = $("<tr></tr>");
             row.append($("<td></td>").html(destination.name));
             var deletebutton = $("<span></span>").text("remove").addClass("btn btn-primary btn-vsm");
@@ -502,10 +509,9 @@ class City {
                 game.update_city_page();
             });
             row.append($("<td></td>").append(deletebutton));
-            tribute_list.append(row);
+            list_div.append(row);
         });
-        div.append(tribute_list);
-        return div;
+        return list_div;
     }
 
     // Start building a colony
