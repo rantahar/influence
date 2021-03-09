@@ -9,6 +9,7 @@ class City {
         this.level = level;
         this.food = food;
         this.name = this.next_name();
+        this.builders = 0;
         this.workers_food = level;
         this.workers_wood = 0;
         this.priests = 0;
@@ -111,8 +112,16 @@ class City {
 
     // Calculate the number of free workers
     free_workers() {
-        return this.level - this.workers_wood - this.workers_food
-               - this.priests - this.merchants - this.tributes;
+        return this.level - this.builders - this.priests
+               - this.workers_wood - this.workers_food
+               - this.merchants - this.tributes;
+    }
+
+    // Set the number of builders
+    set_builders(n){
+        if(n >= 0 && n <= this.free_workers() + this.builders){
+            this.builders = n;
+        }
     }
 
     // Find the maximum amount of food workers possible. This is the
@@ -258,7 +267,7 @@ class City {
         if(this.building != undefined){
             // Free workers have no positive effect now
             //var workers = this.free_workers();
-            //this.building.food -= Math.max(0, workers);
+            this.building.food -= Math.max(0, this.builders);
             if(food > 0){
               var food_diff = Math.min(food,this.building.food);
               this.building.food -= food_diff;
@@ -387,6 +396,13 @@ class City {
             }
 
             // Worker controls
+            // Builders first
+            var worker_div = this.make_worker_div(
+                city.builders, 0, "Builder:", false,
+                function(n){city.set_builders(n)}
+            );
+            div.append(worker_div);
+
             if(this.food_tiles() > 0){
                 // Food can be collected. Show food worker control
                 var worker_div = this.make_worker_div(
@@ -447,7 +463,7 @@ class City {
             div.append(worker_div);
 
             // Build colony button
-            var build_per_turn = (this.food_production() + this.free_workers() - this.food_consumption());
+            var build_per_turn = (this.food_production() + this.builders - this.food_consumption());
             if(build_per_turn > 0){
               // Only add it if the city can ever finish a colony
               var turns_left = Math.ceil(city_items.colony.price / build_per_turn);
