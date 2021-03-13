@@ -380,6 +380,7 @@ class City {
             food_text.append($("<span></span>").text(")"));
             div.append(food_text);
 
+
             // Show the number of free workers
             div.append($("<div></div>").html("<b>Free workers</b>: "+this.free_workers()));
 
@@ -396,71 +397,8 @@ class City {
             }
 
             // Worker controls
-            // Builders first
-            var worker_div = this.make_worker_div(
-                city.builders, 0, "Builder:", false,
-                function(n){city.set_builders(n)}
-            );
-            div.append(worker_div);
-
-            if(this.food_tiles() > 0){
-                // Food can be collected. Show food worker control
-                var worker_div = this.make_worker_div(
-                    city.workers_food,
-                    Math.min(this.food_tiles(), this.level),
-                    "Farmers / Fishers:",
-                    false,
-                    function(n){city.set_food_workers(n)}
-                );
-                div.append(worker_div);
-            }
-
-            if(this.wood_tiles() > 0){
-                // Wood can be collected. Add a similar slider
-                var worker_div = this.make_worker_div(
-                    city.workers_wood,
-                    Math.min(this.wood_tiles(), this.level),
-                    "Wood gatherers:",
-                    false,
-                    function(n){city.set_wood_workers(n)}
-                );
-                div.append(worker_div);
-            }
-
-            var worker_div = this.make_worker_div(
-                city.priests,
-                0,
-                "Priests:",
-                false,
-                function(n){city.set_priests(n)}
-            );
-            div.append(worker_div);
-
-            var worker_div = this.make_worker_div(
-                city.merchants,
-                0,
-                "Merchants:",
-                true,
-                function(n){
-                    if(city.free_workers() > 0){
-                        game.send_worker(city, 'merchant')
-                    }
-                }
-            );
-            div.append(worker_div);
-
-            var worker_div = this.make_worker_div(
-                city.tributes,
-                0,
-                "Tributes:",
-                true,
-                function(n){
-                    if(city.free_workers() > 0){
-                        game.send_worker(city, 'tribute')
-                    }
-                }
-            );
-            div.append(worker_div);
+            div.append(this.local_worker_div());
+            div.append(this.remote_worker_div());
 
             // Build colony button
             var build_per_turn = (this.food_production() + this.builders - this.food_consumption());
@@ -483,6 +421,72 @@ class City {
         return div;
     }
 
+    // List local workers
+    local_worker_div(){
+        var div = $("<div></div>");
+        var city = this;
+        // Builders first
+        var worker_div = this.make_worker_div(
+            city.builders, 0, "Builder:", false,
+            function(n){city.set_builders(n)}
+        );
+        div.append(worker_div);
+
+        if(this.food_tiles() > 0){
+            // Food can be collected. Show food worker control
+            var min = Math.min(this.food_tiles(), this.level);
+            var worker_div = this.make_worker_div(
+                city.workers_food, min, "Farmers / Fishers:", false,
+                function(n){city.set_food_workers(n)}
+            );
+            div.append(worker_div);
+        }
+
+        if(this.wood_tiles() > 0){
+            // Wood can be collected. Add a similar slider
+            var min = Math.min(this.wood_tiles(), this.level);
+            var worker_div = this.make_worker_div(
+                city.workers_wood, min, "Wood gatherers:", false,
+                function(n){city.set_wood_workers(n)}
+            );
+            div.append(worker_div);
+        }
+
+        var worker_div = this.make_worker_div(
+            city.priests, 0, "Priests:", false,
+            function(n){city.set_priests(n)}
+        );
+        div.append(worker_div);
+        return div;
+    }
+
+    // div with the number of workers sent to other cities
+    remote_worker_div(){
+        var div = $("<div></div>");
+        var city = this;
+
+        var worker_div = this.make_worker_div(
+            city.merchants, 0, "Merchants:", true,
+            function(n){
+                if(city.free_workers() > 0){
+                    game.send_worker(city, 'merchant')
+                }
+            }
+        );
+        div.append(worker_div);
+
+        var worker_div = this.make_worker_div(
+            city.tributes, 0, "Tributes:", true,
+            function(n){
+                if(city.free_workers() > 0){
+                    game.send_worker(city, 'tribute')
+                }
+            }
+        );
+        div.append(worker_div);
+        return div;
+    }
+
     // Button for sending a worker
     create_send_button(type){
         // Send a new worker of this type to another city
@@ -502,6 +506,8 @@ class City {
         var div = $("<div></div>");
         // Name as an h4 tag
         div.append($("<h4></h4>").text(this.name));
+        div.append($("<div></div>").html("<b>Free workers</b>: "+this.free_workers()));
+        div.append(this.local_worker_div());
 
         if(this.owner() == 'white'){
             // Lists of each worker type sent to cities
