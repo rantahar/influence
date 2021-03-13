@@ -56,9 +56,9 @@ class City {
         var number = 0;
         var this_city = this;
         game.cities.forEach(function(city){
-            city.tribute_list.forEach(function(destination){
-                if(destination == this_city){
-                    number += destination.number;
+            city.tribute_list.forEach(function(route){
+                if(route.destination == this_city){
+                    number += route.number;
                 }
             });
         });
