@@ -1413,9 +1413,8 @@ function gameboard(map){
 
         var other_city = tiles[x][y].city;
         var owner = city.owner();
-        console.log(tiles[x][y]);
         if( (other_city != undefined) && (tiles[x][y].influence[owner] > 0) ){
-            city[worker_type+'_list'].push(other_city);
+            city.send(worker_type, other_city);
             update_city_page();
         }
     }

@@ -24,16 +24,20 @@ class City {
     }
 
     get merchants() {
-        return this.merchant_list.length;
+        var num = 0;
+        this.merchant_list.forEach(function(destination){
+            num += destination.number;
+        });
+        return num;
     }
 
     get foreign_merchants() {
         var number = 0;
         var this_city = this;
         game.cities.forEach(function(city){
-            city.merchant_list.forEach(function(destination){
-                if(destination == this_city){
-                    number += 1;
+            city.merchant_list.forEach(function(route){
+                if(route.destination == this_city){
+                    number += route.number;
                 }
             });
         });
@@ -41,7 +45,11 @@ class City {
     }
 
     get tributes() {
-        return this.tribute_list.length;
+        var num = 0;
+        this.tribute_list.forEach(function(destination){
+            num += destination.number;
+        });
+        return num;
     }
 
     get foreign_tributes() {
@@ -50,7 +58,7 @@ class City {
         game.cities.forEach(function(city){
             city.tribute_list.forEach(function(destination){
                 if(destination == this_city){
-                    number += 1;
+                    number += destination.number;
                 }
             });
         });
@@ -60,7 +68,6 @@ class City {
     // Draw a new name from the owners list of names
     next_name(){
         var owner = players[this.owner()];
-        console.log(this.owner(), owner, players);
         var name = owner.city_names[owner.cities];
         if(name == undefined){
             name = owner.city_prefix+owner.city_names[owner.cities%owner.city_names.length];
@@ -97,9 +104,9 @@ class City {
     // Count merchants to a given city
     merchants_to(other_city){
         var merchants = 0;
-        this.merchant_list.forEach(function(destination){
-            if(destination == other_city){
-                merchants += 1;
+        this.merchant_list.forEach(function(route){
+            if(route.destination == other_city){
+                merchants += route.number;
             }
         });
         return merchants;
@@ -163,6 +170,25 @@ class City {
        if(n >= 0 && n <= this.priests + this.free_workers()){
            this.priests = n;
        }
+    }
+
+    // Set the number workers sent to city
+    set_remote_worker_count(route, n, list, i){
+       if(n >= 0 && n <= route.number + this.free_workers()){
+           route.number = n;
+       }
+       if(n==0){
+           list.splice(i, 1);
+       }
+       game.update_city_page();
+    }
+
+    // Send a worker to another city
+    send(worker_type, other_city){
+        this[worker_type+'_list'].push({
+            'destination': other_city,
+            'number': 1
+        });
     }
 
     // Count food producing tiles around the city
@@ -506,10 +532,10 @@ class City {
         var div = $("<div></div>");
         // Name as an h4 tag
         div.append($("<h4></h4>").text(this.name));
-        div.append($("<div></div>").html("<b>Free workers</b>: "+this.free_workers()));
-        div.append(this.local_worker_div());
-
         if(this.owner() == 'white'){
+            div.append($("<div></div>").html("<b>Free workers</b>: "+this.free_workers()));
+            div.append(this.local_worker_div());
+
             // Lists of each worker type sent to cities
             div.append($("<div></div>").html("<b>Merchants</b>:").append(this.create_send_button('merchant')));
             div.append(this.worker_list(this.merchant_list));
@@ -522,15 +548,14 @@ class City {
     // List workers in a given list
     worker_list(list){
         var list_div = $("<table></table>")
-        list.forEach(function(destination, i, list){
+        var city = this;
+        list.forEach(function(worker, i, list){
             var row = $("<tr></tr>");
-            row.append($("<td></td>").html(destination.name));
-            var deletebutton = $("<span></span>").text("remove").addClass("btn btn-primary btn-vsm");
-            deletebutton.click(function(){
-                list.splice(i, 1);
-                game.update_city_page();
-            });
-            row.append($("<td></td>").append(deletebutton));
+            var worker_div = city.make_worker_div(
+                worker.number, 0, worker.destination.name, false,
+                function(n){city.set_remote_worker_count(worker, n, list, i)}
+            );
+            row.append($("<td></td>").append(worker_div));
             list_div.append(row);
         });
         return list_div;
