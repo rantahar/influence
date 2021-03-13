@@ -294,7 +294,7 @@ class City {
             map_scene.update_city_sprite(x,y,this.level);
         }
         // Or if the city shrinks
-        if(this.food < 0){
+        if(this.food < 0 && this.level > 0){
             this.level -= 1;
             this.food = this.food_limit()/4;
             if(this.free_workers() == 0){
