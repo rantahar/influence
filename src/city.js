@@ -585,7 +585,7 @@ class City {
                 var set =function(n){sender.set_route_count(route, n)};
             }
             var worker_div = city.make_worker_div(
-                route.number, 0, sender.name, false,
+                route.number, 0, sender.name, false, set
             );
             if(sender.owner()){
                 worker_div.css('color', players[sender.owner()].text_color);
