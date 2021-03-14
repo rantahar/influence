@@ -342,7 +342,7 @@ class City {
         } else{
             worker_div.append(" "+current);
         }
-        if(!send){
+        if(setter != undefined && !send){
             // add worker button
             var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
             pbutton.click(function(){
@@ -357,7 +357,8 @@ class City {
             });
             worker_div.append(pbutton);
             worker_div.append(mbutton);
-        } else {
+        }
+        if(setter != undefined && send){
             // Send a new worker of this type to another city
             var sendbutton = $("<span></span>").text("send").addClass("btn btn-primary btn-vsm");
             sendbutton.click(function(){
@@ -551,9 +552,9 @@ class City {
             });
         });
         div.append($("<div></div>").html("<b>Foreign Merchants</b>:"));
-        div.append(this.worker_list(merchant_list));
+        div.append(this.foreign_worker_list(merchant_list));
         div.append($("<div></div>").html("<b>Tributes Received</b>:"));
-        div.append(this.worker_list(tribute_list));
+        div.append(this.foreign_worker_list(tribute_list));
         return div;
     }
 
@@ -580,10 +581,17 @@ class City {
         list.forEach(function(route){
             var row = $("<tr></tr>");
             var sender = route.source;
+            if(sender.owner() && sender.owner() == 'white'){
+                var set =function(n){sender.set_route_count(route, n)};
+            }
             var worker_div = city.make_worker_div(
-                route.number, 0, route.destination.name, false,
-                function(n){sender.set_route_count(route, n)}
+                route.number, 0, sender.name, false,
             );
+            if(sender.owner()){
+                worker_div.css('color', players[sender.owner()].text_color);
+            } else {
+                worker_div.css('color', 'gray');
+            }
             row.append($("<td></td>").append(worker_div));
             list_div.append(row);
         });
