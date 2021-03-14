@@ -155,19 +155,28 @@ class City {
     }
 
     // Set the number workers sent to city
-    set_remote_worker_count(route, n, list, i){
+    set_route_count(route, n){
        if(n >= 0 && n <= route.number + this.free_workers()){
            route.number = n;
        }
-       if(n==0){
-           list.splice(i, 1);
-       }
+       // Clear routes with 0 workers
+       this.merchant_routes.forEach(function(route, i, list){
+           if(route.number == 0){
+               list.splice(i, 1);
+           }
+       });
+       this.tribute_routes.forEach(function(route, i, list){
+           if(route.number == 0){
+               list.splice(i, 1);
+           }
+       });
        game.update_city_page();
     }
 
     // Send a worker to another city
     send(worker_type, other_city){
         this[worker_type+'_routes'].push({
+            'source': this,
             'destination': other_city,
             'number': 1
         });
@@ -520,11 +529,31 @@ class City {
             div.append(this.local_worker_div());
 
             // Lists of each worker type sent to cities
-            div.append($("<div></div>").html("<b>Merchants</b>:").append(this.create_send_button('merchant')));
+            div.append($("<div></div>").html("<b>Merchants Sent</b>:").append(this.create_send_button('merchant')));
             div.append(this.worker_list(this.merchant_routes));
-            div.append($("<div></div>").html("<b>Tributes:</b>:").append(this.create_send_button('tribute')));
+            div.append($("<div></div>").html("<b>Tributes Sent</b>:").append(this.create_send_button('tribute')));
             div.append(this.worker_list(this.tribute_routes));
         }
+        // List of workers from other cities
+        var this_city = this;
+        var merchant_list = [];
+        var tribute_list = [];
+        game.cities.forEach(function(city){
+            city.merchant_routes.forEach(function(route){
+                if(route.destination == this_city){
+                    merchant_list.push(route);
+                }
+            });
+            city.tribute_routes.forEach(function(route){
+                if(route.destination == this_city){
+                    tribute_list.push(route);
+                }
+            });
+        });
+        div.append($("<div></div>").html("<b>Foreign Merchants</b>:"));
+        div.append(this.worker_list(merchant_list));
+        div.append($("<div></div>").html("<b>Tributes Received</b>:"));
+        div.append(this.worker_list(tribute_list));
         return div;
     }
 
@@ -532,11 +561,28 @@ class City {
     worker_list(list){
         var list_div = $("<table></table>")
         var city = this;
-        list.forEach(function(worker, i, list){
+        list.forEach(function(route){
             var row = $("<tr></tr>");
             var worker_div = city.make_worker_div(
-                worker.number, 0, worker.destination.name, false,
-                function(n){city.set_remote_worker_count(worker, n, list, i)}
+                route.number, 0, route.destination.name, false,
+                function(n){route.source.set_route_count(route, n)}
+            );
+            row.append($("<td></td>").append(worker_div));
+            list_div.append(row);
+        });
+        return list_div;
+    }
+
+    // List foreign workes in a given list
+    foreign_worker_list(list){
+        var list_div = $("<table></table>")
+        var city = this;
+        list.forEach(function(route){
+            var row = $("<tr></tr>");
+            var sender = route.source;
+            var worker_div = city.make_worker_div(
+                route.number, 0, route.destination.name, false,
+                function(n){sender.set_route_count(route, n)}
             );
             row.append($("<td></td>").append(worker_div));
             list_div.append(row);
