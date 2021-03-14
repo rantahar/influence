@@ -15,54 +15,33 @@ class City {
         this.priests = 0;
 
         // workers sent to other cities
-        this.merchant_list = [];
-        this.tribute_list = [];
+        this.merchant_routes = [];
+        this.tribute_routes = [];
 
         // Change tile properties
         tile.influence[this.owner()] = this.influence(this.owner());
         tile.road = true;
     }
 
-    get merchants() {
+    number_sent(type) {
         var num = 0;
-        this.merchant_list.forEach(function(destination){
-            num += destination.number;
+        this[type+"_routes"].forEach(function(route){
+            num += route.number;
         });
         return num;
     }
 
-    get foreign_merchants() {
-        var number = 0;
+    number_received(type) {
+        var num = 0;
         var this_city = this;
         game.cities.forEach(function(city){
-            city.merchant_list.forEach(function(route){
+            city[type+"_routes"].forEach(function(route){
                 if(route.destination == this_city){
-                    number += route.number;
+                    num += route.number;
                 }
             });
-        });
-        return number;
-    }
-
-    get tributes() {
-        var num = 0;
-        this.tribute_list.forEach(function(destination){
-            num += destination.number;
         });
         return num;
-    }
-
-    get foreign_tributes() {
-        var number = 0;
-        var this_city = this;
-        game.cities.forEach(function(city){
-            city.tribute_list.forEach(function(route){
-                if(route.destination == this_city){
-                    number += route.number;
-                }
-            });
-        });
-        return number;
     }
 
     // Draw a new name from the owners list of names
@@ -86,8 +65,10 @@ class City {
             influence += 10;
             // Foreign and local workers
             influence += this.priests;
-            influence += -2*this.merchants - 2*this.foreign_merchants;
-            influence += this.foreign_tributes - this.tributes;
+            influence += - 2*this.number_sent('merchant')
+                         - 2*this.number_received('merchant');
+            influence +=   this.number_received('tribute')
+                         - this.number_sent('tribute');
         }
         // Check for influence from other cities
         var this_city = this;
@@ -104,7 +85,7 @@ class City {
     // Count merchants to a given city
     merchants_to(other_city){
         var merchants = 0;
-        this.merchant_list.forEach(function(route){
+        this.merchant_routes.forEach(function(route){
             if(route.destination == other_city){
                 merchants += route.number;
             }
@@ -121,7 +102,8 @@ class City {
     free_workers() {
         return this.level - this.builders - this.priests
                - this.workers_wood - this.workers_food
-               - this.merchants - this.tributes;
+               - this.number_sent('merchant')
+               - this.number_sent('tribute');
     }
 
     // Set the number of builders
@@ -185,7 +167,7 @@ class City {
 
     // Send a worker to another city
     send(worker_type, other_city){
-        this[worker_type+'_list'].push({
+        this[worker_type+'_routes'].push({
             'destination': other_city,
             'number': 1
         });
@@ -245,8 +227,9 @@ class City {
         // +1 extra for fields
         food += Math.min(workers, fields);
 
-        // Tribute
-        food += this.foreign_tributes - this.tributes;
+        // Tributes received and sent
+        food += this.number_received('tribute')
+              - this.number_sent('tribute');
         return food;
     }
 
@@ -492,7 +475,7 @@ class City {
         var city = this;
 
         var worker_div = this.make_worker_div(
-            city.merchants, 0, "Merchants:", true,
+            city.number_sent('merchant'), 0, "Merchants:", true,
             function(n){
                 if(city.free_workers() > 0){
                     game.send_worker(city, 'merchant')
@@ -502,7 +485,7 @@ class City {
         div.append(worker_div);
 
         var worker_div = this.make_worker_div(
-            city.tributes, 0, "Tributes:", true,
+            city.number_sent('tribute'), 0, "Tributes:", true,
             function(n){
                 if(city.free_workers() > 0){
                     game.send_worker(city, 'tribute')
@@ -538,9 +521,9 @@ class City {
 
             // Lists of each worker type sent to cities
             div.append($("<div></div>").html("<b>Merchants</b>:").append(this.create_send_button('merchant')));
-            div.append(this.worker_list(this.merchant_list));
+            div.append(this.worker_list(this.merchant_routes));
             div.append($("<div></div>").html("<b>Tributes:</b>:").append(this.create_send_button('tribute')));
-            div.append(this.worker_list(this.tribute_list));
+            div.append(this.worker_list(this.tribute_routes));
         }
         return div;
     }
