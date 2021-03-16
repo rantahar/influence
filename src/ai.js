@@ -26,8 +26,13 @@ class AIPlayer {
         this.field_city_level = aiconfig.field_city_level;
         this.field_city_food_tiles = aiconfig.field_city_food_tiles;
         this.field_city_food_tiles = aiconfig.field_city_food_tiles;
-        this.wood_to_food_ratio = aiconfig.wood_to_food_ratio;
         this.large_cities = aiconfig.large_cities;
+
+        // Worker related
+        this.worker_food_base = aiconfig.worker_food_base;
+        this.worker_per_food_production = aiconfig.worker_per_food_production;
+        this.worker_wood_base = aiconfig.worker_wood_base;
+        this.worker_per_wood = aiconfig.worker_per_wood;
 
         this.city_names = aiconfig.city_names;
         this.city_prefix = aiconfig.city_prefix;
@@ -210,11 +215,14 @@ class AIPlayer {
             assign_func = function(){
                 city.set_food_workers(city.workers_food+1);
             };
-            preference = 100;
+            preference = this.worker_food_base
+                       - this.worker_per_food_production *
+                           (city.food_production() - city.food_consumption()) ;
         }
         // Check wood workers
         if(city.max_wood_workers() > city.workers_wood){
-            var pref = 60;
+            pref = this.worker_wood_base
+                 - this.worker_per_wood * this.wood;
             if(preference < pref){
                 assign_func = function(){
                     city.set_wood_workers(city.workers_wood+1);
@@ -305,8 +313,13 @@ function make_players(){
         field_influence: 0,
         field_city_level: 1,
         field_city_food_tiles: 2,
-        wood_to_food_ratio: 0.4,
-        large_cities: 1,
+
+        // Worker related
+        worker_food_base: 100,
+        worker_per_food_production: 1,
+        worker_wood_base: 98,
+        worker_per_wood: 0.1,
+
         city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
         city_prefix: "Am"
     });
@@ -329,7 +342,13 @@ function make_players(){
         field_influence: 1,
         field_city_level: 0,
         field_city_food_tiles: 1,
-        wood_to_food_ratio: 0.5,
+
+        // Worker related
+        worker_food_base: 100,
+        worker_per_food_production: 2,
+        worker_wood_base: 120,
+        worker_per_wood: 1,
+
         city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
                     "Kolma", "Enta", "Aflan", "Ylman", "Umilla", "Wenna", "Tornal", "Kilman" ],
         city_prefix: "Aka-"
@@ -355,7 +374,13 @@ function make_players(){
         field_influence: -1,
         field_city_level: -10,
         field_city_food_tiles: 0,
-        wood_to_food_ratio: 0.2,
+
+        // Worker related
+        worker_food_base: 100,
+        worker_per_food_production: 2,
+        worker_wood_base: 60,
+        worker_per_wood: 2,
+
         city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath", "Arostagath",
             "Ungoth", "Tramath", "Etrukrol", "Dimrasta", "Igratas", "Fedrath", "Brastagrath",
             "Olrath", "Amdaras", "Edrukostarath", "Ostregtha"],
@@ -380,7 +405,13 @@ function make_players(){
         field_influence: -1,
         field_city_level: -2,
         field_city_food_tiles: 0,
-        wood_to_food_ratio: 0.2,
+
+        // Worker related
+        worker_food_base: 100,
+        worker_per_food_production: 2,
+        worker_wood_base: 60,
+        worker_per_wood: 2,
+
         city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta", "Odrila", "Ondara",
                     "Okra", "Omrana", "Otria", "Oula", "Ogra", "Onderasta", "Omudira", "Owdamas",
                     "Omkorsta"],
