@@ -9,6 +9,8 @@ class City {
         this.level = level;
         this.food = food;
         this.name = this.next_name();
+
+        // workers
         this.builders = 0;
         this.workers_food = level;
         this.workers_wood = 0;

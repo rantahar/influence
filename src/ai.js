@@ -25,6 +25,9 @@ class AIPlayer {
         this.field_influence = aiconfig.field_influence;
         this.field_city_level = aiconfig.field_city_level;
         this.field_city_food_tiles = aiconfig.field_city_food_tiles;
+        this.field_city_food_tiles = aiconfig.field_city_food_tiles;
+        this.wood_to_food_ratio = aiconfig.wood_to_food_ratio;
+        this.large_cities = aiconfig.large_cities;
 
         this.city_names = aiconfig.city_names;
         this.city_prefix = aiconfig.city_prefix;
@@ -101,30 +104,20 @@ class AIPlayer {
                         city.queue_colony();
                     }
                 }
-                // Remove one priest to give room for adjusting
-                city.priests = Math.max(city.priests-1, 0);
-                // Add wood or food workers if it makes sense
-                if(city.wood_tiles() > city.workers_wood){
-                    if((city.food_production()*this.wood_to_food_ratio) > (city.wood_production()+1)){
-                        city.workers_food -= 1;
-                        city.workers_wood += 1;
-                        console.log(this.name+": Add wood gatherer");
-                    }
-                    if(((city.food_production()+1)*this.wood_to_food_ratio) < city.wood_production()){
-                        city.workers_food -= 1;
-                        city.workers_wood += 1;
-                        console.log(this.name+": Add farmer / fisher");
-                    }
+
+                // Next worker allocation.
+                city.current_influence = city.influence(this.key);
+                city.workers_food = 0;
+                city.workers_wood = 0;
+                city.priests = 0;
+                city.builders = 0;
+                city.merchant_routes = [];
+                city.tribute_routes = [];
+
+                while(city.free_workers() > 0){
+                    this.assign_workers(city);
                 }
-                if(city.food_tiles() > city.workers_food && city.free_workers() > 0){
-                    city.workers_food += Math.min(city.food_tiles()-city.workers_food, city.free_workers());
-                    console.log(this.name+": Assign farmers / fishers");
-                }
-                // Anyone left over is a priest
-                if(city.free_workers()){
-                    city.priests += city.free_workers();
-                    console.log(this.name+": Assigned priests");
-                }
+                city.current_influence = undefined;
             }
         }
 
@@ -207,6 +200,80 @@ class AIPlayer {
         }
     }
 
+
+    // assign a new worker
+    assign_workers(city){
+        var preference = 0;
+        var assign_func = undefined;
+        // Check if we can assign food workers
+        if(city.max_food_workers() > city.workers_food){
+            assign_func = function(){
+                city.set_food_workers(city.workers_food+1);
+            };
+            preference = 100;
+        }
+        // Check wood workers
+        if(city.max_wood_workers() > city.workers_wood){
+            var pref = 60;
+            if(preference < pref){
+                assign_func = function(){
+                    city.set_wood_workers(city.workers_wood+1);
+                };
+                preference = pref;
+            }
+        }
+        var pref = 50;
+        if(preference < pref){
+            assign_func = function(){
+                city.set_priests(city.priests+1);
+            };
+            preference = pref;
+        }
+        if(city.building != undefined){
+            var pref = 90;
+            if(preference < pref){
+                assign_func = function(){
+                    city.set_builders(city.builders+1);
+                };
+                preference = pref;
+            }
+        }
+        // Tributes
+        var my_inf = city.current_influence;
+        if(city.tile.influence[this.key] > my_inf){
+           my_inf = 0;
+        }
+        for(var key in game.cities){
+            let other_city = game.cities[key];
+            if(other_city.owner() == this.key && other_city != city){
+                // Prefer to send tribute to large influence cities
+                let pref = 49 + other_city.influence(this.key) - my_inf;
+                if(preference < pref){
+                    assign_func = function(){
+                        city.send('tribute', other_city);
+                    };
+                    preference = pref
+                }
+            }
+        }
+        // Merchants
+        for(var key in game.cities){
+            let other_city = game.cities[key];
+            if(other_city.owner() != this.key && other_city != city){
+                // Preference to sending merchants mainly depends on
+                // the difference between influence levels
+                var pref = 55 + other_city.influence(this.key)
+                              - other_city.influence(other_city.owner());
+                if(preference < pref){
+                    assign_func = function(){
+                        city.send('merchant', other_city);
+                    };
+                    preference = pref
+                }
+            }
+        }
+        assign_func();
+    }
 }
 
 
@@ -238,7 +305,8 @@ function make_players(){
         field_influence: 0,
         field_city_level: 1,
         field_city_food_tiles: 2,
-        wood_to_food_ratio: 0,
+        wood_to_food_ratio: 0.4,
+        large_cities: 1,
         city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
         city_prefix: "Am"
     });
