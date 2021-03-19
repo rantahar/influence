@@ -10,6 +10,13 @@ class City {
         this.food = food;
         this.name = this.next_name();
 
+        // Set current influence to start with
+        this.current_influence = {};
+        for(key in players){
+            this.current_influence[key] = 0;
+        }
+        this.current_influence[this.owner()] = 10;
+
         // workers
         this.builders = 0;
         this.workers_food = level;
@@ -332,6 +339,14 @@ class City {
         if(this.owner() != undefined){
             players[this.owner()].wood += this.wood_production();
         }
+
+    }
+
+    update_influence(player){
+        // Update current city influence by one turn and return it.
+        // Increase by 1 if city influence is bigger than current value.
+        this.current_influence[player] = Math.min(this.current_influence[player]+1, this.influence(player));
+        return this.current_influence[player];
     }
 
     // Build a display line for a worker type

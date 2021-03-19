@@ -1061,7 +1061,7 @@ function gameboard(map){
             for(var y = 0; y < tiles.map_size_y; y++) {
                 new_influence_array[x][y] = {}
                 for(player in players){
-                    // Influence on this tile is usually the maximum of neighbours - friction
+                    // Influence on this tile is the maximum of neighbours - friction
                     let c = 0; // max neighbour
                     tiles[x][y].neighbours().forEach(function(tile){
                         let x = tile.x; let y = tile.y;
@@ -1076,7 +1076,7 @@ function gameboard(map){
 
                     if(tiles[x][y].city){
                       // There is a city here. Check if it's culture dominates.
-                      let city_c = tiles[x][y].city.influence(player);
+                      let city_c = tiles[x][y].city.update_influence(player);
                       if(city_c > c){
                         // The city dominates and sets the influence level.
                         c = city_c;
@@ -1091,14 +1091,14 @@ function gameboard(map){
 
         // Write new influence into the array
         for(var x = 0; x < tiles.map_size_x; x++) {
-          for(var y = 0; y < tiles.map_size_y; y++) {
-            tiles[x][y].influence = new_influence_array[x][y];
-          }
+           for(var y = 0; y < tiles.map_size_y; y++) {
+              tiles[x][y].influence = new_influence_array[x][y];
+           }
         }
 
         // Red influence does not mix with others. This will use up red
         // influence to reduce the others
-        persecute('red');
+        //persecute('red'); Disable this and try to differentiate red in a different way
 
         // Now decide the owners of each tile
         for(var x = 0; x < tiles.map_size_x; x++) {

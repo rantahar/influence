@@ -111,7 +111,6 @@ class AIPlayer {
                 }
 
                 // Next worker allocation.
-                city.current_influence = city.influence(this.key);
                 city.workers_food = 0;
                 city.workers_wood = 0;
                 city.priests = 0;
@@ -122,7 +121,6 @@ class AIPlayer {
                 while(city.free_workers() > 0){
                     this.assign_workers(city);
                 }
-                city.current_influence = undefined;
             }
         }
 
@@ -247,7 +245,7 @@ class AIPlayer {
             }
         }
         // Tributes
-        var my_inf = city.current_influence;
+        var my_inf = city.current_influence[this.key];
         if(city.tile.influence[this.key] > my_inf){
            my_inf = 0;
         }
