@@ -33,6 +33,12 @@ class AIPlayer {
         this.worker_per_food_production = aiconfig.worker_per_food_production;
         this.worker_wood_base = aiconfig.worker_wood_base;
         this.worker_per_wood = aiconfig.worker_per_wood;
+        this.tribute_base = aiconfig.tribute_base;
+        this.tribute_high_influence = aiconfig.tribute_high_influence;
+        this.tribute_subdominant = aiconfig.tribute_subdominant;
+        this.merchant_base = aiconfig.merchant_base;
+        this.merchant_high_influence = aiconfig.merchant_high_influence;
+        this.merchant_subdominant = aiconfig.merchant_subdominant;
 
         this.city_names = aiconfig.city_names;
         this.city_prefix = aiconfig.city_prefix;
@@ -246,21 +252,25 @@ class AIPlayer {
         }
         // Tributes
         var my_inf = city.current_influence[this.key];
-        if(city.tile.influence[this.key] > my_inf){
-           my_inf = 0;
+        let influence_diff = city.tile.influence[this.key] - my_inf;
+        var send_pref = this.tribute_base;
+        if(influence_diff > 0){
+            send_pref += this.tribute_subdominant;
         }
         for(var key in game.cities){
-            let other_city = game.cities[key];
-            if(other_city.owner() == this.key && other_city != city){
-                // Prefer to send tribute to large influence cities
-                let pref = 49 + other_city.influence(this.key) - my_inf;
-                if(preference < pref){
-                    assign_func = function(){
-                        city.send('tribute', other_city);
-                    };
-                    preference = pref
-                }
-            }
+           let other_city = game.cities[key];
+           if(other_city.owner() == this.key && other_city != city){
+              // Prefer to send tribute to large influence cities
+              let pref = send_pref;
+              var diff = other_city.current_influence[this.key] - my_inf;
+              pref += this.tribute_high_influence*diff;
+              if(preference < pref){
+                 assign_func = function(){
+                    city.send('tribute', other_city);
+                 };
+                 preference = pref
+              }
+           }
         }
         // Merchants
         for(var key in game.cities){
@@ -317,6 +327,12 @@ function make_players(){
         worker_per_food_production: 1,
         worker_wood_base: 98,
         worker_per_wood: 0.1,
+        tribute_base: 49,
+        tribute_high_influence: 2,
+        tribute_subdominant: 2,
+        merchant_base: 40,
+        merchant_high_influence: 1,
+        merchant_subdominant: 0,
 
         city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
         city_prefix: "Am"
@@ -346,6 +362,12 @@ function make_players(){
         worker_per_food_production: 2,
         worker_wood_base: 120,
         worker_per_wood: 1,
+        tribute_base: 40,
+        tribute_high_influence: 1,
+        tribute_subdominant: 0,
+        merchant_base: 40,
+        merchant_high_influence: 1,
+        merchant_subdominant: 5,
 
         city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
                     "Kolma", "Enta", "Aflan", "Ylman", "Umilla", "Wenna", "Tornal", "Kilman" ],
@@ -378,6 +400,12 @@ function make_players(){
         worker_per_food_production: 2,
         worker_wood_base: 60,
         worker_per_wood: 2,
+        tribute_base: 40,
+        tribute_high_influence: 1,
+        tribute_subdominant: 5,
+        merchant_base: 40,
+        merchant_high_influence: 1,
+        merchant_subdominant: 5,
 
         city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath", "Arostagath",
             "Ungoth", "Tramath", "Etrukrol", "Dimrasta", "Igratas", "Fedrath", "Brastagrath",
@@ -409,6 +437,12 @@ function make_players(){
         worker_per_food_production: 2,
         worker_wood_base: 60,
         worker_per_wood: 2,
+        tribute_base: 40,
+        tribute_high_influence: 1,
+        tribute_subdominant: 2,
+        merchant_base: 40,
+        merchant_high_influence: 1,
+        merchant_subdominant: 2,
 
         city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta", "Odrila", "Ondara",
                     "Okra", "Omrana", "Otria", "Oula", "Ogra", "Onderasta", "Omudira", "Owdamas",
