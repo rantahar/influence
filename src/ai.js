@@ -37,7 +37,8 @@ class AIPlayer {
         this.tribute_high_influence = aiconfig.tribute_high_influence;
         this.tribute_subdominant = aiconfig.tribute_subdominant;
         this.merchant_base = aiconfig.merchant_base;
-        this.merchant_high_influence = aiconfig.merchant_high_influence;
+        this.merchant_agression = aiconfig.merchant_agression;
+        this.merchant_defensiveness = aiconfig.merchant_defensiveness;
         this.merchant_subdominant = aiconfig.merchant_subdominant;
 
         this.city_names = aiconfig.city_names;
@@ -275,11 +276,20 @@ class AIPlayer {
         // Merchants
         for(var key in game.cities){
             let other_city = game.cities[key];
-            if(other_city.owner() != this.key && other_city != city){
+            if(other_city.owner() != this.key && other_city != city &&
+               other_city.tile.influence[this.key] > 0){
                 // Preference to sending merchants mainly depends on
                 // the difference between influence levels
-                var pref = 55 + other_city.influence(this.key)
-                              - other_city.influence(other_city.owner());
+                var diff_there = other_city.influence(this.key)
+                               - other_city.influence(other_city.owner());
+                var diff_here = city.influence(this.key)
+                              - city.influence(other_city.owner());
+                var pref = this.merchant_base
+                         + diff_here*this.merchant_defensiveness;
+                         //+ diff_there*this.merchant_agression;
+                if(this.key == 'blue'){
+                    console.log(city.name, other_city.name, pref)
+                }
                 if(preference < pref){
                     assign_func = function(){
                         city.send('merchant', other_city);
@@ -331,8 +341,9 @@ function make_players(){
         tribute_high_influence: 2,
         tribute_subdominant: 2,
         merchant_base: 40,
-        merchant_high_influence: 1,
-        merchant_subdominant: 0,
+        merchant_agression: 0,
+        merchant_defensiveness: 1,
+        merchant_subdominant: 1,
 
         city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
         city_prefix: "Am"
@@ -359,14 +370,15 @@ function make_players(){
 
         // Worker related
         worker_food_base: 100,
-        worker_per_food_production: 2,
-        worker_wood_base: 120,
+        worker_per_food_production: 5,
+        worker_wood_base: 90,
         worker_per_wood: 1,
         tribute_base: 40,
         tribute_high_influence: 1,
-        tribute_subdominant: 0,
-        merchant_base: 40,
-        merchant_high_influence: 1,
+        tribute_subdominant: 1,
+        merchant_base: 60,
+        merchant_agression: 0,
+        merchant_defensiveness: 1,
         merchant_subdominant: 5,
 
         city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
@@ -404,7 +416,8 @@ function make_players(){
         tribute_high_influence: 1,
         tribute_subdominant: 5,
         merchant_base: 40,
-        merchant_high_influence: 1,
+        merchant_agression: 1,
+        merchant_defensiveness: 1,
         merchant_subdominant: 5,
 
         city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath", "Arostagath",
@@ -441,7 +454,8 @@ function make_players(){
         tribute_high_influence: 1,
         tribute_subdominant: 2,
         merchant_base: 40,
-        merchant_high_influence: 1,
+        merchant_agression: 1,
+        merchant_defensiveness: 1,
         merchant_subdominant: 2,
 
         city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta", "Odrila", "Ondara",
