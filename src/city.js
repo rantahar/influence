@@ -224,11 +224,13 @@ class City {
         if(worker_type == 'merchant' && this.has_trade_route_with(other_city)){
             return; //cannot set
         }
-        this[worker_type+'_routes'].push({
-            'source': this,
-            'destination': other_city,
-            'number': 1
-        });
+        if(this.free_workers() > 0){
+           this[worker_type+'_routes'].push({
+               'source': this,
+               'destination': other_city,
+               'number': 1
+           });
+       }
     }
 
     // Count food producing tiles around the city
