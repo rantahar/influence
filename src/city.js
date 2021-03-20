@@ -606,7 +606,7 @@ class City {
             });
         });
         div.append($("<div></div>").html("<b>Foreign Merchants</b>:"));
-        div.append(this.foreign_worker_list(merchant_list));
+        div.append(this.foreign_merchant_list(merchant_list));
         div.append($("<div></div>").html("<b>Tributes Received</b>:"));
         div.append(this.foreign_worker_list(tribute_list));
         return div;

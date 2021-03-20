@@ -36,6 +36,9 @@ class AIPlayer {
         this.tribute_base = aiconfig.tribute_base;
         this.tribute_high_influence = aiconfig.tribute_high_influence;
         this.tribute_subdominant = aiconfig.tribute_subdominant;
+        this.tribute_starvation = aiconfig.tribute_starvation;
+        this.merchant_internal = aiconfig.merchant_internal;
+        this.merchant_growth = aiconfig.merchant_growth;
         this.merchant_base = aiconfig.merchant_base;
         this.merchant_agression = aiconfig.merchant_agression;
         this.merchant_defensiveness = aiconfig.merchant_defensiveness;
@@ -215,14 +218,15 @@ class AIPlayer {
     assign_workers(city){
         var preference = 0;
         var assign_func = undefined;
+        var food_balance = city.food_production() - city.food_consumption();
+        var starving = food_balance > 0;
         // Check if we can assign food workers
         if(city.max_food_workers() > city.workers_food){
             assign_func = function(){
                 city.set_food_workers(city.workers_food+1);
             };
             preference = this.worker_food_base
-                       - this.worker_per_food_production *
-                           (city.food_production() - city.food_consumption()) ;
+                       - this.worker_per_food_production * food_balance;
         }
         // Check wood workers
         if(city.max_wood_workers() > city.workers_wood){
@@ -251,12 +255,16 @@ class AIPlayer {
                 preference = pref;
             }
         }
+
         // Tributes
         var my_inf = city.current_influence[this.key];
         let influence_diff = city.tile.influence[this.key] - my_inf;
         var send_pref = this.tribute_base;
         if(influence_diff > 0){
             send_pref += this.tribute_subdominant;
+        }
+        if(starving){
+            send_pref -= this.tribute_starvation;
         }
         for(var key in game.cities){
            let other_city = game.cities[key];
@@ -273,22 +281,30 @@ class AIPlayer {
               }
            }
         }
+
         // Merchants
+        var send_pref = this.tribute_base;
+        if(influence_diff > 0){
+            send_pref += this.tribute_subdominant;
+        }
         for(var key in game.cities){
             let other_city = game.cities[key];
-            if(other_city.owner() != this.key && other_city != city &&
+            if(other_city != city &&
+               !city.has_trade_route_with(other_city) &&
                other_city.tile.influence[this.key] > 0){
-                // Preference to sending merchants mainly depends on
-                // the difference between influence levels
-                var diff_there = other_city.influence(this.key)
-                               - other_city.influence(other_city.owner());
-                var diff_here = city.influence(this.key)
-                              - city.influence(other_city.owner());
-                var pref = this.merchant_base
-                         + diff_here*this.merchant_defensiveness;
-                         //+ diff_there*this.merchant_agression;
-                if(this.key == 'blue'){
-                    console.log(city.name, other_city.name, pref)
+                var pref = send_pref;
+                if(other_city.owner() == this.key){
+                    pref += this.merchant_internal
+                          + other_city.level * this.merchant_growth;
+                } else {
+                    // Preference to sending merchants mainly depends on
+                    // the difference between influence levels
+                    var diff_there = other_city.influence(this.key)
+                        - other_city.influence(other_city.owner());
+                    var diff_here = city.influence(this.key)
+                        - city.influence(other_city.owner());
+                    pref += diff_here*this.merchant_defensiveness;
+                          + diff_there*this.merchant_aggression;
                 }
                 if(preference < pref){
                     assign_func = function(){
@@ -335,14 +351,17 @@ function make_players(){
         // Worker related
         worker_food_base: 100,
         worker_per_food_production: 1,
-        worker_wood_base: 98,
-        worker_per_wood: 0.1,
+        worker_wood_base: 100,
+        worker_per_wood: 0,
         tribute_base: 49,
         tribute_high_influence: 2,
-        tribute_subdominant: 2,
+        tribute_subdominant: 5,
+        tribute_starvation: 20,
+        merchant_internal: 10,
+        merchant_growth: 1,
         merchant_base: 40,
-        merchant_agression: 0,
-        merchant_defensiveness: 1,
+        merchant_agression: -1,
+        merchant_defensiveness: 4,
         merchant_subdominant: 1,
 
         city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
@@ -376,8 +395,11 @@ function make_players(){
         tribute_base: 40,
         tribute_high_influence: 1,
         tribute_subdominant: 1,
+        tribute_starvation: 20,
+        merchant_internal: 70,
+        merchant_growth: 0,
         merchant_base: 60,
-        merchant_agression: 0,
+        merchant_agression: -1,
         merchant_defensiveness: 1,
         merchant_subdominant: 5,
 
@@ -415,10 +437,13 @@ function make_players(){
         tribute_base: 40,
         tribute_high_influence: 1,
         tribute_subdominant: 5,
+        tribute_starvation: 10,
+        merchant_internal: 50,
+        merchant_growth: 1,
         merchant_base: 40,
         merchant_agression: 1,
         merchant_defensiveness: 1,
-        merchant_subdominant: 5,
+        merchant_subdominant: 10,
 
         city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath", "Arostagath",
             "Ungoth", "Tramath", "Etrukrol", "Dimrasta", "Igratas", "Fedrath", "Brastagrath",
@@ -453,6 +478,9 @@ function make_players(){
         tribute_base: 40,
         tribute_high_influence: 1,
         tribute_subdominant: 2,
+        tribute_starvation: 5,
+        merchant_internal: 5,
+        merchant_growth: 0,
         merchant_base: 40,
         merchant_agression: 1,
         merchant_defensiveness: 1,
