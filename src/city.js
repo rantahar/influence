@@ -76,12 +76,16 @@ class City {
             influence += this.number_received('tribute')
                        - this.number_sent('tribute');
         }
-        // Add 1 for each trade route where this city is subdominant
+        // Merchants effect of influence. This is a bit more complicated:
+        // they add 2 but only up to the other city's influence - 1.
+        // They need to be sorted first.
         var trade_cities = this.get_trade_cities();
+        // This will sort the list by the current influence in each city
+        trade_cities = trade_cities.sort((a, b) => (a.current_influence[player] > b.current_influence[player]) ? 1 : -1);
         for(var key in trade_cities){
             var other_city = trade_cities[key];
-            if(other_city.current_influence[player] >= influence+1){
-                influence += 1;
+            if(other_city.current_influence[player] > influence+1){
+                influence = Math.min(influence+2,other_city.current_influence[player]-1);
             }
         }
         influence = Math.max(influence, 0)
