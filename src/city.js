@@ -523,9 +523,9 @@ class City {
 
         if(this.food_tiles() > 0){
             // Food can be collected. Show food worker control
-            var min = Math.min(this.food_tiles(), this.level);
+            var max = this.food_tiles();
             var worker_div = this.make_worker_div(
-                city.workers_food, min, "Farmers / Fishers:", false, false,
+                city.workers_food, max, "Farmers / Fishers:", false, false,
                 function(n){city.set_food_workers(n)}
             );
             div.append(worker_div);
@@ -533,9 +533,9 @@ class City {
 
         if(this.wood_tiles() > 0){
             // Wood can be collected. Add a similar slider
-            var min = Math.min(this.wood_tiles(), this.level);
+            var max = this.wood_tiles();
             var worker_div = this.make_worker_div(
-                city.workers_wood, min, "Wood gatherers:", false, false,
+                city.workers_wood, max, "Wood gatherers:", false, false,
                 function(n){city.set_wood_workers(n)}
             );
             div.append(worker_div);
