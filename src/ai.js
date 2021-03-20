@@ -30,15 +30,18 @@ class AIPlayer {
 
         // Worker related
         this.worker_food_base = aiconfig.worker_food_base;
+        this.worker_food_starving = aiconfig.worker_food_starving;
         this.worker_per_food_production = aiconfig.worker_per_food_production;
         this.worker_wood_base = aiconfig.worker_wood_base;
         this.worker_per_wood = aiconfig.worker_per_wood;
+        this.priest_base = aiconfig.priest_base;
+        this.priest_count = aiconfig.priest_count;
         this.tribute_base = aiconfig.tribute_base;
         this.tribute_high_influence = aiconfig.tribute_high_influence;
         this.tribute_subdominant = aiconfig.tribute_subdominant;
-        this.tribute_starvation = aiconfig.tribute_starvation;
         this.merchant_internal = aiconfig.merchant_internal;
-        this.merchant_growth = aiconfig.merchant_growth;
+        this.merchant_internal_number = aiconfig.merchant_internal_number;
+        this.merchant_internal_influence = aiconfig.merchant_internal_influence;
         this.merchant_base = aiconfig.merchant_base;
         this.merchant_agression = aiconfig.merchant_agression;
         this.merchant_defensiveness = aiconfig.merchant_defensiveness;
@@ -220,6 +223,9 @@ class AIPlayer {
             };
             preference = this.worker_food_base
                        - this.worker_per_food_production * food_balance;
+            if(starving){
+                preference += this.worker_food_starving;
+            }
         }
         // Check wood workers
         if(city.max_wood_workers() > city.workers_wood){
@@ -232,7 +238,7 @@ class AIPlayer {
                 preference = pref;
             }
         }
-        var pref = 50;
+        var pref = this.priest_base + this.priest_count*city.priests;
         if(preference < pref){
             assign_func = function(){
                 city.set_priests(city.priests+1);
@@ -255,9 +261,6 @@ class AIPlayer {
         var send_pref = this.tribute_base;
         if(influence_diff > 0){
             send_pref += this.tribute_subdominant;
-        }
-        if(starving){
-            send_pref -= this.tribute_starvation;
         }
         for(var key in game.cities){
            let other_city = game.cities[key];
@@ -287,8 +290,12 @@ class AIPlayer {
                other_city.tile.influence[this.key] > 0){
                 var pref = send_pref;
                 if(other_city.owner() == this.key){
+                    var influence_flow = city.current_influence[this.key]
+                                       - other_city.current_influence[this.key];
+                    influence_flow = Math.abs(influence_flow) - 1;
                     pref += this.merchant_internal
-                          + other_city.level * this.merchant_growth;
+                          + influence_flow * this.merchant_internal_influence
+                          + city.number_sent('merchant') * this.merchant_internal_number;
                 } else {
                     // Preference to sending merchants mainly depends on
                     // the difference between influence levels
@@ -341,17 +348,20 @@ function make_players(){
         field_city_level: 1,
         field_city_food_tiles: 2,
 
-        // Worker related
+        // Worker related priest_base
         worker_food_base: 100,
+        worker_food_starving: 1000,
         worker_per_food_production: 1,
         worker_wood_base: 95,
         worker_per_wood: 1,
+        priest_base: 50,
+        priest_count: 1,
         tribute_base: 49,
         tribute_high_influence: 2,
         tribute_subdominant: 5,
-        tribute_starvation: 20,
         merchant_internal: 35,
-        merchant_growth: 1,
+        merchant_internal_number: -1,
+        merchant_internal_influence: 1,
         merchant_base: 0,
         merchant_agression: -1,
         merchant_defensiveness: 4,
@@ -382,18 +392,21 @@ function make_players(){
 
         // Worker related
         worker_food_base: 100,
-        worker_per_food_production: 5,
+        worker_food_starving: 100,
+        worker_per_food_production: 1,
         worker_wood_base: 90,
         worker_per_wood: 1,
+        priest_base: 53,
+        priest_count: -1,
         tribute_base: 40,
         tribute_high_influence: 1,
-        tribute_subdominant: 1,
-        tribute_starvation: 20,
-        merchant_internal: 70,
-        merchant_growth: 0,
-        merchant_base: 60,
+        tribute_subdominant: 5,
+        merchant_base: 20,
+        merchant_internal: 33,
+        merchant_internal_number: -1,
+        merchant_internal_influence: 2,
         merchant_agression: -1,
-        merchant_defensiveness: 1,
+        merchant_defensiveness: 2,
         merchant_subdominant: 5,
 
         city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
@@ -424,16 +437,19 @@ function make_players(){
 
         // Worker related
         worker_food_base: 100,
+        worker_food_starving: 50,
         worker_per_food_production: 2,
-        worker_wood_base: 60,
+        worker_wood_base: 70,
         worker_per_wood: 2,
+        priest_base: 50,
+        priest_count: 0,
         tribute_base: 40,
         tribute_high_influence: 1,
         tribute_subdominant: 5,
-        tribute_starvation: 10,
-        merchant_internal: 50,
-        merchant_growth: 1,
-        merchant_base: 40,
+        merchant_internal: 10,
+        merchant_internal_number: -1,
+        merchant_internal_influence: 1,
+        merchant_base: 30,
         merchant_agression: 1,
         merchant_defensiveness: 1,
         merchant_subdominant: 10,
@@ -465,15 +481,18 @@ function make_players(){
 
         // Worker related
         worker_food_base: 100,
+        worker_food_starving: 0,
         worker_per_food_production: 2,
-        worker_wood_base: 60,
+        worker_wood_base: 70,
         worker_per_wood: 2,
+        priest_base: 50,
+        priest_count: 0,
         tribute_base: 40,
         tribute_high_influence: 1,
         tribute_subdominant: 2,
-        tribute_starvation: 5,
         merchant_internal: 5,
-        merchant_growth: 0,
+        merchant_internal_number: -1,
+        merchant_internal_influence: 0,
         merchant_base: 40,
         merchant_agression: 1,
         merchant_defensiveness: 1,
