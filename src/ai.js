@@ -121,8 +121,8 @@ class AIPlayer {
                 }
 
                 // Next worker allocation.
-                city.workers_food = 0;
-                city.workers_wood = 0;
+                city.food_workers = 0;
+                city.wood_workers = 0;
                 city.priests = 0;
                 city.builders = 0;
                 city.merchant_routes = [];
@@ -217,9 +217,9 @@ class AIPlayer {
         var food_balance = city.food_production() - city.food_consumption();
         var starving = food_balance > 0;
         // Check if we can assign food workers
-        if(city.max_food_workers() > city.workers_food){
+        if(city.max_food_workers() > city.food_workers){
             assign_func = function(){
-                city.set_food_workers(city.workers_food+1);
+                city.set_worker('food_worker', city.food_workers+1);
             };
             preference = this.worker_food_base
                        - this.worker_per_food_production * food_balance;
@@ -228,12 +228,12 @@ class AIPlayer {
             }
         }
         // Check wood workers
-        if(city.max_wood_workers() > city.workers_wood){
+        if(city.max_wood_workers() > city.wood_workers){
             pref = this.worker_wood_base
                  - this.worker_per_wood * this.wood;
             if(preference < pref){
                 assign_func = function(){
-                    city.set_wood_workers(city.workers_wood+1);
+                    city.set_workers('wood_worker', city.wood_workers+1);
                 };
                 preference = pref;
             }
@@ -241,7 +241,7 @@ class AIPlayer {
         var pref = this.priest_base + this.priest_count*city.priests;
         if(preference < pref){
             assign_func = function(){
-                city.set_priests(city.priests+1);
+                city.set_worker('priest', city.priests+1);
             };
             preference = pref;
         }
@@ -249,7 +249,7 @@ class AIPlayer {
             var pref = 90;
             if(preference < pref){
                 assign_func = function(){
-                    city.set_builders(city.builders+1);
+                    city.set_worker('builder', city.builders+1);
                 };
                 preference = pref;
             }

@@ -19,13 +19,16 @@ class City {
 
         // workers
         this.builders = 0;
-        this.workers_food = level;
-        this.workers_wood = 0;
+        this.food_workers = level;
+        this.wood_workers = 0;
         this.priests = 0;
 
         // workers sent to other cities
         this.merchant_routes = [];
         this.tribute_routes = [];
+
+        // Assing new workers to
+        this.new_worker_type = 'food_worker';
 
         // Change tile properties
         tile.influence[this.owner()] = this.influence(this.owner());
@@ -111,16 +114,9 @@ class City {
     // Calculate the number of free workers
     free_workers() {
         return this.level - this.builders - this.priests
-               - this.workers_wood - this.workers_food
+               - this.wood_workers - this.food_workers
                - this.number_sent('merchant')
                - this.number_sent('tribute');
-    }
-
-    // Set the number of builders
-    set_builders(n){
-        if(n >= 0 && n <= this.free_workers() + this.builders){
-            this.builders = n;
-        }
     }
 
     // Find the maximum amount of food workers possible. This is the
@@ -129,39 +125,31 @@ class City {
     // Note: if there will be more city resources, the food and wood functions
     // should be combined and the possible resources separely
     max_food_workers(){
-        var max = this.free_workers() + this.workers_food;
+        var max = this.free_workers() + this.food_workers;
         max = Math.min(this.food_tiles(), max);
         return max;
-    }
-
-    // Set the number of food workers
-    set_food_workers(n){
-        if(n >= 0 && n <= this.max_food_workers()){
-            this.workers_food = n;
-        }
     }
 
     // Find the maximum possible number of wood gatherers. Similar to
     // the max_food_workers()
     max_wood_workers(){
-        var max = this.free_workers() + this.workers_wood;
+        var max = this.free_workers() + this.wood_workers;
         max = Math.min(this.wood_tiles(), max);
         return max;
     }
 
-    // Set the number of wood workers. Similar to set_food_workers(n)
-    set_wood_workers(n){
-      if(n >= 0 && n <= this.max_wood_workers()){
-            this.workers_wood = n;
+    // Set the number of a given type of worker
+    set_worker(type, n){
+        var max = this[type+'s'] + this.free_workers();
+        if(type == 'food_worker'){
+            max = Math.min(this.food_tiles(), max);
         }
-    }
-
-    // Set the number of priests. The maximum number of priests and merchants
-    // is just the current number + free workers
-    set_priests(n){
-       if(n >= 0 && n <= this.priests + this.free_workers()){
-           this.priests = n;
-       }
+        if(type == 'wood_worker'){
+            max = Math.min(this.wood_tiles(), max);
+        }
+        if(n >= 0 && n <= max ){
+            this[type+'s'] = n;
+        }
     }
 
     // Set the number workers sent to city
@@ -276,7 +264,7 @@ class City {
 
     // The amount of food produced per turn
     food_production(){
-        var workers = this.workers_food;
+        var workers = this.food_workers;
         var food_tiles = this.food_tiles();
         var fields = this.fields();
         var food = 1; // City always produces 1 food
@@ -299,7 +287,7 @@ class City {
 
     // The amount of wood produced per turn
     wood_production(){
-        var wood = Math.min(this.workers_wood, this.wood_tiles());
+        var wood = Math.min(this.wood_workers, this.wood_tiles());
         return wood;
     }
 
@@ -321,12 +309,12 @@ class City {
 
         // Check for newly unemployed workers. This can
         // happen if a tile is lost to another player.
-        if(this.workers_food > this.max_food_workers()){
-          this.workers_food = this.max_food_workers();
+        if(this.food_workers > this.max_food_workers()){
+          this.food_workers = this.max_food_workers();
         }
 
-        if(this.workers_wood > this.max_wood_workers()){
-          this.workers_wood = this.max_wood_workers();
+        if(this.wood_workers > this.max_wood_workers()){
+          this.wood_workers = this.max_wood_workers();
         }
 
 
@@ -358,12 +346,7 @@ class City {
         if(this.food >= this.food_limit()){
             this.food -= this.food_limit();
             this.level += 1;
-            // Automatically assign to food, then wood
-            if(this.workers_food < this.food_tiles()){
-                this.workers_food += 1;
-            } else if(this.workers_wood < this.wood_tiles()){
-                this.workers_wood += 1;
-            }
+            this.set_worker(this.new_worker_type, this[this.new_worker_type+'s']+1);
             map_scene.update_city_sprite(x,y,this.level);
         }
         // Or if the city shrinks
@@ -407,14 +390,14 @@ class City {
                 this.priests -= 1;
             } else if(this.builders > 0){
                 this.builders -= 1;
-            } else if(this.workers_wood > 0){
-                this.workers_wood -= 1;
-            } else if(this.workers_food > 0){
-                this.workers_food -= 1;
+            } else if(this.wood_workers > 0){
+                this.wood_workers -= 1;
+            } else if(this.food_workers > 0){
+                this.food_workers -= 1;
             } else {
                 //this should never happen
-                this.workers_food = 0;
-                this.workers_wood = 0;
+                this.food_workers = 0;
+                this.wood_workers = 0;
                 this.builders = 0;
                 this.priests = 0;
                 this.tribute_routes = [];
@@ -561,7 +544,7 @@ class City {
         // Builders first
         var worker_div = this.make_worker_div(
             city.builders, 0, "Builder:", false, false,
-            function(n){city.set_builders(n)}
+            function(n){city.set_worker('builder', n)}
         );
         div.append(worker_div);
 
@@ -569,8 +552,8 @@ class City {
             // Food can be collected. Show food worker control
             var max = this.food_tiles();
             var worker_div = this.make_worker_div(
-                city.workers_food, max, "Farmers / Fishers:", false, false,
-                function(n){city.set_food_workers(n)}
+                city.food_workers, max, "Farmers / Fishers:", false, false,
+                function(n){city.set_worker('food_worker', n)}
             );
             div.append(worker_div);
         }
@@ -579,15 +562,15 @@ class City {
             // Wood can be collected. Add a similar slider
             var max = this.wood_tiles();
             var worker_div = this.make_worker_div(
-                city.workers_wood, max, "Wood gatherers:", false, false,
-                function(n){city.set_wood_workers(n)}
+                city.wood_workers, max, "Wood gatherers:", false, false,
+                function(n){city.set_worker('wood_worker', n)}
             );
             div.append(worker_div);
         }
 
         var worker_div = this.make_worker_div(
             city.priests, 0, "Priests:", false, false,
-            function(n){city.set_priests(n)}
+            function(n){city.set_worker('priest', n)}
         );
         div.append(worker_div);
         return div;
@@ -636,10 +619,25 @@ class City {
     // Build and return a div containing a list of merchants and controls for
     // deleting and sending them
     worker_panel(){
+        var city = this;
         var div = $("<div></div>");
         // Name as an h4 tag
         div.append($("<h4></h4>").text(this.name));
         if(this.owner() == 'white'){
+            var assign_div = $("<div></div>").html("New workers are ");
+            var assign_workers_to =$("<select></select>");
+            assign_workers_to.append("<option value='food_worker'>Farmers / Fishers</option>");
+            assign_workers_to.append("<option value='wood_worker'>Wood gatherers</option>");
+            assign_workers_to.append("<option value='builder'>Builders</option>");
+            assign_workers_to.append("<option value='priest'>Priests</option>");
+            assign_workers_to.val(city.new_worker_type);
+            assign_div.append(assign_workers_to);
+            div.append(assign_div);
+            assign_workers_to.change(function(){
+                var value = $(this).val();
+                city.new_worker_type = value;
+            });
+
             div.append($("<div></div>").html("<b>Free workers</b>: "+this.free_workers()));
             div.append(this.local_worker_div());
 
