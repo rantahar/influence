@@ -96,10 +96,8 @@ class AIPlayer {
                 }
             }
 
-            console.log(this.name+": best place for a city is at "+city_x+","+city_y);
             if(city_x != undefined && city_y != undefined){
                 if( city_utility > 0 ){
-                    console.log(this.name+" builds a city at "+city_x+","+city_y);
                     build('city', this.key, city_x, city_y);
                 }
             }
@@ -114,7 +112,6 @@ class AIPlayer {
                     var utility = this.colony_base +
                                   this.colony_food*city.food +
                                   this.colony_level*city.level;
-                    console.log(this.name+": Colony utility "+utility);
                     if(utility > 0){
                         city.queue_colony();
                     }
@@ -129,7 +126,7 @@ class AIPlayer {
                 city.tribute_routes = [];
 
                 while(city.free_workers() > 0){
-                    this.assign_workers(city);
+                    this.assign_worker(city);
                 }
             }
         }
@@ -170,10 +167,8 @@ class AIPlayer {
             }
         }
 
-        console.log(this.name+": best place for a road is at "+road_x+","+road_y+" (utility "+road_utility+")");
         if(this.wood >= item.price.wood && road_utility > 0){
             build('road', this.key, road_x,road_y);
-            console.log(this.name+" builds a road at "+road_x+","+road_y);
         }
 
         /// Check for good places for a field
@@ -206,16 +201,14 @@ class AIPlayer {
             }
         }
 
-        console.log(this.name+": best place for a field is at "+field_x+","+field_y+" (utility "+utility+")");
         if(this.wood >= item.price.wood && field_utility > 0){
             build('field', this.key, field_x, field_y);
-            console.log(this.name+" builds a field at "+field_x+","+field_y);
         }
     }
 
 
     // assign a new worker
-    assign_workers(city){
+    assign_worker(city){
         var preference = 0;
         var assign_func = undefined;
         var food_balance = city.food_production() - city.food_consumption();
@@ -283,9 +276,9 @@ class AIPlayer {
         }
 
         // Merchants
-        var send_pref = this.tribute_base;
+        var send_pref = this.merchant_base;
         if(influence_diff > 0){
-            send_pref += this.tribute_subdominant;
+            send_pref += this.merchant_subdominant;
         }
         for(var key in game.cities){
             let other_city = game.cities[key];
@@ -304,7 +297,7 @@ class AIPlayer {
                     var diff_here = city.influence(this.key)
                         - city.influence(other_city.owner());
                     pref += diff_here*this.merchant_defensiveness;
-                          + diff_there*this.merchant_aggression;
+                          - diff_there*this.merchant_aggression;
                 }
                 if(preference < pref){
                     assign_func = function(){
@@ -357,9 +350,9 @@ function make_players(){
         tribute_high_influence: 2,
         tribute_subdominant: 5,
         tribute_starvation: 20,
-        merchant_internal: 10,
+        merchant_internal: 35,
         merchant_growth: 1,
-        merchant_base: 40,
+        merchant_base: 0,
         merchant_agression: -1,
         merchant_defensiveness: 4,
         merchant_subdominant: 1,

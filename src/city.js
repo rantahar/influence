@@ -67,26 +67,23 @@ class City {
 
     // Calculate the base influence of the city
     influence(player){
-        //return 3+Math.floor(this.level/3);
         var influence = 0;
         if(player == this.owner()){
-            // base influence of a city
+            // base influence of the city goes to the owner
             influence += 10;
             // Foreign and local workers
             influence += this.priests;
-            influence += - 2*this.number_sent('merchant')
-                         - 2*this.number_received('merchant');
-            influence +=   this.number_received('tribute')
-                         - this.number_sent('tribute');
+            influence += this.number_received('tribute')
+                       - this.number_sent('tribute');
         }
-        // Check for influence from other cities
-        var this_city = this;
-        game.cities.forEach(function(city){
-            if(city.owner() == player){
-                influence += 2 * city.merchants_to(this_city);
-                influence += 2 * this_city.merchants_to(city);
+        // Add 1 for each trade route where this city is subdominant
+        var trade_cities = this.get_trade_cities();
+        for(var key in trade_cities){
+            var other_city = trade_cities[key];
+            if(other_city.current_influence[player] >= influence+1){
+                influence += 1;
             }
-        });
+        }
         influence = Math.max(influence, 0)
         return influence;
     }
@@ -180,6 +177,25 @@ class City {
            }
        });
        game.update_city_page();
+    }
+
+    get_trade_cities(player){
+        // Check that there are no other merchants of this type
+        var cities = [];
+        for(var key in this.merchant_routes){
+            var route = this.merchant_routes[key];
+            cities.push(route.destination);
+        }
+        for(var key in game.cities){
+            var other_city = game.cities[key];
+            for(var key in other_city.merchant_routes){
+                var route = other_city.merchant_routes[key];
+                if(route.destination == this){
+                    cities.push(route.source);
+                }
+            }
+        }
+        return cities;
     }
 
     has_trade_route_with(other_city){
