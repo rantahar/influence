@@ -412,26 +412,41 @@ class City {
         }
         if(setter != undefined && !send && !delete_button){
             // add worker button
-            var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
+            var pbutton = $("<span></span>").text("+").addClass("btn btn-vsm");
             pbutton.click(function(){
                 setter(current+1);
                 game.update_city_page();
             });
+            if( this.free_workers() < 1 || (max > 0 && current == max) ){
+                pbutton.addClass("btn-secondary")
+            } else {
+                pbutton.addClass("btn-primary")
+            }
             // remove worker button
-            var mbutton = $("<span></span>").text("-").addClass("btn btn-primary btn-vsm");
+            var mbutton = $("<span></span>").text("-").addClass("btn btn-vsm");
             mbutton.click(function(){
                 setter(current-1);
                 game.update_city_page();
             });
+            if(current == 0){
+                mbutton.addClass("btn-secondary")
+            } else {
+                mbutton.addClass("btn-primary")
+            }
             worker_div.append(pbutton);
             worker_div.append(mbutton);
         }
         if(setter != undefined && send){
             // Send a new worker of this type to another city
-            var sendbutton = $("<span></span>").text("send").addClass("btn btn-primary btn-vsm");
+            var sendbutton = $("<span></span>").text("send").addClass("btn btn-vsm");
             sendbutton.click(function(){
                 setter();
             });
+            if( this.free_workers() < 1 || (max > 0 && current == max) ){
+                sendbutton.addClass("btn-secondary")
+            } else {
+                sendbutton.addClass("btn-primary")
+            }
             worker_div.append(sendbutton);
         }
         if(setter != undefined && delete_button){
