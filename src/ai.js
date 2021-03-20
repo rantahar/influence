@@ -233,7 +233,7 @@ class AIPlayer {
                  - this.worker_per_wood * this.wood;
             if(preference < pref){
                 assign_func = function(){
-                    city.set_workers('wood_worker', city.wood_workers+1);
+                    city.set_worker('wood_worker', city.wood_workers+1);
                 };
                 preference = pref;
             }
