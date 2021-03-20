@@ -369,15 +369,8 @@ class City {
         // Or if the city shrinks
         if(this.food < 0 && this.level > 0){
             this.level -= 1;
+            this.force_remove_worker();
             this.food = this.food_limit()/4;
-            if(this.free_workers() == 0){
-                // Take workers first from wood, then food
-                if(this.workers_wood > 0){
-                    this.workers_wood -= 1;
-                } else {
-                    this.workers_food -= 1;
-                }
-            }
             map_scene.update_city_sprite(x,y,this.level);
         }
 
@@ -385,19 +378,49 @@ class City {
         if(this.owner() != undefined){
             players[this.owner()].wood += this.wood_production();
         }
-
     }
 
+    // Update current city influence by one turn and return it.
+    // Current influence either increases or decreases by 1 untill
+    // it reaches the city influence value
     update_influence(player){
-        // Update current city influence by one turn and return it.
-        // Current influence either increases or decreases by 1 untill
-        // it reaches the city influence value
         if(this.current_influence[player] > this.influence(player)){
             this.current_influence[player] = Math.max(this.current_influence[player]-1, this.influence(player));
         } else {
             this.current_influence[player] = Math.min(this.current_influence[player]+1, this.influence(player));
         }
         return this.current_influence[player];
+    }
+
+    // Remove a worker
+    force_remove_worker(){
+        if(this.free_workers() < 0){
+            console.log("here", this.free_workers());
+            console.log(this.tribute_routes.length);
+            // Somewhat arbitrary order
+            if(this.tribute_routes.length > 0){
+                this.tribute_routes.pop();
+                console.log(this.tribute_routes.length);
+            } else if(this.merchant_routes.length > 0){
+                this.merchant_routes.pop();
+            } else if(this.priests > 0){
+                this.priests -= 1;
+            } else if(this.builders > 0){
+                this.builders -= 1;
+            } else if(this.workers_wood > 0){
+                this.workers_wood -= 1;
+            } else if(this.workers_food > 0){
+                this.workers_food -= 1;
+            } else {
+                //this should never happen
+                this.workers_food = 0;
+                this.workers_wood = 0;
+                this.builders = 0;
+                this.priests = 0;
+                this.tribute_routes = [];
+                this.merchant_routes = [];
+            }
+        }
     }
 
     // Build a display line for a worker type
