@@ -182,8 +182,28 @@ class City {
        game.update_city_page();
     }
 
+    has_trade_route_with(other_city){
+        // Check that there are no other merchants of this type
+        for(var key in this.merchant_routes){
+            var route = this.merchant_routes[key];
+            if(route.destination == other_city){
+                return true;
+            }
+        }
+        for(var key in other_city.merchant_routes){
+            var route = other_city.merchant_routes[key];
+            if(route.destination == this){
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Send a worker to another city
     send(worker_type, other_city){
+        if(worker_type == 'merchant' && this.has_trade_route_with(other_city)){
+            return; //cannot set
+        }
         this[worker_type+'_routes'].push({
             'source': this,
             'destination': other_city,
@@ -244,6 +264,10 @@ class City {
 
         // +1 extra for fields
         food += Math.min(workers, fields);
+
+        // +1 for each trading route
+        food += this.number_sent('merchant')
+              + this.number_received('merchant');
 
         // Tributes received and sent
         food += this.number_received('tribute')
@@ -344,13 +368,18 @@ class City {
 
     update_influence(player){
         // Update current city influence by one turn and return it.
-        // Increase by 1 if city influence is bigger than current value.
-        this.current_influence[player] = Math.min(this.current_influence[player]+1, this.influence(player));
+        // Current influence either increases or decreases by 1 untill
+        // it reaches the city influence value
+        if(this.current_influence[player] > this.influence(player)){
+            this.current_influence[player] = Math.max(this.current_influence[player]-1, this.influence(player));
+        } else {
+            this.current_influence[player] = Math.min(this.current_influence[player]+1, this.influence(player));
+        }
         return this.current_influence[player];
     }
 
     // Build a display line for a worker type
-    make_worker_div(current, max, description, send, setter){
+    make_worker_div(current, max, description, send, delete_button, setter){
         var city = this;
         var worker_div = $("<div></div>").html(description + " ");
         // Also print the number of workers
@@ -359,7 +388,7 @@ class City {
         } else{
             worker_div.append(" "+current);
         }
-        if(setter != undefined && !send){
+        if(setter != undefined && !send && !delete_button){
             // add worker button
             var pbutton = $("<span></span>").text("+").addClass("btn btn-primary btn-vsm");
             pbutton.click(function(){
@@ -382,6 +411,14 @@ class City {
                 setter();
             });
             worker_div.append(sendbutton);
+        }
+        if(setter != undefined && delete_button){
+            // Send a new worker of this type to another city
+            var deletebutton = $("<span></span>").text("delete").addClass("btn btn-primary btn-vsm");
+            deletebutton.click(function(){
+                setter(0);
+            });
+            worker_div.append(deletebutton);
         }
         return worker_div;
     }
@@ -463,7 +500,7 @@ class City {
         var city = this;
         // Builders first
         var worker_div = this.make_worker_div(
-            city.builders, 0, "Builder:", false,
+            city.builders, 0, "Builder:", false, false,
             function(n){city.set_builders(n)}
         );
         div.append(worker_div);
@@ -472,7 +509,7 @@ class City {
             // Food can be collected. Show food worker control
             var min = Math.min(this.food_tiles(), this.level);
             var worker_div = this.make_worker_div(
-                city.workers_food, min, "Farmers / Fishers:", false,
+                city.workers_food, min, "Farmers / Fishers:", false, false,
                 function(n){city.set_food_workers(n)}
             );
             div.append(worker_div);
@@ -482,14 +519,14 @@ class City {
             // Wood can be collected. Add a similar slider
             var min = Math.min(this.wood_tiles(), this.level);
             var worker_div = this.make_worker_div(
-                city.workers_wood, min, "Wood gatherers:", false,
+                city.workers_wood, min, "Wood gatherers:", false, false,
                 function(n){city.set_wood_workers(n)}
             );
             div.append(worker_div);
         }
 
         var worker_div = this.make_worker_div(
-            city.priests, 0, "Priests:", false,
+            city.priests, 0, "Priests:", false, false,
             function(n){city.set_priests(n)}
         );
         div.append(worker_div);
@@ -502,7 +539,7 @@ class City {
         var city = this;
 
         var worker_div = this.make_worker_div(
-            city.number_sent('merchant'), 0, "Merchants:", true,
+            city.number_sent('merchant'), 0, "Merchants:", true, false,
             function(n){
                 if(city.free_workers() > 0){
                     game.send_worker(city, 'merchant')
@@ -512,7 +549,7 @@ class City {
         div.append(worker_div);
 
         var worker_div = this.make_worker_div(
-            city.number_sent('tribute'), 0, "Tributes:", true,
+            city.number_sent('tribute'), 0, "Tributes:", true, false,
             function(n){
                 if(city.free_workers() > 0){
                     game.send_worker(city, 'tribute')
@@ -548,7 +585,7 @@ class City {
 
             // Lists of each worker type sent to cities
             div.append($("<div></div>").html("<b>Merchants Sent</b>:").append(this.create_send_button('merchant')));
-            div.append(this.worker_list(this.merchant_routes));
+            div.append(this.merchant_list(this.merchant_routes));
             div.append($("<div></div>").html("<b>Tributes Sent</b>:").append(this.create_send_button('tribute')));
             div.append(this.worker_list(this.tribute_routes));
         }
@@ -575,14 +612,14 @@ class City {
         return div;
     }
 
-    // List workers in a given list
-    worker_list(list){
+    // Given a list of merchants, return a table with a delete button
+    merchant_list(list){
         var list_div = $("<table></table>")
         var city = this;
         list.forEach(function(route){
             var row = $("<tr></tr>");
             var worker_div = city.make_worker_div(
-                route.number, 0, route.destination.name, false,
+                route.number, 0, route.destination.name, false, true,
                 function(n){route.source.set_route_count(route, n)}
             );
             row.append($("<td></td>").append(worker_div));
@@ -591,7 +628,47 @@ class City {
         return list_div;
     }
 
-    // List foreign workes in a given list
+    // Given a list of remote workers, return a table with +- buttons
+    worker_list(list){
+        var list_div = $("<table></table>")
+        var city = this;
+        list.forEach(function(route){
+            var row = $("<tr></tr>");
+            var worker_div = city.make_worker_div(
+                route.number, 0, route.destination.name, false, false,
+                function(n){route.source.set_route_count(route, n)}
+            );
+            row.append($("<td></td>").append(worker_div));
+            list_div.append(row);
+        });
+        return list_div;
+    }
+
+    // Table of foreign merchants in a list. Include delete button
+    foreign_merchant_list(list){
+        var list_div = $("<table></table>")
+        var city = this;
+        list.forEach(function(route){
+            var row = $("<tr></tr>");
+            var sender = route.source;
+            if(sender.owner() && sender.owner() == 'white'){
+                var set = function(n){sender.set_route_count(route, n)};
+            }
+            var worker_div = city.make_worker_div(
+                route.number, 0, sender.name, false, true, set
+            );
+            if(sender.owner()){
+                worker_div.css('color', players[sender.owner()].text_color);
+            } else {
+                worker_div.css('color', 'gray');
+            }
+            row.append($("<td></td>").append(worker_div));
+            list_div.append(row);
+        });
+        return list_div;
+    }
+
+    // Table foreign workers in a list. Include +- buttons
     foreign_worker_list(list){
         var list_div = $("<table></table>")
         var city = this;
@@ -599,10 +676,10 @@ class City {
             var row = $("<tr></tr>");
             var sender = route.source;
             if(sender.owner() && sender.owner() == 'white'){
-                var set =function(n){sender.set_route_count(route, n)};
+                var set = function(n){sender.set_route_count(route, n)};
             }
             var worker_div = city.make_worker_div(
-                route.number, 0, sender.name, false, set
+                route.number, 0, sender.name, false, false, set
             );
             if(sender.owner()){
                 worker_div.css('color', players[sender.owner()].text_color);
