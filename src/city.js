@@ -483,17 +483,7 @@ class City {
         // For the human player show more details and controls
         if(this.owner() == 'white'){
             // Show the amount of food and production rate
-            var food_text = $("<div></div>").html("<b>Food</b>: "+this.food+"/"+
-                                              this.food_limit()+" (");
-            var food_prod = this.food_production() - this.food_consumption();
-            if(food_prod >= 0){
-                food_text.append($("<span></span>").text("+"+food_prod.toFixed(0)).css('color', 'green'));
-            } else {
-                food_text.append($("<span></span>").text(""+food_prod.toFixed(0)).css('color', 'red'));
-            }
-            food_text.append($("<span></span>").text(")"));
-            div.append(food_text);
-
+            div.append(this.food_production_line());
 
             // Show the number of free workers
             div.append($("<div></div>").html("<b>Free workers</b>: "+this.free_workers()));
@@ -527,6 +517,19 @@ class City {
         }
 
         return div;
+    }
+
+    food_production_line(){
+        var food_text = $("<div></div>").html("<b>Food</b>: "+this.food+"/"+
+                                          this.food_limit()+" (");
+        var food_prod = this.food_production() - this.food_consumption();
+        if(food_prod >= 0){
+            food_text.append($("<span></span>").text("+"+food_prod.toFixed(0)).css('color', 'green'));
+        } else {
+            food_text.append($("<span></span>").text(""+food_prod.toFixed(0)).css('color', 'red'));
+        }
+        food_text.append($("<span></span>").text(")"));
+        return food_text;
     }
 
     // List local workers
@@ -616,6 +619,8 @@ class City {
         // Name as an h4 tag
         div.append($("<h4></h4>").text(this.name));
         if(this.owner() == 'white'){
+            div.append(this.food_production_line());
+
             var assign_div = $("<div></div>").html("New workers are ");
             var assign_workers_to =$("<select></select>");
             assign_workers_to.append("<option value='food_worker'>Farmers / Fishers</option>");
