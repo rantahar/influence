@@ -378,10 +378,13 @@ class City {
     // Remove a worker
     force_remove_worker(){
         if(this.free_workers() < 0){
-            console.log("here", this.free_workers());
-            console.log(this.tribute_routes.length);
-            // Somewhat arbitrary order
-            if(this.tribute_routes.length > 0){
+            // First check the type the city is currently assigning
+            var type = this.new_worker_type;
+            if(this[type+'s'] > 0){
+                this.set_worker(type, this[type+'s']-1);
+
+            // Try every other type is somewhat arbitrary order
+            } else if(this.tribute_routes.length > 0){
                 this.tribute_routes.pop();
                 console.log(this.tribute_routes.length);
             } else if(this.merchant_routes.length > 0){
