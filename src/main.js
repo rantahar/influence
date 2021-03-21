@@ -1185,6 +1185,15 @@ function gameboard(map){
     // List of advise given by the advisor
     var advisor_list = [];
 
+    function go_to_city(city){
+       console.log(city.name);
+       mapscene = phaser_game.scene.scenes[0];
+       active_city = city;
+       active_tile = city.tile;
+       mapscene.center_camera_on(city.tile.x,city.tile.y);
+       update_city_page();
+    }
+
     // Bind the next turn button to the next_turn function
     $( "#next_turn_button" ).unbind();
     $( "#next_turn_button" ).click(function(e) {
@@ -1335,13 +1344,14 @@ function gameboard(map){
        }
        for(var key in advisor_list){
           var advise = advisor_list[key];
-          console.log(key, advise);
-          var advise_card = $("<div></div>").addClass("card-body bg-dark")
+          var advise_card = $("<div></div>").addClass("card bg-dark")
+          var advise_card_body = $("<div></div>").addClass("card-body bg-dark")
           var title = $("<a></a>").html("<b>"+advise.title+"</b>").addClass("stretched-link");
-          title.click(function(){advise.onclick();});
-          advise_card.append(title);
+          title.click(advise.onclick);
+          advise_card_body.append(title);
           var text = $("<a></a>").html("</br>"+advise.text);
-          advise_card.append(text);
+          advise_card_body.append(text);
+          advise_card.append(advise_card_body);
           $("#advisor_card").append(advise_card);
        }
     }
@@ -1350,21 +1360,48 @@ function gameboard(map){
     function update_advisor(){
         var player = players.white;
         advisor_list = [];
-        for(var key in cities){
-           city = cities[key];
+
+        cities.forEach(function(city){
            if(city.owner() == player.key){
+              let tile = city.tile;
+              // Check for starvation
               if(city.food_production() < city.food_consumption()){
                  advisor_list.push({
                     title: "Starvation!",
                     text: "People in "+city.name+" are eating their reserves.",
                     onclick: function(){
-                       active_city = city;
+                       go_to_city(city);
                        show_tab("#worker");
                     }
                  });
               }
+              // Check for free workers
+              if(city.free_workers() > 0){
+                 advisor_list.push({
+                    title: "Free workers",
+                    text: "There are unemployed workers in "+city.name+".",
+                    onclick: function(){
+                       go_to_city(city);
+                       show_tab("#worker");
+                    }
+                 });
+              }
+              // Check if a city is threatening to revolt
+              for(other in players){
+                 if(tile.influence[player] + 3 < tile.influence[other]){
+                    advisor_list.push({
+                       title: "Unrest",
+                       text: other.toUpperCase() +" influence is close to "
+                           + "overtaking yours in "+city.name+".",
+                       onclick: function(){
+                          go_to_city(city);
+                          show_tab("#worker");
+                       }
+                    });
+                 }
+              }
            }
-        }
+        });
     }
 
     // Update both city and home page
