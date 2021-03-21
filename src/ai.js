@@ -34,6 +34,7 @@ class AIPlayer {
         this.worker_per_food_production = aiconfig.worker_per_food_production;
         this.worker_wood_base = aiconfig.worker_wood_base;
         this.worker_per_wood = aiconfig.worker_per_wood;
+        this.builder_base = aiconfig.builder_base;
         this.priest_base = aiconfig.priest_base;
         this.priest_count = aiconfig.priest_count;
         this.tribute_base = aiconfig.tribute_base;
@@ -246,7 +247,7 @@ class AIPlayer {
             preference = pref;
         }
         if(city.building != undefined){
-            var pref = 90;
+            var pref = this.builder_base;
             if(preference < pref){
                 assign_func = function(){
                     city.set_worker('builder', city.builders+1);
@@ -355,6 +356,7 @@ function make_players(){
         worker_wood_base: 95,
         worker_per_wood: 1,
         priest_base: 50,
+        builder_base: 110,
         priest_count: 1,
         tribute_base: 49,
         tribute_high_influence: 2,
@@ -396,6 +398,7 @@ function make_players(){
         worker_per_food_production: 1,
         worker_wood_base: 90,
         worker_per_wood: 1,
+        builder_base: 110,
         priest_base: 53,
         priest_count: -1,
         tribute_base: 40,
@@ -441,6 +444,7 @@ function make_players(){
         worker_per_food_production: 1,
         worker_wood_base: 95,
         worker_per_wood: 1,
+        builder_base: 110,
         priest_base: 50,
         priest_count: 1,
         tribute_base: 49,
@@ -485,6 +489,7 @@ function make_players(){
         worker_per_food_production: 2,
         worker_wood_base: 70,
         worker_per_wood: 2,
+        builder_base: 110,
         priest_base: 50,
         priest_count: 0,
         tribute_base: 40,

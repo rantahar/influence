@@ -328,14 +328,9 @@ class City {
         if(this.building != undefined){
             // Free workers have no positive effect now
             //var workers = this.free_workers();
-            this.building.food -= Math.max(0, this.builders);
-            if(food > 0){
-              var food_diff = Math.min(food,this.building.food);
-              this.building.food -= food_diff;
-              food -= food_diff;
-            }
-            if(this.building.food <= 0 ) {
-                this.building_done();
+            this.building.price -= Math.max(0, this.builders);
+            if(this.building.price <= 0 ) {
+               this.building_done();
             }
         }
 
@@ -506,7 +501,7 @@ class City {
             // And building projects (only colony exists for now)
             if(this.building){
                 div.append($("<span></span>").text("Building a "+this.building.type
-                 + "("+this.building.food+")"));
+                 + "("+this.building.price+")"));
                 var cancel_button = $("<span></span>").text("Cancel").addClass("btn btn-primary btn-vsm");
                 cancel_button.click(function(){
                     city.cancel_building();
@@ -756,7 +751,7 @@ class City {
     // Start building a colony
     queue_colony(){
         if(this.building==undefined){
-            this.building = {'food': city_items.colony.price, 'type': 'colony'};
+            this.building = {'price': city_items.colony.price, 'type': 'colony'};
         }
     }
 
