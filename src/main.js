@@ -1174,6 +1174,7 @@ function gameboard(map){
 
 
 
+
     //////////////////////////////////
     // The panel
 
@@ -1181,6 +1182,8 @@ function gameboard(map){
     var active_tile;
     // The city currently shown on the panel
     var active_city;
+    // List of advise given by the advisor
+    var advisor_list = [];
 
     // Bind the next turn button to the next_turn function
     $( "#next_turn_button" ).unbind();
@@ -1196,6 +1199,10 @@ function gameboard(map){
         $('#panel-tabs li a').removeClass("active");
         $(id+"-tab").addClass("active");
         $('.tab-pane').hide();
+        if(id == "#advisor"){
+           update_advisor();
+           update_advisor_panel();
+        }
         $(id).show();
     }
 
@@ -1236,8 +1243,8 @@ function gameboard(map){
         if(active_tile.city){
             active_city = active_tile.city;
             update_city_page();
-            // If the home tab is active, move to the city tab
-            if($("#home-tab").hasClass("active")){
+            // Move to the city tab unless the active tab is economy
+            if(!$("#economy-tab").hasClass("active")){
                 show_tab("#city");
             }
         } else {
@@ -1264,8 +1271,7 @@ function gameboard(map){
     // Update the home page of the panel
     function update_home_page(){
         // Set the human player (for future...)
-        player = players.white;
-
+        var player = players.white;
 
         $("#turn_number_text").text('Year '+turn_counter);
 
@@ -1315,6 +1321,49 @@ function gameboard(map){
             }
 
             $("#player_info").append(button);
+        }
+    }
+
+    // Update the advisor panel
+    function update_advisor_panel(){
+       $("#advisor_card").empty();
+       var title = $("<h4></h4>").html("Advisor");
+       $("#advisor_card").append(title);
+       if(advisor_list.length < 1){
+          var text = $("<p></p>").html("The advisors have heard no complaints.");
+          $("#advisor_card").append(text);
+       }
+       for(var key in advisor_list){
+          var advise = advisor_list[key];
+          console.log(key, advise);
+          var advise_card = $("<div></div>").addClass("card-body bg-dark")
+          var title = $("<a></a>").html("<b>"+advise.title+"</b>").addClass("stretched-link");
+          title.click(function(){advise.onclick();});
+          advise_card.append(title);
+          var text = $("<a></a>").html("</br>"+advise.text);
+          advise_card.append(text);
+          $("#advisor_card").append(advise_card);
+       }
+    }
+
+    // Update the advisor info
+    function update_advisor(){
+        var player = players.white;
+        advisor_list = [];
+        for(var key in cities){
+           city = cities[key];
+           if(city.owner() == player.key){
+              if(city.food_production() < city.food_consumption()){
+                 advisor_list.push({
+                    title: "Starvation!",
+                    text: "People in "+city.name+" are eating their reserves.",
+                    onclick: function(){
+                       active_city = city;
+                       show_tab("#worker");
+                    }
+                 });
+              }
+           }
         }
     }
 
@@ -1473,7 +1522,8 @@ function gameboard(map){
         update_city_page: update_city_page,
         update_home_page: update_home_page,
         send_worker: send_worker,
-        cities, cities,
+        cities: cities,
+        advisor: advisor_list,
         destroy: destroy,
         popup: popup,
         player: players['white'],

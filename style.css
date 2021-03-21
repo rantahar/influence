@@ -104,6 +104,15 @@ label {
     display: none;
 }
 
+/* The navigation tabs */
+.card-header-tabs{
+    font-size: 14px;
+}
+
+.nav-link {
+    font-size: 14px;
+    border: 0 !important;
+}
 
 /* Very small button, for incrementing and decrementing worker amounts */
 .btn-vsm {
