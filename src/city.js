@@ -381,7 +381,6 @@ class City {
             // Try every other type is somewhat arbitrary order
             } else if(this.tribute_routes.length > 0){
                 this.tribute_routes.pop();
-                console.log(this.tribute_routes.length);
             } else if(this.merchant_routes.length > 0){
                 this.merchant_routes.pop();
             } else if(this.priests > 0){
