@@ -515,21 +515,15 @@ class City {
             div.append(this.remote_worker_div());
 
             // Build colony button
-            var build_per_turn = (this.food_production() + this.builders - this.food_consumption());
-            if(build_per_turn > 0){
-              // Only add it if the city can ever finish a colony
-              var turns_left = Math.ceil(city_items.colony.price / build_per_turn);
-              if( turns_left < Infinity ) {
-                var colony_button = $("<span></span>").text("Colony ("+turns_left+" turns)");
-                colony_button.addClass("btn btn-success my-1");
-                var city = this;
-                colony_button.click(function(){
-                    city.queue_colony();
-                    game.update_city_page();
-                });
-                div.append(colony_button);
-              }
-            }
+            var turns_left = Math.ceil(city_items.colony.price / this.builders);
+            var colony_button = $("<span></span>").text("Colony ("+city_items.colony.price+")");
+            colony_button.addClass("btn btn-success my-1");
+            var city = this;
+            colony_button.click(function(){
+                city.queue_colony();
+                game.update_city_page();
+            });
+            div.append(colony_button);
         }
 
         return div;
