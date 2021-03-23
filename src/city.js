@@ -150,6 +150,9 @@ class City {
         if(n >= 0 && n <= max ){
             this[type+'s'] = n;
         }
+        // Remove any active highlight or onclick action and update page
+        game.update_city_page();
+        game.remove_highlight();
     }
 
     // Set the number workers sent to city
@@ -168,7 +171,9 @@ class City {
                list.splice(i, 1);
            }
        });
-       game.update_city_page();
+        // Remove any active highlight or onclick action and update page
+        game.remove_highlight();
+        game.update_city_page();
     }
 
     get_trade_cities(player){

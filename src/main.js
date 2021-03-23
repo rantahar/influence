@@ -989,6 +989,7 @@ function gameboard(map){
             this.highlights.forEach(function(marker, i){
                 marker.destroy();
             });
+            this.on_next_click = undefined;
         }
 
     }
@@ -1186,7 +1187,6 @@ function gameboard(map){
     var advisor_list = [];
 
     function go_to_city(city){
-       console.log(city.name);
        mapscene = phaser_game.scene.scenes[0];
        active_city = city;
        active_tile = city.tile;
@@ -1241,7 +1241,7 @@ function gameboard(map){
 
         if(map_scene.on_next_click != undefined){
             map_scene.on_next_click(x,y);
-            map_scene.on_next_click = undefined;
+            map_scene.remove_highlight();
             return;
         }
 
@@ -1416,7 +1416,13 @@ function gameboard(map){
 
     // Green highlight for tiles matching a criterion
     function highlight_tile(tile){
+        var mapscene = phaser_game.scene.scenes[0];
         mapscene.highlight_allowed_tile(tile.x,tile.y);
+    }
+
+    function remove_highlight(){
+        var mapscene = phaser_game.scene.scenes[0];
+        mapscene.remove_highlight();
     }
 
     // Higlight allowed places for a field and start preview
@@ -1559,6 +1565,7 @@ function gameboard(map){
         update_city_page: update_city_page,
         update_home_page: update_home_page,
         send_worker: send_worker,
+        remove_highlight: remove_highlight,
         cities: cities,
         advisor: advisor_list,
         destroy: destroy,
