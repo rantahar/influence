@@ -553,6 +553,7 @@ function gameboard(map){
             if (this.escape_key.isDown) {
                 this.remove_highlight();
                 this.preview = undefined;
+                this.on_next_click = undefined;
             }
 
             // Set item shortcuts
@@ -989,7 +990,6 @@ function gameboard(map){
             this.highlights.forEach(function(marker, i){
                 marker.destroy();
             });
-            this.on_next_click = undefined;
         }
 
     }
@@ -1232,8 +1232,9 @@ function gameboard(map){
         for(item_key in home_items){
             if( map_scene.preview == item_key){
                 build(item_key,'white',x,y);
-                map_scene.preview = undefined;
                 map_scene.remove_highlight();
+                map_scene.on_next_click = undefined;
+                map_scene.preview = undefined;
                 update_home_page();
                 return;
             }
@@ -1242,6 +1243,8 @@ function gameboard(map){
         if(map_scene.on_next_click != undefined){
             map_scene.on_next_click(x,y);
             map_scene.remove_highlight();
+            map_scene.on_next_click = undefined;
+            map_scene.preview = undefined;
             return;
         }
 
@@ -1423,6 +1426,8 @@ function gameboard(map){
     function remove_highlight(){
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.remove_highlight();
+        mapscene.on_next_click = undefined;
+        mapscene.preview = undefined;
     }
 
     // Higlight allowed places for a field and start preview
@@ -1439,6 +1444,7 @@ function gameboard(map){
         // Set the preview
         var mapscene = phaser_game.scene.scenes[0];
         mapscene.preview = item.name;
+        mapscene.on_next_click = undefined;
         // Highlight the allowed tiles
         mapscene.remove_highlight();
         for(var x = 0; x < tiles.map_size_x; x++) {
@@ -1485,6 +1491,7 @@ function gameboard(map){
     function send_worker(city, worker_type){
        // Highlight the allowed tiles
        var mapscene = phaser_game.scene.scenes[0];
+       mapscene.preview = undefined;
        mapscene.remove_highlight();
        var owner = city.owner();
        cities.forEach(function(other_city){
