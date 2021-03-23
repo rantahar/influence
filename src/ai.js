@@ -120,8 +120,26 @@ class AIPlayer {
                         city.queue_colony();
                     }
                 }
-
-                // Next worker allocation.
+            }
+        }
+        // mark one of the cities as the capital
+        var capital;
+        var pref = 0;
+        for(var key in cities){
+            var city = cities[key];
+            if(city.owner() == this.key){
+                var p = city.level*1000+city.tile.influence[this.key]*10 + city.food;
+                if(p > pref){
+                    capital = city;
+                    pref = p;
+                }
+            }
+        }
+        // Now set workers at each city
+        for(var key in cities){
+            var city = cities[key];
+            if(city.owner() == this.key){
+                // Simple but somewhat inefficient: set to zero and start over
                 city.food_workers = 0;
                 city.wood_workers = 0;
                 city.priests = 0;
@@ -129,8 +147,49 @@ class AIPlayer {
                 city.merchant_routes = [];
                 city.tribute_routes = [];
 
-                while(city.free_workers() > 0){
-                    this.assign_worker(city);
+                // Set each free worker one by one
+                var n_workers = city.free_workers();
+                var tribute_sent = false;
+                for(var i=0; i<n_workers; i++){
+                    var food_balance = city.food_production() - city.food_consumption();
+                    var starving = food_balance < 0;
+                    if(starving && city.food_workers < city.max_food_workers()){
+                        // First, if starving send out farmers
+                        city.food_workers += 1;
+                        continue;
+                    }
+                    if(starving && !city.has_trade_route_with(capital)){
+                        // if still starving, could try sending a merchant
+                        city.send('merchant', capital);
+                        continue
+                    }
+                    if(city.building != undefined){
+                        // If building, put everything towards that
+                        city.builders += 1;
+                        continue;
+                    }
+                    if(food_balance < 5 && city.food_workers < city.max_food_workers()){
+                        // Fill in food workers
+                        city.food_workers += 1;
+                        continue;
+                    }
+                    if(this.wood < 20 && city.wood_workers < city.max_food_workers()){
+                        city.wood_workers += 1;
+                        continue;
+                    }
+                    if(city == capital){
+                        city.priests += 1;
+                        continue;
+                    }
+
+                    if(tribute_sent && !city.has_trade_route_with(capital)){
+                        city.send('merchant', capital);
+                        continue
+                    }
+
+                    // Finally send a tribute, even if it causes starvation
+                    city.send('tribute', capital);
+                    tribute_sent = true;
                 }
             }
         }
