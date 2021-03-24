@@ -95,6 +95,7 @@ class AIPlayer {
         }
 
         // Check if there is anything useful to do in cities
+        var n_cities = 0; // Count cities on first loop
         for(var key in cities){
             var city = cities[key];
             if(city.owner() == this.key){
@@ -107,6 +108,8 @@ class AIPlayer {
                         city.queue_colony();
                     }
                 }
+
+                n_cities += 1;
             }
         }
         // mark one of the cities as the capital
@@ -134,13 +137,15 @@ class AIPlayer {
                 }
             }
         }
+        // Coordinated hostile takeover: reduce the influence level of a
+        // boarder city
         var hostile_takeover_destination;
         pref = 0;
         for(var key in cities){
             var city = cities[key];
-            if(city.owner() != this.key && city.tile.influence[this.key] > 0){
-                var influence_diff = city.influence(city.owner()) - city.influence(this.key);
-                var p = influence_diff - 5;
+            var my_inf = city.tile.influence[this.key];
+            if(city.owner() != this.key && my_inf > 0){
+                var p = my_inf - city.influence(city.owner()) + n_cities-1;
                 if(p > pref){
                     hostile_takeover_destination = city;
                     pref = p;
@@ -167,7 +172,8 @@ class AIPlayer {
                         city.food_workers += 1;
                         continue;
                     }
-                    if(starving && !city.has_trade_route_with(merchant_destination)){
+                    if(starving && city != merchant_destination &&
+                       !city.has_trade_route_with(merchant_destination)){
                         // if still starving, could try sending a merchant
                         city.send('merchant', merchant_destination);
                         continue
@@ -188,18 +194,20 @@ class AIPlayer {
                     }
 
                     if(this.hostile_takeover && hostile_takeover_destination != undefined &&
-                        !city.has_trade_route_with(hostile_takeover_destination)){
+                       !city.has_trade_route_with(hostile_takeover_destination)){
                          city.send('merchant', hostile_takeover_destination);
                          continue;
                     }
 
-                    if(this.capital_merchants && !city.has_trade_route_with(capital) &&
-                       capital.influence(this.key) > city.influence(this.key)){
-                        city.send('merchant', capital);
-                        continue;
+                    if(this.capital_merchants && city != capital &&
+                       !city.has_trade_route_with(capital) &&
+                         capital.influence(this.key) > city.influence(this.key)){
+                         city.send('merchant', capital);
+                         continue;
                     }
 
-                    if(this.internal_merchants && !city.has_trade_route_with(merchant_destination)){
+                    if(this.internal_merchants && merchant_destination != city &&
+                       !city.has_trade_route_with(merchant_destination)){
                         city.send('merchant', merchant_destination);
                         continue;
                     }
@@ -228,17 +236,18 @@ class AIPlayer {
                     var utility = this.road_utility + this.wood;
 
                     // Modify by distance to close by cities
-                    var player = this;
-                    for(key in cities){
-                        var city = cities[key];
-                        var dx = city.x - x;
-                        var dy = city.y - y;
-                        var dist = dx*dx+dy*dy;
-                        if(city.owner() == player.key){
-                            utility += player.road_to_own_cities/dist;
-                        } else {
-                            utility += player.road_to_other_cities/dist;
-                        }
+                    if(this.road_to_own_cities != 0){
+                       for(key in cities){
+                          var city = cities[key];
+                          var dx = city.x - x;
+                          var dy = city.y - y;
+                          var dist = dx*dx+dy*dy;
+                          if(city.owner() == this.key){
+                             utility += this.road_to_own_cities/dist;
+                          } else {
+                             utility += this.road_to_other_cities/dist;
+                          }
+                       }
                     }
 
                     // Use influence as a proxy for how central the area is
@@ -469,19 +478,20 @@ function make_players(){
     // The red players influence doesn't mix with others. It likes to spread toward
     // other players
     red_player = new AIPlayer('red','Red player',"#FF5555","#FF0000",{
-        city_utility: 1000,
-        city_influence: -1,
+        city_utility: 0,
+        city_influence: 0.1,
         city_food: 1,
-        city_wood: 2.5,
         colony_base: -40,
         colony_food: 1,
+        city_wood: 1.3,
         colony_level: 10,
-        max_colonies: 5,
         road_utility: -5,
+        max_colonies: 1,
+        road_utility: -20,
         road_to_own_cities: 0,
         road_to_other_cities: 1,
-        road_influence: 0,
-        field_utility: 100000,
+        road_influence: 1,
+        field_utility: 10000,
         field_influence: -1,
         field_city_level: -10,
         field_city_food_tiles: 0,
@@ -507,7 +517,7 @@ function make_players(){
         colony_food: 1,
         colony_level: 10,
         max_colonies: 5,
-        road_utility: 10000,
+        road_utility: 1000,
         road_to_own_cities: 0,
         road_to_other_cities: 0,
         road_influence: -1,
