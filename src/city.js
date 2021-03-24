@@ -76,22 +76,27 @@ class City {
             influence += 10;
             // Foreign and local workers
             influence += this.priests;
+            // Tributes increase influence in the receiving city and decrease
+            // in the sender
             influence += this.number_received('tribute')
                        - this.number_sent('tribute');
+            // Trade routes take one influence from here and send it to the
+            // other city. But we also receive from the other city (below).
+            influence -= this.number_received('merchant')
+                       + this.number_sent('merchant');
+
         }
-        // Merchants effect of influence. This is a bit more complicated:
-        // they add 2 but only up to the other city's influence - 1.
-        // They need to be sorted first.
+        // Merchants effect on influence.
+        // Each trade route bring 1 of the controlling influence in the other
+        // city
         var trade_cities = this.get_trade_cities();
-        // This will sort the list by the current influence in each city
-        trade_cities = trade_cities.sort((a, b) => (a.current_influence[player] > b.current_influence[player]) ? 1 : -1);
         for(var key in trade_cities){
             var other_city = trade_cities[key];
-            if(other_city.current_influence[player] > influence+1){
-                influence = Math.min(influence+2,other_city.current_influence[player]-1);
+            if(other_city.owner() == player){
+                influence += 1;
             }
         }
-        influence = Math.max(influence, 0)
+        influence = Math.max(influence, 0);
         return influence;
     }
 

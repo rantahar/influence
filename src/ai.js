@@ -29,24 +29,11 @@ class AIPlayer {
         this.large_cities = aiconfig.large_cities;
 
         // Worker related
-        this.worker_food_base = aiconfig.worker_food_base;
-        this.worker_food_starving = aiconfig.worker_food_starving;
-        this.worker_per_food_production = aiconfig.worker_per_food_production;
-        this.worker_wood_base = aiconfig.worker_wood_base;
-        this.worker_per_wood = aiconfig.worker_per_wood;
-        this.builder_base = aiconfig.builder_base;
-        this.priest_base = aiconfig.priest_base;
-        this.priest_count = aiconfig.priest_count;
-        this.tribute_base = aiconfig.tribute_base;
-        this.tribute_high_influence = aiconfig.tribute_high_influence;
-        this.tribute_subdominant = aiconfig.tribute_subdominant;
-        this.merchant_internal = aiconfig.merchant_internal;
-        this.merchant_internal_number = aiconfig.merchant_internal_number;
-        this.merchant_internal_influence = aiconfig.merchant_internal_influence;
-        this.merchant_base = aiconfig.merchant_base;
-        this.merchant_agression = aiconfig.merchant_agression;
-        this.merchant_defensiveness = aiconfig.merchant_defensiveness;
-        this.merchant_subdominant = aiconfig.merchant_subdominant;
+        this.capital_tribute = aiconfig.capital_tribute;
+        this.capital_merchants = aiconfig.capital_merchants;
+        this.capital_merchants = aiconfig.capital_merchants;
+        this.internal_merchants = aiconfig.internal_merchants;
+        this.hostile_takeover = aiconfig.hostile_takeover;
 
         this.city_names = aiconfig.city_names;
         this.city_prefix = aiconfig.city_prefix;
@@ -128,9 +115,34 @@ class AIPlayer {
         for(var key in cities){
             var city = cities[key];
             if(city.owner() == this.key){
-                var p = city.level*1000+city.tile.influence[this.key]*10 + city.food;
+                var p = city.level*100+city.tile.influence[this.key];
                 if(p > pref){
                     capital = city;
+                    pref = p;
+                }
+            }
+        }
+        var merchant_destination;
+        pref = 0;
+        for(var key in cities){
+            var city = cities[key];
+            if(city.owner() == this.key){
+                var p = city.tile.influence[this.key];
+                if(p > pref){
+                    merchant_destination = city;
+                    pref = p;
+                }
+            }
+        }
+        var hostile_takeover_destination;
+        pref = 0;
+        for(var key in cities){
+            var city = cities[key];
+            if(city.owner() != this.key && city.tile.influence[this.key] > 0){
+                var influence_diff = city.influence(city.owner()) - city.influence(this.key);
+                var p = influence_diff - 5;
+                if(p > pref){
+                    hostile_takeover_destination = city;
                     pref = p;
                 }
             }
@@ -147,20 +159,17 @@ class AIPlayer {
                 city.merchant_routes = [];
                 city.tribute_routes = [];
 
-                // Set each free worker one by one
-                var n_workers = city.free_workers();
-                var tribute_sent = false;
-                for(var i=0; i<n_workers; i++){
+                // First set enough food workers to feed everyone
+                for(var i=0; city.free_workers() > 0;){
                     var food_balance = city.food_production() - city.food_consumption();
                     var starving = food_balance < 0;
                     if(starving && city.food_workers < city.max_food_workers()){
-                        // First, if starving send out farmers
                         city.food_workers += 1;
                         continue;
                     }
-                    if(starving && !city.has_trade_route_with(capital)){
+                    if(starving && !city.has_trade_route_with(merchant_destination)){
                         // if still starving, could try sending a merchant
-                        city.send('merchant', capital);
+                        city.send('merchant', merchant_destination);
                         continue
                     }
                     if(city.building != undefined){
@@ -173,23 +182,36 @@ class AIPlayer {
                         city.food_workers += 1;
                         continue;
                     }
-                    if(this.wood < 20 && city.wood_workers < city.max_food_workers()){
+                    if(this.wood < 20 && city.wood_workers < city.max_wood_workers()){
                         city.wood_workers += 1;
                         continue;
                     }
-                    if(city == capital){
-                        city.priests += 1;
+
+                    if(this.hostile_takeover && hostile_takeover_destination != undefined &&
+                        !city.has_trade_route_with(hostile_takeover_destination)){
+                         city.send('merchant', hostile_takeover_destination);
+                         continue;
+                    }
+
+                    if(this.capital_merchants && !city.has_trade_route_with(capital) &&
+                       capital.influence(this.key) > city.influence(this.key)){
+                        city.send('merchant', capital);
                         continue;
                     }
 
-                    if(tribute_sent && !city.has_trade_route_with(capital)){
-                        city.send('merchant', capital);
-                        continue
+                    if(this.internal_merchants && !city.has_trade_route_with(merchant_destination)){
+                        city.send('merchant', merchant_destination);
+                        continue;
                     }
 
-                    // Finally send a tribute, even if it causes starvation
-                    city.send('tribute', capital);
-                    tribute_sent = true;
+                    if(this.capital_tribute && city != capital){
+                        // Send
+                        city.send('tribute', capital);
+                        continue;
+                    }
+
+                    // Priests are the default
+                    city.priests += 1;
                 }
             }
         }
@@ -409,24 +431,7 @@ function make_players(){
         field_city_food_tiles: 2,
 
         // Worker related priest_base
-        worker_food_base: 100,
-        worker_food_starving: 1000,
-        worker_per_food_production: 1,
-        worker_wood_base: 95,
-        worker_per_wood: 1,
-        priest_base: 50,
-        builder_base: 110,
-        priest_count: 1,
-        tribute_base: 49,
-        tribute_high_influence: 2,
-        tribute_subdominant: 5,
-        merchant_internal: 35,
-        merchant_internal_number: -1,
-        merchant_internal_influence: 1,
-        merchant_base: 0,
-        merchant_agression: -1,
-        merchant_defensiveness: 4,
-        merchant_subdominant: 1,
+        capital_tribute: true,
 
         city_names: ["Ystan", "Damasy", "Amary", "Orna", "Inestan", "Ynila", "Donla", "Ostany", "Angla"],
         city_prefix: "Am"
@@ -452,24 +457,8 @@ function make_players(){
         field_city_food_tiles: 1,
 
         // Worker related
-        worker_food_base: 100,
-        worker_food_starving: 100,
-        worker_per_food_production: 1,
-        worker_wood_base: 90,
-        worker_per_wood: 1,
-        builder_base: 110,
-        priest_base: 53,
-        priest_count: -1,
-        tribute_base: 40,
-        tribute_high_influence: 1,
-        tribute_subdominant: 5,
-        merchant_base: 20,
-        merchant_internal: 33,
-        merchant_internal_number: -1,
-        merchant_internal_influence: 2,
-        merchant_agression: -1,
-        merchant_defensiveness: 2,
-        merchant_subdominant: 5,
+        capital_merchants: true,
+        internal_merchants: true,
 
         city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
                     "Kolma", "Enta", "Aflan", "Ylman", "Umilla", "Wenna", "Tornal", "Kilman" ],
@@ -498,24 +487,9 @@ function make_players(){
         field_city_food_tiles: 0,
 
         // Worker related
-        worker_food_base: 100,
-        worker_food_starving: 50,
-        worker_per_food_production: 1,
-        worker_wood_base: 95,
-        worker_per_wood: 1,
-        builder_base: 110,
-        priest_base: 50,
-        priest_count: 1,
-        tribute_base: 49,
-        tribute_high_influence: 2,
-        tribute_subdominant: 5,
-        merchant_base: 5,
-        merchant_internal: 35,
-        merchant_internal_number: -1,
-        merchant_internal_influence: 1,
-        merchant_agression: 4,
-        merchant_defensiveness: 3,
-        merchant_subdominant: 5,
+        capital_merchants: true,
+        internal_merchants: true,
+        hostile_takeover: true,
 
         city_names: ["Argath", "Moroth", "Thalath", "Grahath", "Omroth", "Grth", "Afath", "Arostagath",
             "Ungoth", "Tramath", "Etrukrol", "Dimrasta", "Igratas", "Fedrath", "Brastagrath",
@@ -543,24 +517,9 @@ function make_players(){
         field_city_food_tiles: 0,
 
         // Worker related
-        worker_food_base: 100,
-        worker_food_starving: 0,
-        worker_per_food_production: 2,
-        worker_wood_base: 70,
-        worker_per_wood: 2,
-        builder_base: 110,
-        priest_base: 50,
-        priest_count: 0,
-        tribute_base: 40,
-        tribute_high_influence: 1,
-        tribute_subdominant: 2,
-        merchant_internal: 5,
-        merchant_internal_number: -1,
-        merchant_internal_influence: 0,
-        merchant_base: 40,
-        merchant_agression: 1,
-        merchant_defensiveness: 1,
-        merchant_subdominant: 2,
+        capital_tribute: true,
+        capital_merchants: true,
+        hostile_takeover: true,
 
         city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta", "Odrila", "Ondara",
                     "Okra", "Omrana", "Otria", "Oula", "Ogra", "Onderasta", "Omudira", "Owdamas",
