@@ -2,7 +2,7 @@
 // Items buildable in the ciy screen
 var city_items = {
   colony: {
-      price: 24
+      price: 12
   }
 }
 
