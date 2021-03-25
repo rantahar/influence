@@ -95,20 +95,10 @@ class AIPlayer {
         }
 
         // Check if there is anything useful to do in cities
-        var n_cities = 0; // Count cities on first loop
+        var n_cities = 0; // Count cities first
         for(var key in cities){
             var city = cities[key];
             if(city.owner() == this.key){
-                // Check if it makes sense to build a colony
-                if(this.colony < this.max_colonies){
-                    var utility = this.colony_base +
-                                  this.colony_food*city.food +
-                                  this.colony_level*city.level;
-                    if(utility > 0){
-                        city.queue_colony();
-                    }
-                }
-
                 n_cities += 1;
             }
         }
@@ -178,10 +168,15 @@ class AIPlayer {
                         city.send('merchant', merchant_destination);
                         continue
                     }
-                    if(city.building != undefined){
-                        // If building, put everything towards that
-                        city.builders += 1;
-                        continue;
+                    // Check if it makes sense to build a colony
+                    if(this.colony < this.max_colonies){
+                        var utility = this.colony_base +
+                                      this.colony_food*city.food +
+                                      this.colony_level*city.level;
+                        if(utility > 0){
+                            city.builders += city.free_workers();
+                            continue;
+                        }
                     }
                     if(food_balance < 5 && city.food_workers < city.max_food_workers()){
                         // Fill in food workers
