@@ -340,12 +340,17 @@ class City {
         food -= this.food_consumption();
 
         // Check buildings
-        if(this.building != undefined){
-            // Free workers have no positive effect now
-            //var workers = this.free_workers();
-            this.building.price -= Math.max(0, this.builders);
-            if(this.building.price <= 0 ) {
-               this.building_done();
+        if(this.builders > 0){
+            if(this.building == undefined){
+                this.queue_colony();
+            } else {
+                // Free workers have no positive effect now
+                //var workers = this.free_workers();
+                this.building.price -= Math.max(0, this.builders);
+                if(this.building.price <= 0 ) {
+                    this.building_done();
+                    this.queue_colony();
+                }
             }
         }
 
@@ -517,17 +522,6 @@ class City {
             // Worker controls
             div.append(this.local_worker_div());
             div.append(this.remote_worker_div());
-
-            // Build colony button
-            var turns_left = Math.ceil(city_items.colony.price / this.builders);
-            var colony_button = $("<span></span>").text("Colony ("+city_items.colony.price+")");
-            colony_button.addClass("btn btn-success my-1");
-            var city = this;
-            colony_button.click(function(){
-                city.queue_colony();
-                game.update_city_page();
-            });
-            div.append(colony_button);
         }
 
         return div;
