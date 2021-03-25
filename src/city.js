@@ -144,7 +144,7 @@ class City {
     }
 
     // Set the number of a given type of worker
-    set_worker(type, n){
+    _set_worker(type, n){
         var max = this[type+'s'] + this.free_workers();
         if(type == 'food_worker'){
             max = Math.min(this.food_tiles(), max);
@@ -155,10 +155,16 @@ class City {
         if(n >= 0 && n <= max ){
             this[type+'s'] = n;
         }
-        // Remove any active highlight or onclick action and update page
-        game.update_city_page();
-        game.remove_highlight();
     }
+
+    // Assign worker interactively:
+    // Assign, clear the highlighting and update the city page
+    set_worker(type, n){
+       this._set_worker(type,n);
+       game.update_city_page();
+       game.remove_highlight();
+    }
+
 
     // Set the number workers sent to city
     set_route_count(route, n){
@@ -290,8 +296,7 @@ class City {
               + this.number_received('merchant');
 
         // Tributes received and sent
-        food += this.number_received('tribute')
-              - this.number_sent('tribute');
+        food -= 5*this.number_sent('tribute');
         return food;
     }
 
@@ -351,7 +356,7 @@ class City {
         if(this.food >= this.food_limit()){
             this.food -= this.food_limit();
             this.level += 1;
-            this.set_worker(this.new_worker_type, this[this.new_worker_type+'s']+1);
+            this._set_worker(this.new_worker_type, this[this.new_worker_type+'s']+1);
             map_scene.update_city_sprite(x,y,this.level);
         }
         // Or if the city shrinks
@@ -386,7 +391,7 @@ class City {
             // First check the type the city is currently assigning
             var type = this.new_worker_type;
             if(this[type+'s'] > 0){
-                this.set_worker(type, this[type+'s']-1);
+                this._set_worker(type, this[type+'s']-1);
 
             // Try every other type is somewhat arbitrary order
             } else if(this.tribute_routes.length > 0){
