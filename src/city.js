@@ -744,22 +744,26 @@ class City {
     foreign_worker_list(list){
         var list_div = $("<table></table>")
         var city = this;
+        var show = city.owner() == "white";
         list.forEach(function(route){
             var row = $("<tr></tr>");
             var sender = route.source;
-            if(sender.owner() && sender.owner() == 'white'){
-                var set = function(n){sender.set_route_count(route, n)};
+            if(show){
+                if(sender.owner() && sender.owner() == 'white'){
+                    var set = function(n){sender.set_route_count(route, n)};
+                    show = true;
+                }
+                var worker_div = city.make_worker_div(
+                    route.number, 0, sender.name, false, false, set
+                );
+                if(sender.owner()){
+                    worker_div.css('color', players[sender.owner()].text_color);
+                } else {
+                    worker_div.css('color', 'gray');
+                }
+                row.append($("<td></td>").append(worker_div));
+                list_div.append(row);
             }
-            var worker_div = city.make_worker_div(
-                route.number, 0, sender.name, false, false, set
-            );
-            if(sender.owner()){
-                worker_div.css('color', players[sender.owner()].text_color);
-            } else {
-                worker_div.css('color', 'gray');
-            }
-            row.append($("<td></td>").append(worker_div));
-            list_div.append(row);
         });
         return list_div;
     }
