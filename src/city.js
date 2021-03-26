@@ -716,22 +716,26 @@ class City {
     foreign_merchant_list(list){
         var list_div = $("<table></table>")
         var city = this;
+        var show = city.owner() == "white";
         list.forEach(function(route){
             var row = $("<tr></tr>");
             var sender = route.source;
             if(sender.owner() && sender.owner() == 'white'){
+                show = true;
                 var set = function(n){sender.set_route_count(route, n)};
             }
-            var worker_div = city.make_worker_div(
-                route.number, 0, sender.name, false, true, set
-            );
-            if(sender.owner()){
-                worker_div.css('color', players[sender.owner()].text_color);
-            } else {
-                worker_div.css('color', 'gray');
+            if(show){
+                var worker_div = city.make_worker_div(
+                    route.number, 0, sender.name, false, true, set
+                );
+                if(sender.owner()){
+                    worker_div.css('color', players[sender.owner()].text_color);
+                } else {
+                    worker_div.css('color', 'gray');
+                }
+                row.append($("<td></td>").append(worker_div));
+                list_div.append(row);
             }
-            row.append($("<td></td>").append(worker_div));
-            list_div.append(row);
         });
         return list_div;
     }
