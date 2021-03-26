@@ -1288,8 +1288,8 @@ function gameboard(map){
         }
 
         $("#player_info").empty();
-        var Title = $("<h4></h4>").html("Your empire:");
-        $("#player_info").append(Title);
+        var title = $("<h4></h4>").html("Your empire:");
+        $("#player_info").append(title);
 
         var info = $("<div></div>").text("Influence: " + format_number(player.influence));
         $("#player_info").append(info);
