@@ -343,14 +343,13 @@ class City {
         if(this.builders > 0){
             if(this.building == undefined){
                 this.queue_colony();
-            } else {
-                // Free workers have no positive effect now
-                //var workers = this.free_workers();
-                this.building.price -= Math.max(0, this.builders);
-                if(this.building.price <= 0 ) {
-                    this.building_done();
-                    this.queue_colony();
-                }
+            }
+            // Free workers have no positive effect now
+            //var workers = this.free_workers();
+            this.building.price -= Math.max(0, this.builders);
+            if(this.building.price <= 0 ) {
+                this.building_done();
+                this.queue_colony();
             }
         }
 
@@ -490,39 +489,101 @@ class City {
         var div = $("<div></div>");
         // Name as an h4 tag
         div.append($("<h4></h4>").text(this.name));
-        // Location
-        div.append("<div><b>Tile:</b> x="+this.x+", y="+this.y+"</div>");
         // Print the amount of influence each player has here
-        div.append(this.tile.describe_influence());
+        var influence_line = $("<div></div>").text("Influence on tile: ");
+        if(this.owner() != undefined){
+            var text = $("<span></span>").text(" "+this.tile.influence[this.owner()])
+            .css('color', players[this.owner()].text_color);
+            influence_line.append(text);
+        }
+        for(var key in players){
+            if(key != this.owner()){
+                var inf = this.tile.influence[key];
+                if(inf > 0){
+                   var text = $("<span></span>").text(" "+inf)
+                   .css('color', players[key].text_color);
+                   influence_line.append(text);
+               }
+            }
+        }
+        div.append(influence_line);
+        // The city's influence level
+        var influence_p = $("<div></div>").text("City influence: ");
+        if(this.owner() != undefined){
+            var text = $("<span></span>").text(" "+this.influence(this.owner()))
+            .css('color', players[this.owner()].text_color);
+            influence_p.append(text);
+        }
+        for(var key in this.influence){
+            if(key != this.owner()){
+                var inf = this.influence(key);
+                if(inf > 0){
+                    var text = $("<span></span>").text(" "+this.influence(key))
+                    .css('color', players[key].text_color);
+                    influence_p.append(text);
+                }
+            }
+        }
+        div.append(influence_p);
         // The city level
         div.append($("<div></div>").html("<b>Population</b>: "+this.level));
-        // It's influence level
-        div.append($("<div></div>").html("<b>City influence</b>: "+this.influence(this.owner())));
 
         // For the human player show more details and controls
         if(this.owner() == 'white'){
             // Show the amount of food and production rate
             div.append(this.food_production_line());
 
-            // Show the number of free workers
-            div.append($("<div></div>").html("<b>Free workers</b>: "+this.free_workers()));
-
             // And building projects (only colony exists for now)
             if(this.building){
-                div.append($("<span></span>").text("Building a "+this.building.type
-                 + "("+this.building.price+")"));
-                var cancel_button = $("<span></span>").text("Cancel").addClass("btn btn-primary btn-vsm");
-                cancel_button.click(function(){
-                    city.cancel_building();
-                    game.update_city_page();
-                });
-                div.append(cancel_button);
+                div.append($("<span></span>").text("Building "+this.building.type
+                 + " ("+this.building.price+")"));
             }
 
             // Worker controls
+            div.append($("<div></div>").html("<b>Free workers</b>: "+this.free_workers()));
+
+            var assign_div = $("<div></div>").html("New workers are ");
+            var assign_workers_to =$("<select></select>");
+            assign_workers_to.append("<option value='food_worker'>Farmers / Fishers</option>");
+            assign_workers_to.append("<option value='wood_worker'>Wood gatherers</option>");
+            assign_workers_to.append("<option value='builder'>Builders</option>");
+            assign_workers_to.append("<option value='priest'>Priests</option>");
+            assign_workers_to.val(city.new_worker_type);
+            assign_div.append(assign_workers_to);
+            div.append(assign_div);
+            assign_workers_to.change(function(){
+                var value = $(this).val();
+                city.new_worker_type = value;
+            });
+
             div.append(this.local_worker_div());
-            div.append(this.remote_worker_div());
+
+            // Lists of each worker type sent to cities
+            div.append($("<div></div>").html("<b>Merchants Sent</b>:").append(this.create_send_button('merchant')));
+            div.append(this.merchant_list(this.merchant_routes));
+            div.append($("<div></div>").html("<b>Tributes Sent</b>:").append(this.create_send_button('tribute')));
+            div.append(this.worker_list(this.tribute_routes));
         }
+        // List of workers from other cities
+        var this_city = this;
+        var merchant_list = [];
+        var tribute_list = [];
+        game.cities.forEach(function(city){
+            city.merchant_routes.forEach(function(route){
+                if(route.destination == this_city){
+                    merchant_list.push(route);
+                }
+            });
+            city.tribute_routes.forEach(function(route){
+                if(route.destination == this_city){
+                    tribute_list.push(route);
+                }
+            });
+        });
+        div.append($("<div></div>").html("<b>Foreign Merchants</b>:"));
+        div.append(this.foreign_merchant_list(merchant_list));
+        div.append($("<div></div>").html("<b>Tributes Received</b>:"));
+        div.append(this.foreign_worker_list(tribute_list));
 
         return div;
     }
@@ -617,62 +678,6 @@ class City {
             }
         });
         return sendbutton;
-    }
-
-    // Build and return a div containing a list of merchants and controls for
-    // deleting and sending them
-    worker_panel(){
-        var city = this;
-        var div = $("<div></div>");
-        // Name as an h4 tag
-        div.append($("<h4></h4>").text(this.name));
-        if(this.owner() == 'white'){
-            div.append(this.food_production_line());
-
-            var assign_div = $("<div></div>").html("New workers are ");
-            var assign_workers_to =$("<select></select>");
-            assign_workers_to.append("<option value='food_worker'>Farmers / Fishers</option>");
-            assign_workers_to.append("<option value='wood_worker'>Wood gatherers</option>");
-            assign_workers_to.append("<option value='builder'>Builders</option>");
-            assign_workers_to.append("<option value='priest'>Priests</option>");
-            assign_workers_to.val(city.new_worker_type);
-            assign_div.append(assign_workers_to);
-            div.append(assign_div);
-            assign_workers_to.change(function(){
-                var value = $(this).val();
-                city.new_worker_type = value;
-            });
-
-            div.append($("<div></div>").html("<b>Free workers</b>: "+this.free_workers()));
-            div.append(this.local_worker_div());
-
-            // Lists of each worker type sent to cities
-            div.append($("<div></div>").html("<b>Merchants Sent</b>:").append(this.create_send_button('merchant')));
-            div.append(this.merchant_list(this.merchant_routes));
-            div.append($("<div></div>").html("<b>Tributes Sent</b>:").append(this.create_send_button('tribute')));
-            div.append(this.worker_list(this.tribute_routes));
-        }
-        // List of workers from other cities
-        var this_city = this;
-        var merchant_list = [];
-        var tribute_list = [];
-        game.cities.forEach(function(city){
-            city.merchant_routes.forEach(function(route){
-                if(route.destination == this_city){
-                    merchant_list.push(route);
-                }
-            });
-            city.tribute_routes.forEach(function(route){
-                if(route.destination == this_city){
-                    tribute_list.push(route);
-                }
-            });
-        });
-        div.append($("<div></div>").html("<b>Foreign Merchants</b>:"));
-        div.append(this.foreign_merchant_list(merchant_list));
-        div.append($("<div></div>").html("<b>Tributes Received</b>:"));
-        div.append(this.foreign_worker_list(tribute_list));
-        return div;
     }
 
     // Given a list of merchants, return a table with a delete button

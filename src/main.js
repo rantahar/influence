@@ -1272,12 +1272,6 @@ function gameboard(map){
         // Add the div created by the city object
         var div = active_city.describe();
         $("#city_card").append(div);
-
-        // Also the workers pane
-        $("#worker_card").empty();
-        // Add the div created by the city object
-        var div = active_city.worker_panel();
-        $("#worker_card").append(div);
     }
 
     // Update the home page of the panel
@@ -1374,7 +1368,7 @@ function gameboard(map){
                     text: "People in "+city.name+" are eating their reserves.",
                     onclick: function(){
                        go_to_city(city);
-                       show_tab("#worker");
+                       show_tab("#city");
                     }
                  });
               }
@@ -1385,7 +1379,7 @@ function gameboard(map){
                     text: "There are unemployed workers in "+city.name+".",
                     onclick: function(){
                        go_to_city(city);
-                       show_tab("#worker");
+                       show_tab("#city");
                     }
                  });
               }
@@ -1398,7 +1392,7 @@ function gameboard(map){
                            + "overtaking yours in "+city.name+".",
                        onclick: function(){
                           go_to_city(city);
-                          show_tab("#worker");
+                          show_tab("#city");
                        }
                     });
                  }

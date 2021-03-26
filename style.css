@@ -124,3 +124,9 @@ label {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
 }
+
+.panel_card {
+    max-height: 440px;
+    padding-bottom: 0px;
+    overflow-y: auto;
+}
