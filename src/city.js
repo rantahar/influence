@@ -12,7 +12,7 @@ class City {
 
         // Set current influence to start with
         this.current_influence = {};
-        for(key in players){
+        for(var key in players){
             this.current_influence[key] = 0;
         }
         this.current_influence[this.owner()] = 10;
@@ -238,7 +238,7 @@ class City {
     send(worker_type, other_city){
        if(this.can_send(worker_type, other_city) && this.free_workers() > 0){
           // If the route already exists, add one. Otherwise create new route.
-          for(key in this[worker_type+'_routes']){
+          for(var key in this[worker_type+'_routes']){
              var route = this[worker_type+'_routes'][key];
              if(route.destination == other_city){
                 route.number += 1;

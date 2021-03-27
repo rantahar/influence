@@ -330,7 +330,7 @@ function random_map(size_x, size_y, water_amount, water_continuity, forest_amoun
 
     min_distance = Math.min(0.2*(size_x*size_x + size_y*size_y), 9);
     map.start = {};
-    for(key in players){
+    for(var key in players){
         var player = players[key];
         var accepted = false;
         var n;

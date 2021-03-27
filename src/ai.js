@@ -1,4 +1,3 @@
-
 // The player class. AI players have a number of parameters related to their
 // preferred actions. The take_turn() function is the actual AI script and is
 // shared between all players
@@ -232,7 +231,7 @@ class AIPlayer {
 
                     // Modify by distance to close by cities
                     if(this.road_to_own_cities != 0){
-                       for(key in cities){
+                       for(var key in cities){
                           var city = cities[key];
                           var dx = city.x - x;
                           var dy = city.y - y;

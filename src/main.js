@@ -1308,13 +1308,13 @@ function gameboard(map){
         for(let item_key in home_items){
             var item = home_items[item_key];
             var text = item.button_text + " (";
-            for(key in item.price){
+            for(var key in item.price){
                 text += item.price[key] + " " + key;
             }
             text += ")";
             var button = $("<div></div>").html(text);
             var can_afford = true;
-            for(key in item.price){
+            for(var key in item.price){
                 if(players['white'][key] < item.price[key]){
                     can_afford = false;
                 }
@@ -1429,7 +1429,7 @@ function gameboard(map){
       var item = home_items[item_key];
       // Check the player is allowed to build
       var can_afford = true;
-      for(key in item.price){
+      for(var key in item.price){
           if(players['white'][key] < item.price[key]){
               can_afford = false;
           }
@@ -1457,7 +1457,7 @@ function gameboard(map){
         // check that we can afford
         var item = home_items[item_key];
         var can_afford = true;
-        for(key in item.price){
+        for(var key in item.price){
             if(players[player_key][key] < item.price[key]){
                 can_afford = false;
             }
@@ -1472,7 +1472,7 @@ function gameboard(map){
                 item.on_build(tiles[x][y]);
                 // and the map
                 mapscene.add_item(item_key, x, y);
-                for(key in item.price){
+                for(var key in item.price){
                     players[player_key][key] -= item.price[key];
                 }
             }
