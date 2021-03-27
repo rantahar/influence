@@ -168,7 +168,7 @@ class AIPlayer {
                         city.food_workers += 1;
                         continue;
                     }
-                    if(this.wood < 20 && city.wood_workers < city.max_wood_workers()){
+                    if(this.wood < 50 && city.wood_workers < city.max_wood_workers()){
                         city.wood_workers += 1;
                         continue;
                     }
@@ -407,7 +407,7 @@ function make_players(){
         colony_base: 1,
         colony_food: 0,
         colony_level: 0,
-        max_colonies: 3,
+        max_colonies: 4,
         road_utility: -22,
         road_to_own_cities: 0,
         road_to_other_cities: 1,
