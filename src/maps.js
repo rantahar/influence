@@ -355,8 +355,7 @@ var tutorial_5 = {
         game.popup({
             title: "Tutorial",
             text: "Violet grows and engulfs all things. It is an elder god "+
-            "from an unknown past. You should be glad it's resources are "+
-            "limited on this island."
+            "from an unknown past. It's not always smart, but it is inscrutable."
         });
     }
 }
