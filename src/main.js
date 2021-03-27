@@ -1521,7 +1521,7 @@ function gameboard(map){
         }
         // Set the text
         if(content.text){
-            $("#popup_content").text(content.text);
+            $("#popup_content").html(content.text);
         }
         // If there is another popup, add a next button with the content
         if(content.next){

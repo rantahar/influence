@@ -91,9 +91,9 @@ var tutorial_map = [
 ['w','w','g','f','m','g','g','g','w','w','w','w','w'],
 ['w','g','g','g','m','g','g','f','w','w','w','w','w'],
 ['w','f','g','g','m','g','g','g','w','w','w','w','w'],
-['w','g','g','g','g','g','g','w','w','w','w','w','w'],
-['w','g','f','g','f','g','g','w','w','w','w','w','w'],
-['w','g','g','g','g','g','g','w','w','w','w','w','w'],
+['w','g','g','g','g','g','g','g','w','w','w','w','w'],
+['w','g','f','g','f','g','g','g','g','w','w','w','w'],
+['w','g','g','g','g','g','g','g','w','w','w','w','w'],
 ['w','g','f','g','g','f','g','g','w','w','w','w','w'],
 ['w','g','g','g','g','g','g','g','w','w','w','w','w'],
 ['w','w','w','w','w','w','w','w','w','w','w','w','w'],
@@ -106,7 +106,7 @@ var tutorial_map = [
 
 
 
-// SHows the elements and explains the rules
+// Shows the elements and explains the rules
 var tutorial_1 = {
     map: tutorial_map,
     start: {
@@ -127,9 +127,9 @@ var tutorial_1 = {
             this.city_click = true;
             game.popup({
                 title: "Tutorial",
-                text: "The city panel has opened on the left. Your first city starts with population 1, "+
-                "but it grows as it produces surplus food. The city's influence starts at 3 and " +
-                "grows by 1 every 3 population points. "+
+                text: "The city panel has opened on the left. Your first city starts with population"+
+                "1, but it grows as it produces food. You have 10 influence on the city, "+
+                "and this will also grow if you take care of your city well. "+
                 "Your influence will spread from the city once you click 'Next Turn'."
             });
         }
@@ -137,35 +137,75 @@ var tutorial_1 = {
             this.turn_2 = true;
             game.popup({
                 title: "Tutorial",
-                text: "The city's influence has spread to the neighbouring tiles. when influence spreads "+
-                "it gets reduced a bit. On grass tiles, it gets reduced by 1. On forest "+
-                "and water tiles the reduction is 2 and on cities there is no reduction. "+
-                "You cannot influence mountain tiles.",
-                next:{
-                  title: "Tutorial",
-                  text: "In the city panel you see that you have one worker producing food. "+
-                  "The worker can produce either food or wood, thanks "+
-                  "to the field and forest tiles around the city. "+
-                  "It is better to produce food in the beginning, since this helps the city grow and get "+
-                  "more workers.",
-                  next: {
-                    title: "Tutorial",
-                    text: "Once you have a few workers, you should start producing a colony. When building "+
-                    "a colony, all the city's food production goes towards the cost of the colony "+
-                    "and the city does not grow. The colony costs is "+city_items.colony.price+" food. "+
-                    "Any free workers will also contribute by 1 food per turn."
-                  }
-                }
+                text: "The city's influence has spread to the neighbouring tiles and you "+
+                "control them now. You can click on the tiles to see how much influence you have " +
+                "on each.",
+                next: {
 
+                title: "Tutorial",
+                text: "Notice that don't have quite as much influence on the neighbour tiles as in " +
+                "your city. When influence spreads to a grass tile, it gets reduced by 3. " +
+                "On forest and water tiles it is reduced by 4. Your influence does not "+
+                "spread to mountain tiles.",
+                next: {
+
+                title: "Tutorial",
+                text: "Click 'Next Turn' again to see your influence spread to the sea."
+                }
+                }
             });
         }
-        if(this.colony == undefined && game.player.colonies > 0){
+        if(this.turn_3 == undefined && game.turn > 2){
+            this.turn_3 = true;
+            game.popup({
+                title: "Tutorial",
+                text: "Now let's look at the city page. Click on the city again, or use the "+
+                '"City"-tab in the panel on the left.',
+                next: {
+
+                title: "Tutorial",
+                text: "You have no free workers, which is good. The one worker you have "+
+                "is farming one of the grass tiles around the city. The city also has a forest "+
+                "tile, so you could also choose to collect wood. ",
+                next: {
+
+                title: "Tutorial",
+                text: "It's usually best to put "+
+                "unemployed workers to a good use. In the dropdown menu you can choose where "+
+                "new workers will go when the population grows. We will "+
+                "talk about the other workers later, but for now set new workers to become "+
+                "builders."
+                }
+                }
+            });
+        }
+        if(this.builders == undefined && game.turn > 2 && game.cities[0].new_worker_type == 'builder'){
+            this.builders = true;
+            game.popup({
+                title: "Tutorial",
+                text: "Good! The city's population will increase in a few turns and you will "+
+                "get your first builder. You could assing one now, but without a single farmer "+
+                "your city would not grow."
+            });
+        }
+        if(this.has_builders == undefined && game.cities[0].builders > 0){
+            this.has_builders = true;
+            game.popup({
+                title: "Tutorial",
+                text: "Now your city has a builder! Builders make new colonies and colonies are "+
+                "the only way you can expand to fill the world! It will take a few turns to "+
+                "churn one out."
+            });
+        }
+        if(this.colony == undefined && game.player.colony > 0){
             this.colony = true;
             game.popup({
                 title: "Tutorial",
-                text: "Great! You can now send your colony to establish a new city in the 'home' menu. "+
-                "Cities cannot be established too close to the original, so you might have to click "+
-                "'Next Turn' a couple more times first. Build your second city."
+                text: "Great! You can now send your colony to establish a new city!. "+
+                "Click on the 'home' tab to find the 'City' button. "+
+                "Cities must be at least 3 tiles away from the original (no shared neighbours). "+
+                "Also, they can only be built on grass tiles. "+
+                "Build your second city."
             });
         }
         if(this.two_cities == undefined && game.cities.length > 1){
@@ -174,14 +214,15 @@ var tutorial_1 = {
             game.popup({
                 title: "Tutorial",
                 text: "Your second city will take a few turns to flourish, but rest assured it will. "+
-                "Your influence on a city tile is at least the city's influence level, but it can be "+
-                "higher second city has more influence there. Even then the smaller city is not useless, "+
-                "it can still produce resources for you. And it might grow big enough to make a difference.",
+                "You influence on the tile has immediately jumped to 10. This only happens when you "+
+                "establish a colony, usually influence spreads more slowly, either from tile to tile "+
+                "or from a city to it's tile.",
                 next: {
-                    title: "Tutorial",
-                    text: "Next, gather "+
-                    home_items.field.price.wood+
-                    " wood."
+
+                title: "Tutorial",
+                text: "Next, gather "+
+                home_items.field.price.wood+
+                " wood."
                 }
             });
         }
@@ -190,17 +231,30 @@ var tutorial_1 = {
             this.goal_next_turn = true;
             game.popup({
                 title: "Tutorial",
-                text: "Now you can build a field or a road in the home screen. Each field allows one worker "+
-                "to produce one more food per turn. "+
-                "Roads allow influence to spread more easily. The reduction in "+
-                "influence is halved.",
+                text: "Now you can build a field or a road in the home panel. Each field allows one "+
+                "farmer to produce one extra food per turn. "+
+                "Roads allow influence to spread more easily. One additional point of influence "+
+                "spreads to tiles with a road.",
+
                 next: {
-                    title: "Tutorial",
-                    text: "Your goal is to spread your influence as far as you can. Since there are "+
-                    "no other gods on this island, you can take your time. You win when you control "+
-                    "more than half of the world or have more influence than anyone else after 200 "+
-                    "turns."
+                title: "Tutorial",
+                text: "Your goal is to spread your influence as far as you can. Since there are "+
+                "no other gods on this island, you can take your time. You win when you control "+
+                "more than half of the world or have more influence than anyone else after 200 "+
+                "turns."
                 }
+            });
+        }
+        if(this.priests == undefined && this.wood_for_field &&
+           game.cities[1] && game.cities[1].free_workers() > 0){
+            this.priests = true;
+            this.goal_next_turn = true;
+            game.popup({
+                title: "Tutorial",
+                text: "It looks like you have a free worker in Sivola. If you don't "+
+                "know what to do with it, try making it a priest. Priests increase the "+
+                "city's influence by 1 each. This will not immediately affect the tile, "+
+                "but it will catch up with the city's influence in time."
             });
         }
     }
@@ -217,18 +271,30 @@ var tutorial_2 = {
         game.popup({
             title: "Tutorial",
             text: "Now you have competition. Blue is the messenger. "+
-            "Where it has control, it will build roads to connect cities, whether the cities "+
-            "belong to it or to someone else.",
+            "It likes to send merchants to create trade routes between cities and to "+
+            "build roads.",
             next: {
-                title: "Tutorial",
-                text: "Any tile, including cities, belong to whoever has the highest influence "+
-                "there. You can take over enemy cities by building a bigger city close by. You can "+
-                "also lose cities. When you take over a city, remember to check that the workers "+
-                "are doing something useful.",
-                next: {
-                    title: "Tutorial",
-                    text: "Other gods have the same win conditions as you."
-                }
+
+            title: "Tutorial",
+            text: "<p>Merchants are useful workers. Sending a merchant to another city "+
+            "creates a trade route between them. Both cities get more diverse food "+
+            "(1 extra food per turn). Trade also spreads influence "+
+            "around. One influence point from each city moves to the other one.</p>"+
+            "<p>To send a worker to another city, you need to have some influence there. "+
+            "Also, there can only be one trade route between any two cities.</p>",
+            next: {
+
+            title: "Tutorial",
+            text: "Any tile, including cities, belongs to whoever has the highest influence "+
+            "there. You can take over enemy cities by building a bigger city close by. You can "+
+            "also lose cities. When you take over a city, remember to check that the workers "+
+            "are doing something useful. The advisor panel give useful reminders.",
+            next: {
+
+            title: "Tutorial",
+            text: "Other gods have the same win conditions as you."
+            }
+            }
             }
         });
     }
@@ -246,9 +312,18 @@ var tutorial_3 = {
         game.popup({
             title: "Tutorial",
             text: "Green is the god of agriculture. "+
-            "It likes to build fields and grow large cities. "+
-            "Remember that the god with the most influence wins after 200 turns. "+
-            "It does not matter how many tiles you own then."
+            "It likes to build fields and grow a large capital city. "+
+            "It is also kind of old fashioned. It commands smaller cities "+
+            "to pay tribute to the capital.",
+            next: {
+
+            title: "Tutorial",
+            text: "Tributes take 5 food to another city to sacrifice it there. "+
+            "This increases the receiving cities influence by 1 "+
+            "point. It's a high price, but often smaller cities get swamped by "+
+            "the influence of a bigger one and are made useless. This way they "+
+            "can still make a difference."
+            }
         });
     }
 }
@@ -258,14 +333,13 @@ var tutorial_4 = {
     map: tutorial_map,
     start: {
         white: {x: 2, y:4},
-        blue:  {x: 6, y:9},
-        red:  {x: 1, y:8}
+        red: {x: 7, y:4}
     },
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "Red is the god of war. It's influence cannot mix with others. This can give "+
-            "you an edge in an otherwise symmetric situation."
+            text: "Red is the god of war. Even in times of piece, it does it's "+
+            "best to take from others instead of creating for itself."
         });
     }
 }
@@ -275,13 +349,14 @@ var tutorial_5 = {
     map: tutorial_map,
     start: {
         white: {x: 2, y:4},
-        violet:  {x: 5, y:5}
+        violet: {x: 6, y:1}
     },
     at_start: function(){
         game.popup({
             title: "Tutorial",
-            text: "Violet engulfs all things. It is the god of growth and of competition, "+
-            "whether winning or losing."
+            text: "Violet grows and engulfs all things. It is an elder god "+
+            "from an unknown past. You should be glad it's resources are "+
+            "limited on this island."
         });
     }
 }
