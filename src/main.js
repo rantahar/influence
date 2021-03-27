@@ -1490,7 +1490,8 @@ function gameboard(map){
        var owner = city.owner();
        cities.forEach(function(other_city){
            var tile = other_city.tile;
-           if(tile.influence[owner] > 0 && city != other_city){
+           if(tile.influence[owner] > 0 && city != other_city &&
+              city.can_send(worker_type, other_city)){
                mapscene.highlight_allowed_tile(tile.x,tile.y);
            }
        });

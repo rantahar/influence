@@ -223,17 +223,25 @@ class City {
         return false;
     }
 
+    // Check if a worker can be sent
+    can_send(worker_type, other_city){
+        if(worker_type == 'merchant' && this.has_trade_route_with(other_city)){
+            return false;
+        }
+        if(other_city.tile.influence[this.owner()] > 0){
+            return true;
+        }
+        return false;
+    }
+
     // Send a worker to another city
     send(worker_type, other_city){
-        if(worker_type == 'merchant' && this.has_trade_route_with(other_city)){
-            return; //cannot set
-        }
-        if(this.free_workers() > 0){
-           this[worker_type+'_routes'].push({
+       if(this.can_send(worker_type, other_city) && this.free_workers() > 0){
+          this[worker_type+'_routes'].push({
                'source': this,
                'destination': other_city,
                'number': 1
-           });
+          });
        }
     }
 
