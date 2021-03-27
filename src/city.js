@@ -237,6 +237,15 @@ class City {
     // Send a worker to another city
     send(worker_type, other_city){
        if(this.can_send(worker_type, other_city) && this.free_workers() > 0){
+          // If the route already exists, add one. Otherwise create new route.
+          for(key in this[worker_type+'_routes']){
+             var route = this[worker_type+'_routes'][key];
+             if(route.destination == other_city){
+                route.number += 1;
+                return;
+             }
+          }
+          // This is reached when no route already exists.
           this[worker_type+'_routes'].push({
                'source': this,
                'destination': other_city,
