@@ -30,8 +30,8 @@ class AIPlayer {
         // Worker related
         this.capital_tribute = aiconfig.capital_tribute;
         this.capital_merchants = aiconfig.capital_merchants;
-        this.capital_merchants = aiconfig.capital_merchants;
         this.internal_merchants = aiconfig.internal_merchants;
+        this.global_merchants = aiconfig.global_merchants;
         this.hostile_takeover = aiconfig.hostile_takeover;
 
         this.city_names = aiconfig.city_names;
@@ -107,21 +107,9 @@ class AIPlayer {
         for(var key in cities){
             var city = cities[key];
             if(city.owner() == this.key){
-                var p = city.level*100+city.tile.influence[this.key];
+                var p = city.food_production()*10000 + city.level*100+city.tile.influence[this.key];
                 if(p > pref){
                     capital = city;
-                    pref = p;
-                }
-            }
-        }
-        var merchant_destination;
-        pref = 0;
-        for(var key in cities){
-            var city = cities[key];
-            if(city.owner() == this.key){
-                var p = city.tile.influence[this.key];
-                if(p > pref){
-                    merchant_destination = city;
                     pref = p;
                 }
             }
@@ -134,13 +122,16 @@ class AIPlayer {
             var city = cities[key];
             var my_inf = city.tile.influence[this.key];
             if(city.owner() != this.key && my_inf > 0){
-                var p = my_inf - city.influence(city.owner()) + n_cities-1;
-                if(p > pref){
-                    hostile_takeover_destination = city;
-                    pref = p;
+                if(city.tile.influence[city.owner()] <= city.current_influence[city.owner()]){
+                   var p = my_inf - city.influence(city.owner()) + n_cities + 3;
+                   if(p > pref){
+                       hostile_takeover_destination = city;
+                       pref = p;
+                   }
                 }
             }
         }
+        var n_colony_builders = 0;
         // Now set workers at each city
         for(var key in cities){
             var city = cities[key];
@@ -161,19 +152,14 @@ class AIPlayer {
                         city.food_workers += 1;
                         continue;
                     }
-                    if(starving && city != merchant_destination &&
-                       !city.has_trade_route_with(merchant_destination)){
-                        // if still starving, could try sending a merchant
-                        city.send('merchant', merchant_destination);
-                        continue
-                    }
                     // Check if it makes sense to build a colony
-                    if(this.colony < this.max_colonies){
+                    if((this.colony + n_colony_builders) < this.max_colonies){
                         var utility = this.colony_base +
                                       this.colony_food*city.food +
                                       this.colony_level*city.level;
                         if(utility > 0){
                             city.builders += city.free_workers();
+                            n_colony_builders += 1;
                             continue;
                         }
                     }
@@ -184,6 +170,11 @@ class AIPlayer {
                     }
                     if(this.wood < 20 && city.wood_workers < city.max_wood_workers()){
                         city.wood_workers += 1;
+                        continue;
+                    }
+
+                    if(food_balance > 5 && this.capital_tribute && city != capital){
+                        city.send('tribute', capital);
                         continue;
                     }
 
@@ -200,20 +191,33 @@ class AIPlayer {
                          continue;
                     }
 
-                    if(this.internal_merchants && merchant_destination != city &&
-                       !city.has_trade_route_with(merchant_destination)){
-                        city.send('merchant', merchant_destination);
-                        continue;
+                    var merchant_set = false;
+                    if(this.internal_merchants){
+                        for(key in game.cities){
+                            var dest = game.cities[key];
+                            if(dest != city && dest.owner==this.key &&
+                               city.can_send('merchant', dest)){
+                                 city.send('merchant', dest);
+                                 break;
+                            }
+                        }
+                        // No continue statement: try settign a priest
+                        // for every merchant
+                        merchant_set = true;
                     }
 
-                    if(this.capital_tribute && city != capital){
-                        // Send
-                        city.send('tribute', capital);
-                        continue;
+                    if(this.global_merchants && !merchant_set){
+                        for(key in game.cities){
+                            var dest = game.cities[key];
+                            if(dest != city && city.can_send('merchant', dest)){
+                                 city.send('merchant', dest);
+                                 break;
+                            }
+                        }
                     }
 
                     // Priests are the default
-                    city.priests += 1;
+                    city.set_worker('priest', city.priests+1);
                 }
             }
         }
@@ -315,7 +319,7 @@ function make_players(){
         colony_base: -60,
         colony_food:  1,
         colony_level: 10,
-        max_colonies: 1,
+        max_colonies: 2,
         road_utility: -25,
         road_to_own_cities: 1,
         road_to_other_cities: 1,
@@ -341,7 +345,7 @@ function make_players(){
         colony_base: -210,
         colony_food: 10,
         colony_level: -1,
-        max_colonies: 5,
+        max_colonies: 3,
         road_utility: -5,
         road_to_own_cities: 5,
         road_to_other_cities: 5,
@@ -354,6 +358,7 @@ function make_players(){
         // Worker related
         capital_merchants: true,
         internal_merchants: true,
+        global_merchants: true,
 
         city_names: ["Ilnam", "Alaman", "Gellon", "Atosa", "Umman", "Omolla", "Nala", "Antan", "Tovisa",
                     "Kolma", "Enta", "Aflan", "Ylman", "Umilla", "Wenna", "Tornal", "Kilman" ],
@@ -372,15 +377,15 @@ function make_players(){
         city_wood: 1.3,
         colony_level: 10,
         road_utility: -5,
-        max_colonies: 1,
+        max_colonies: 2,
         road_utility: -20,
         road_to_own_cities: 0,
         road_to_other_cities: 1,
         road_influence: 1,
-        field_utility: 10000,
-        field_influence: -1,
-        field_city_level: -10,
-        field_city_food_tiles: 0,
+        field_utility: 10,
+        field_influence: 1,
+        field_city_level: -1,
+        field_city_food_tiles: 1,
 
         // Worker related
         capital_merchants: true,
@@ -399,22 +404,22 @@ function make_players(){
         city_influence: -2,
         city_food: 1,
         city_wood: 3,
-        colony_base: -40,
-        colony_food: 1,
-        colony_level: 10,
-        max_colonies: 5,
-        road_utility: 1000,
+        colony_base: 1,
+        colony_food: 0,
+        colony_level: 0,
+        max_colonies: 3,
+        road_utility: -22,
         road_to_own_cities: 0,
-        road_to_other_cities: 0,
-        road_influence: -1,
-        field_utility: 100000,
-        field_influence: -1,
-        field_city_level: -2,
-        field_city_food_tiles: 0,
+        road_to_other_cities: 1,
+        road_influence: 1,
+        field_utility: 0,
+        field_influence: 1,
+        field_city_level: 1,
+        field_city_food_tiles: 1,
 
         // Worker related
-        capital_tribute: true,
         capital_merchants: true,
+        internal_merchants: true,
         hostile_takeover: true,
 
         city_names: ["Omral", "Orna", "Oscila", "Ondo", "Otha", "Omwe", "Oasta", "Odrila", "Ondara",
