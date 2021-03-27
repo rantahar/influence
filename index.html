@@ -29,10 +29,10 @@
         </div>
         <div class="card-body text-center">
             <button id="tutorial_1" type="button" class="btn btn-primary w-50 my-1">Rules</button>
-            <button id="tutorial_2" type="button" class="btn btn-primary w-50 my-1">Competition 1</button>
-            <button id="tutorial_3" type="button" class="btn btn-primary w-50 my-1">Competition 2</button>
-            <button id="tutorial_4" type="button" class="btn btn-primary w-50 my-1">Competition 3</button>
-            <button id="tutorial_5" type="button" class="btn btn-primary w-50 my-1">Competition 4</button>
+            <button id="tutorial_2" type="button" class="btn btn-primary w-50 my-1">Merchnants and Competition</button>
+            <button id="tutorial_3" type="button" class="btn btn-primary w-50 my-1">Tributes</button>
+            <button id="tutorial_4" type="button" class="btn btn-primary w-50 my-1">Adversity</button>
+            <button id="tutorial_5" type="button" class="btn btn-primary w-50 my-1">Spread</button>
             <button id="tutorial_back" type="button" class="btn btn-primary w-50 my-1">Back</button>
         </div>
     </div>
@@ -129,9 +129,6 @@
                             <a class="nav-link bg-dark" data-toggle="tab" href="#city" id="city-tab">City</a>
                         </li>
                         <li>
-                            <a class="nav-link bg-dark" data-toggle="tab" href="#worker" id="worker-tab">Economy</a>
-                        </li>
-                        <li>
                             <a class="nav-link bg-dark" data-toggle="tab" href="#advisor" id="advisor-tab">Advisor</a>
                         </li>
                     </ul>
@@ -143,22 +140,17 @@
                             <!-- The home panel, contains tile and player info, which are filled in by the game -->
                             <div class="tab-pane active text-white" id="home" role="tabpanel">
                                 <div class="card bg-dark"><div class="card-body bg-dark" id="tile_info"></div></div>
-                                <div class="card bg-dark"><div class="card-body bg-dark" id="player_info"></div></div>
+                                <div class="card bg-dark"><div class="panel_card card-body bg-dark" id="player_info"></div></div>
                             </div>
 
                             <!-- The city panel, filled in by the game -->
                             <div class="tab-pane text-white1" id="city" role="tabpanel">
-                                <div class="card bg-dark"><div class="card-body bg-dark" id="city_card"></div></div>
-                            </div>
-
-                            <!-- The worker panel, filled in by the game -->
-                            <div class="tab-pane text-white1" id="worker" role="tabpanel">
-                                <div class="card bg-dark"><div class="card-body bg-dark" id="worker_card"></div></div>
+                                <div class="card bg-dark"><div class="panel_card card-body bg-dark" id="city_card"></div></div>
                             </div>
 
                            <!-- The advisor panel, filled in by the game -->
                            <div class="tab-pane text-white1" id="advisor" role="tabpanel">
-                               <div class="card bg-dark"><div class="card-body bg-dark" id="advisor_card"></div></div>
+                               <div class="card bg-dark"><div class="panel_card card-body bg-dark" id="advisor_card"></div></div>
                            </div>
                         </div>
 
