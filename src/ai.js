@@ -23,7 +23,7 @@ class AIPlayer {
         this.field_influence = aiconfig.field_influence;
         this.field_city_level = aiconfig.field_city_level;
         this.field_city_food_tiles = aiconfig.field_city_food_tiles;
-        this.field_city_food_tiles = aiconfig.field_city_food_tiles;
+        this.field_wood = aiconfig.field_wood;
         this.large_cities = aiconfig.large_cities;
 
         // Worker related
@@ -258,7 +258,7 @@ class AIPlayer {
             for (var y = 0; y < tiles.map_size_y; y++) {
                 var tile = tiles[x][y];
                 if(tile.owner == this.key && item.can_build_at(tiles[x][y])){
-                    var utility = this.field_utility + this.wood;
+                    var utility = this.field_utility + this.field_wood*this.wood;
 
                     // Use influence as a proxy for how central the area is
                     utility += this.field_influence*tile.influence[this.key];
@@ -312,6 +312,7 @@ function make_players(){
         road_influence: 0,
         field_utility: 0,
         field_influence: 0,
+        field_wood: 1,
         field_city_level: 1,
         field_city_food_tiles: 2,
 
@@ -337,6 +338,7 @@ function make_players(){
         road_influence: 0,
         field_utility: -15,
         field_influence: 1,
+        field_wood: 1,
         field_city_level: 0,
         field_city_food_tiles: 1,
 
@@ -368,6 +370,7 @@ function make_players(){
         road_influence: 1,
         field_utility: 10,
         field_influence: 1,
+        field_wood: 1,
         field_city_level: -1,
         field_city_food_tiles: 1,
 
@@ -394,11 +397,12 @@ function make_players(){
         road_utility: -22,
         road_to_own_cities: 0,
         road_to_other_cities: 1,
-        road_influence: 1,
-        field_utility: 0,
-        field_influence: 1,
+        road_influence: 0,
+        field_utility: 1,
+        field_influence: 0,
+        field_wood: 0,
         field_city_level: 1,
-        field_city_food_tiles: 1,
+        field_city_food_tiles: -1,
 
         // Worker related
         capital_merchants: true,
