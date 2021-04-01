@@ -128,8 +128,9 @@ var tutorial_1 = {
             game.popup({
                 title: "Tutorial",
                 text: "The city panel has opened on the left. Your first city starts with population"+
-                "1, but it grows as it produces food. You have 10 influence on the city, "+
-                "and this will also grow if you take care of your city well. "+
+                "1 and will grow when the growth meter is full. This will happend in 10 turns. "+
+                "You have 10 influence on the city, "+
+                "and this will also grow if you take care of your city. "+
                 "Your influence will spread from the city once you click 'Next Turn'."
             });
         }
@@ -138,14 +139,16 @@ var tutorial_1 = {
             game.popup({
                 title: "Tutorial",
                 text: "The city's influence has spread to the neighbouring tiles and you "+
-                "control them now. You can click on the tiles to see how much influence you have " +
-                "on each.",
+                "control them now. The city collects food from neighbouring grass and water tiles "+
+                "if you own them. "+
+                "Your empire will receive wood for every forest tile. "+
+                "You can click on the tiles to see your influence on each in the side panel.",
                 next: {
 
                 title: "Tutorial",
                 text: "Notice that don't have quite as much influence on the neighbour tiles as in " +
                 "your city. When influence spreads to a grass tile, it gets reduced by 3. " +
-                "On forest and water tiles it is reduced by 4. Your influence does not "+
+                "On forest and water tiles it is reduced by 4. It does not "+
                 "spread to mountain tiles.",
                 next: {
 
@@ -164,37 +167,20 @@ var tutorial_1 = {
                 next: {
 
                 title: "Tutorial",
-                text: "You have no free workers, which is good. The one worker you have "+
-                "is farming one of the grass tiles around the city. The city also has a forest "+
-                "tile, so you could also choose to collect wood. ",
-                next: {
-
-                title: "Tutorial",
-                text: "It's usually best to put "+
-                "unemployed workers to a good use. In the dropdown menu you can choose where "+
-                "new workers will go when the population grows. We will "+
-                "talk about the other workers later, but for now set new workers to become "+
-                "builders."
+                text: "You gave one free worker. It's usually best to put "+
+                "unemployed workers to a good use. Let's make it a builder. "+
+                "We will talk about the other workers later."
                 }
                 }
-            });
-        }
-        if(this.builders == undefined && game.turn > 2 && game.cities[0].new_worker_type == 'builder'){
-            this.builders = true;
-            game.popup({
-                title: "Tutorial",
-                text: "Good! The city's population will increase in a few turns and you will "+
-                "get your first builder. You could assing one now, but without a single farmer "+
-                "your city would not grow."
             });
         }
         if(this.has_builders == undefined && game.cities[0].builders > 0){
             this.has_builders = true;
             game.popup({
                 title: "Tutorial",
-                text: "Now your city has a builder! Builders make new colonies and colonies are "+
-                "the only way you can expand to fill the world! It will take a few turns to "+
-                "churn one out."
+                text: "Good! Builders make new colonies and colonies are "+
+                "the only way you can expand to fill the world! "+
+                "It will take a few turns to churn one out."
             });
         }
         if(this.colony == undefined && game.player.colony > 0){
@@ -213,28 +199,21 @@ var tutorial_1 = {
             this.goal_next_turn = true;
             game.popup({
                 title: "Tutorial",
-                text: "Your second city will take a few turns to flourish, but rest assured it will. "+
-                "You influence on the tile has immediately jumped to 10. This only happens when you "+
-                "establish a colony, usually influence spreads more slowly, either from tile to tile "+
-                "or from a city to it's tile.",
-                next: {
-
-                title: "Tutorial",
-                text: "Next, gather "+
-                home_items.field.price.wood+
-                " wood."
-                }
+                text: "Your second city will grow in 10 turns. "+
+                "Notice that your influence on the tile has immediately jumped to 10. This only "+
+                "happens when you establish a colony, usually influence spreads more slowly, either "+
+                "from tile to tile or from a city to its tile.",
             });
         }
         if(this.wood_for_field == undefined && game.player.wood >= home_items.field.price.wood){
             this.wood_for_field = true;
-            this.goal_next_turn = true;
             game.popup({
                 title: "Tutorial",
-                text: "Now you can build a field or a road in the home panel. Each field allows one "+
-                "farmer to produce one extra food per turn. "+
-                "Roads allow influence to spread more easily. One additional point of influence "+
-                "spreads to tiles with a road.",
+                text: "By the way, you have accumulated a good amount of wood. You can use it to "+
+                "build a field or a road in the home panel. Building a field next to a city "+
+                "increases its food production by one. "+
+                "Roads allow influence to spread more easily. The amount of influence that "+
+                "spreads to a road tile is increased by 1.",
 
                 next: {
                 title: "Tutorial",
@@ -245,14 +224,13 @@ var tutorial_1 = {
                 }
             });
         }
-        if(this.priests == undefined && this.wood_for_field &&
-           game.cities[1] && game.cities[1].free_workers() > 0){
+        if(this.priests == undefined &&
+           game.cities[0].level > 4){
             this.priests = true;
             this.goal_next_turn = true;
             game.popup({
                 title: "Tutorial",
-                text: "It looks like you have a free worker in Sivola. If you don't "+
-                "know what to do with it, try making it a priest. Priests increase the "+
+                text: "Have you tried adding priests? They increase the "+
                 "city's influence by 1 each. This will not immediately affect the tile, "+
                 "but it will catch up with the city's influence in time."
             });
@@ -271,8 +249,8 @@ var tutorial_2 = {
         game.popup({
             title: "Tutorial",
             text: "Now you have competition. Blue is the messenger. "+
-            "It likes to send merchants to create trade routes between cities and to "+
-            "build roads.",
+            "It likes to build roads and to send merchants to create trade "+
+            "routes between cities.",
             next: {
 
             title: "Tutorial",
@@ -318,7 +296,7 @@ var tutorial_3 = {
             next: {
 
             title: "Tutorial",
-            text: "Tributes take 5 food to another city to sacrifice it there. "+
+            text: "Tributes take 5 food to another city as a sacrifice. "+
             "This increases the receiving cities influence by 1 "+
             "point. It's a high price, but often smaller cities get swamped by "+
             "the influence of a bigger one and are made useless. This way they "+
