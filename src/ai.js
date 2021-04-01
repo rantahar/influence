@@ -13,7 +13,6 @@ class AIPlayer {
         this.city_food = aiconfig.city_food;
         this.city_wood = aiconfig.city_wood;
         this.colony_base = aiconfig.colony_base;
-        this.colony_food = aiconfig.colony_food;
         this.colony_level = aiconfig.colony_level;
         this.max_colonies = aiconfig.max_colonies;
         this.road_utility = aiconfig.road_utility;
@@ -137,8 +136,6 @@ class AIPlayer {
             var city = cities[key];
             if(city.owner() == this.key){
                 // Simple but somewhat inefficient: set to zero and start over
-                city.food_workers = 0;
-                city.wood_workers = 0;
                 city.priests = 0;
                 city.builders = 0;
                 city.merchant_routes = [];
@@ -148,14 +145,9 @@ class AIPlayer {
                 for(var i=0; city.free_workers() > 0;){
                     var food_balance = city.food_production() - city.food_consumption();
                     var starving = food_balance < 0;
-                    if(starving && city.food_workers < city.max_food_workers()){
-                        city.food_workers += 1;
-                        continue;
-                    }
                     // Check if it makes sense to build a colony
                     if((this.colony + n_colony_builders) < this.max_colonies){
                         var utility = this.colony_base +
-                                      this.colony_food*city.food +
                                       this.colony_level*city.level;
                         if(utility > 0){
                             city.builders += city.free_workers();
@@ -163,18 +155,13 @@ class AIPlayer {
                             continue;
                         }
                     }
-                    if(food_balance < 5 && city.food_workers < city.max_food_workers()){
-                        // Fill in food workers
-                        city.food_workers += 1;
-                        continue;
-                    }
-                    if(this.wood < 50 && city.wood_workers < city.max_wood_workers()){
-                        city.wood_workers += 1;
-                        continue;
-                    }
 
-                    if(food_balance > 5 && this.capital_tribute && city != capital){
-                        city.send('tribute', capital);
+                    if(this.capital_tribute && city != capital){
+                        // Level should remain positive
+                        var n = this.number_sent('tribute');
+                        if(6*n > city.food_production()){
+                            city.send('tribute', capital);
+                        }
                         continue;
                     }
 
@@ -316,9 +303,8 @@ function make_players(){
         city_influence: 0.1,
         city_food: 1,
         city_wood: 1.3,
-        colony_base: -60,
-        colony_food:  1,
-        colony_level: 10,
+        colony_base: -1,
+        colony_level: 1,
         max_colonies: 2,
         road_utility: -25,
         road_to_own_cities: 1,
@@ -342,8 +328,7 @@ function make_players(){
         city_influence: 0.1,
         city_food: 1,
         city_wood: 2,
-        colony_base: -210,
-        colony_food: 10,
+        colony_base: 100,
         colony_level: -1,
         max_colonies: 3,
         road_utility: -5,
@@ -372,10 +357,9 @@ function make_players(){
         city_utility: 0,
         city_influence: 0.1,
         city_food: 1,
-        colony_base: -40,
-        colony_food: 1,
+        colony_base: -1,
+        colony_level: 1,
         city_wood: 1.3,
-        colony_level: 10,
         road_utility: -5,
         max_colonies: 2,
         road_utility: -20,
@@ -405,9 +389,8 @@ function make_players(){
         city_food: 1,
         city_wood: 3,
         colony_base: 1,
-        colony_food: 0,
         colony_level: 0,
-        max_colonies: 4,
+        max_colonies: 3,
         road_utility: -22,
         road_to_own_cities: 0,
         road_to_other_cities: 1,
