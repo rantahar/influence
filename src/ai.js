@@ -158,11 +158,11 @@ class AIPlayer {
 
                     if(this.capital_tribute && city != capital){
                         // Level should remain positive
-                        var n = this.number_sent('tribute');
+                        var n = city.number_sent('tribute');
                         if(6*n > city.food_production()){
                             city.send('tribute', capital);
+                            continue;
                         }
-                        continue;
                     }
 
                     if(this.hostile_takeover && hostile_takeover_destination != undefined &&
@@ -328,8 +328,8 @@ function make_players(){
         city_influence: 0.1,
         city_food: 1,
         city_wood: 2,
-        colony_base: 100,
-        colony_level: -1,
+        colony_base: -1,
+        colony_level: 1,
         max_colonies: 3,
         road_utility: -5,
         road_to_own_cities: 5,
