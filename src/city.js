@@ -10,13 +10,6 @@ class City {
         this.population_counter = 0;
         this.name = this.next_name();
 
-        // Set current influence to start with
-        this.current_influence = {};
-        for(var key in players){
-            this.current_influence[key] = 0;
-        }
-        this.current_influence[this.owner()] = 10;
-
         // workers
         this.builders = 0;
         this.priests = 0;
@@ -27,6 +20,13 @@ class City {
 
         // Assing new workers to
         this.new_worker_type = 'priest';
+
+        // Set current influence to start with
+        this.current_influence = {};
+        for(var key in players){
+            this.current_influence[key] = 0;
+        }
+        this.current_influence[this.owner()] = this.influence(this.owner());
 
         // Change tile properties
         tile.influence[this.owner()] = this.influence(this.owner());
@@ -324,7 +324,7 @@ class City {
         }
         if(food < 0){
             // Decrease population growth counter if the population is starving
-            this.population_counter += 1;
+            this.population_counter -= 1;
         }
 
         // Check if the city grows
