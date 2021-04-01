@@ -127,29 +127,34 @@ var tutorial_1 = {
             this.city_click = true;
             game.popup({
                 title: "Tutorial",
-                text: "The city panel has opened on the left. Your first city starts with population"+
+                text: "<p>The city panel has opened on the left. Your first city starts with population"+
                 "1 and will grow when the growth meter is full. This will happend in 10 turns. "+
-                "You have 10 influence on the city, "+
+                "</p><p>You have 10 influence on the city, "+
                 "and this will also grow if you take care of your city. "+
-                "Your influence will spread from the city once you click 'Next Turn'."
+                "Your influence will spread from the city once you click 'Next Turn'.</p>"
             });
         }
         if(this.turn_2 == undefined && game.turn > 1){
             this.turn_2 = true;
             game.popup({
                 title: "Tutorial",
-                text: "The city's influence has spread to the neighbouring tiles and you "+
-                "control them now. The city collects food from neighbouring grass and water tiles "+
-                "if you own them. "+
-                "Your empire will receive wood for every forest tile. "+
-                "You can click on the tiles to see your influence on each in the side panel.",
+                text: "<p>The city's influence has spread to the neighbouring tiles and you "+
+                "control them now. "+
+                "This means thay your city can collects food from the grass and water tiles "+
+                "and wood from the forest tile."+
+                "</p><p>The wood goes directly to your empires shared reserves (home panel). "+
+                "The city keeps the food it produces. When amount of food produced is higher "+
+                "than the citys population, the growth meter will keep filling. "+
+                "</p>",
                 next: {
 
                 title: "Tutorial",
-                text: "Notice that don't have quite as much influence on the neighbour tiles as in " +
-                "your city. When influence spreads to a grass tile, it gets reduced by 3. " +
+                text: "<p>You can click on the tiles to see your influence on each."+
+                "Notice that don't have quite as much influence on the neighbour tiles as in " +
+                "your city.</p>"+
+                "<p>When influence spreads to a grass tile, it gets reduced by 3. " +
                 "On forest and water tiles it is reduced by 4. It does not "+
-                "spread to mountain tiles.",
+                "spread to mountain tiles.</p>",
                 next: {
 
                 title: "Tutorial",
@@ -167,19 +172,20 @@ var tutorial_1 = {
                 next: {
 
                 title: "Tutorial",
-                text: "You have one free worker. It's usually best to put "+
-                "unemployed workers to a good use. Let's make it a builder. "+
-                "We will talk about the other workers later."
-                }
-            });
-        }
-        if(this.has_builders == undefined && game.cities[0].builders > 0){
-            this.has_builders = true;
-            game.popup({
+                text: "<p>In addition to city level and influence, the city panel shows "+
+                "the number of different workers the city has and lets you adjust them. "+
+                "</p><p>"+
+                "Builders are important in the beginning. They make colonies, which "+
+                "you can send to make establish new cities. You currently have one builder."+
+                "</p><p>"+
+                "Usually you want your workers to be priests. Priests increase your influence "+
+                "in the city.</p>",
+                next: {
+
                 title: "Tutorial",
-                text: "Good! Builders make new colonies and colonies are "+
-                "the only way you can expand to fill the world! "+
-                "It will take a few turns to churn one out."
+                text: "Click on 'Next Turn' a few times, until you have produced a colony."
+                }
+                }
             });
         }
         if(this.colony == undefined && game.player.colony > 0){
@@ -221,17 +227,6 @@ var tutorial_1 = {
                 "more than half of the world or have more influence than anyone else after 200 "+
                 "turns."
                 }
-            });
-        }
-        if(this.priests == undefined &&
-           game.cities[0].level > 4){
-            this.priests = true;
-            this.goal_next_turn = true;
-            game.popup({
-                title: "Tutorial",
-                text: "You probably have some priests by now. They increase the "+
-                "city's influence by 1 each. This will not immediately affect the tile, "+
-                "but it will catch up with the city's influence in time."
             });
         }
     }
