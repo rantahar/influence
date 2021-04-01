@@ -362,7 +362,7 @@ function make_players(){
         city_wood: 1.3,
         road_utility: -5,
         max_colonies: 2,
-        road_utility: -20,
+        road_utility: -30,
         road_to_own_cities: 0,
         road_to_other_cities: 1,
         road_influence: 1,
