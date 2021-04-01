@@ -37,7 +37,7 @@ var home_items = {
         name: 'road',
         button_text: '<u>r</u>oad', // Underline the 'f'
         quick_key: 'R',
-        price: {wood: 5},
+        price: {wood: 10},
         spritesheet: 'roadtiles', // Only the preview, otherwise special case
         sprite: 0,
         can_build_at(tile){ // Checks if a road is allowed on a tile
@@ -64,7 +64,7 @@ var home_items = {
         name: 'field',
         button_text: '<u>f</u>ield', // Underline the 'f'
         quick_key: 'F',
-        price: {wood: 10},
+        price: {wood: 20},
         spritesheet: 'allToenstiles',
         sprite: 48,
         can_build_at(tile){ // Checks if a field is allowed on a tile
