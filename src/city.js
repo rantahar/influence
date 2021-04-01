@@ -571,10 +571,17 @@ class City {
         // Growth bar
         var progress = $('<div class="progress" style="height: 14px;"></div>"')
         progress.append('<div class="progress-bar" role="progressbar" style="width: '+this.population_counter+'0%"></div>');
-        progress.append('<div class="justify-content-center d-flex position-absolute w-100"> Growth: '+this.population_counter+'/10 </div>').css('color', 'black');;
         div.append(progress);
         // The city level
-        div.append($("<div></div>").html("<b>Population</b>: "+this.level));
+        if(this.food_balance() > 0){
+            div.append($("<div></div>").html("<b>Population</b>: "+this.level+' (growing in '+(10-this.population_counter)+')'));
+        }
+        if(this.food_balance() == 0){
+            div.append($("<div></div>").html("<b>Population</b>: "+this.level));
+        }
+        if(this.food_balance() < 0){
+            div.append($("<div></div>").html("<b>Population</b>: "+this.level+' (shrinking in '+this.population_counter+')'));
+        }
         // Food balance
         var food_balance = this.food_balance();
         var food_text = $("<div></div>").html("<b>Food balance</b>: "+this.food_balance());
