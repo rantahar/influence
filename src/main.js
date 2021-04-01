@@ -424,6 +424,7 @@ function gameboard(map){
                     this.center_camera_on(start.x,start.y);
                     active_city = tiles[start.x][start.y].city;
                     active_tile = tiles[start.x][start.y];
+                    active_city.builders = 1; // First worker should usually be a builder
                     update_panel();
                 }
             }
