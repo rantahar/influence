@@ -330,7 +330,7 @@ function make_players(){
         city_wood: 2,
         colony_base: -1,
         colony_level: 1,
-        max_colonies: 3,
+        max_colonies: 2,
         road_utility: -5,
         road_to_own_cities: 5,
         road_to_other_cities: 5,
