@@ -167,10 +167,9 @@ var tutorial_1 = {
                 next: {
 
                 title: "Tutorial",
-                text: "You gave one free worker. It's usually best to put "+
+                text: "You have one free worker. It's usually best to put "+
                 "unemployed workers to a good use. Let's make it a builder. "+
                 "We will talk about the other workers later."
-                }
                 }
             });
         }
@@ -230,7 +229,7 @@ var tutorial_1 = {
             this.goal_next_turn = true;
             game.popup({
                 title: "Tutorial",
-                text: "Have you tried adding priests? They increase the "+
+                text: "You probably have some priests by now. They increase the "+
                 "city's influence by 1 each. This will not immediately affect the tile, "+
                 "but it will catch up with the city's influence in time."
             });
