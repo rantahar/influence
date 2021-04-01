@@ -200,7 +200,7 @@ class City {
 
     // Check if a worker can be sent
     can_send(worker_type, other_city){
-        if(this.free_workers() < 1){
+        if(this.free_workers() < 1 || other_city == this){
             return false;
         }
         if(worker_type == 'merchant' && this.has_trade_route_with(other_city)){
@@ -637,13 +637,25 @@ class City {
     // Button for sending a worker
     create_send_button(type){
         // Send a new worker of this type to another city
-        var sendbutton = $("<span></span>").text("send").addClass("btn btn-primary btn-vsm");
-        var city = this;
-        sendbutton.click(function(){
-            if(city.free_workers() > 0){
-                game.send_worker(city, type)
+        var sendbutton = $("<span></span>").text("send").addClass("btn btn-vsm");
+        var any_sendable = false;
+        for(var key in game.cities){
+            var city = game.cities[key];
+            if(this.can_send(type, city)){
+                any_sendable = true;
             }
-        });
+        }
+        if(this.free_workers() > 0 && any_sendable){
+            sendbutton.addClass("btn-primary")
+            var city = this;
+            sendbutton.click(function(){
+                if(city.free_workers() > 0){
+                    game.send_worker(city, type)
+                }
+            });
+        } else {
+            sendbutton.addClass("btn-secondary")
+        }
         return sendbutton;
     }
 
