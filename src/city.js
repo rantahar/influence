@@ -7,7 +7,7 @@ class City {
         this.x = tile.x;
         this.y = tile.y;
         this.level = level;
-        this.food = food;
+        this.population_counter = 0;
         this.name = this.next_name();
 
         // Set current influence to start with
@@ -19,8 +19,6 @@ class City {
 
         // workers
         this.builders = 0;
-        this.food_workers = level;
-        this.wood_workers = 0;
         this.priests = 0;
 
         // workers sent to other cities
@@ -28,32 +26,11 @@ class City {
         this.tribute_routes = [];
 
         // Assing new workers to
-        this.new_worker_type = 'food_worker';
+        this.new_worker_type = 'priest';
 
         // Change tile properties
         tile.influence[this.owner()] = this.influence(this.owner());
         tile.road = true;
-    }
-
-    number_sent(type) {
-        var num = 0;
-        this[type+"_routes"].forEach(function(route){
-            num += route.number;
-        });
-        return num;
-    }
-
-    number_received(type) {
-        var num = 0;
-        var this_city = this;
-        game.cities.forEach(function(city){
-            city[type+"_routes"].forEach(function(route){
-                if(route.destination == this_city){
-                    num += route.number;
-                }
-            });
-        });
-        return num;
     }
 
     // Draw a new name from the owners list of names
@@ -65,6 +42,29 @@ class City {
         }
         owner.cities += 1;
         return name;
+    }
+
+    // Number of a given worker type sent
+    number_sent(type) {
+        var num = 0;
+        this[type+"_routes"].forEach(function(route){
+            num += route.number;
+        });
+        return num;
+    }
+
+    // Number of a given worker type received
+    number_received(type) {
+        var num = 0;
+        var this_city = this;
+        game.cities.forEach(function(city){
+            city[type+"_routes"].forEach(function(route){
+                if(route.destination == this_city){
+                    num += route.number;
+                }
+            });
+        });
+        return num;
     }
 
 
@@ -119,39 +119,14 @@ class City {
     // Calculate the number of free workers
     free_workers() {
         return this.level - this.builders - this.priests
-               - this.wood_workers - this.food_workers
                - this.number_sent('merchant')
                - this.number_sent('tribute');
     }
 
-    // Find the maximum amount of food workers possible. This is the
-    // minimum of the number of food tiles and the number of workers not
-    // working on food
-    // Note: if there will be more city resources, the food and wood functions
-    // should be combined and the possible resources separely
-    max_food_workers(){
-        var max = this.free_workers() + this.food_workers;
-        max = Math.min(this.food_tiles(), max);
-        return max;
-    }
-
-    // Find the maximum possible number of wood gatherers. Similar to
-    // the max_food_workers()
-    max_wood_workers(){
-        var max = this.free_workers() + this.wood_workers;
-        max = Math.min(this.wood_tiles(), max);
-        return max;
-    }
 
     // Set the number of a given type of worker
     _set_worker(type, n){
         var max = this[type+'s'] + this.free_workers();
-        if(type == 'food_worker'){
-            max = Math.min(this.food_tiles(), max);
-        }
-        if(type == 'wood_worker'){
-            max = Math.min(this.wood_tiles(), max);
-        }
         if(n >= 0 && n <= max ){
             this[type+'s'] = n;
         }
@@ -187,8 +162,8 @@ class City {
         game.update_city_page();
     }
 
+    // Get a list of cities with a trade route with this city
     get_trade_cities(player){
-        // Check that there are no other merchants of this type
         var cities = [];
         for(var key in this.merchant_routes){
             var route = this.merchant_routes[key];
@@ -206,8 +181,8 @@ class City {
         return cities;
     }
 
+    // Check if a given city has a trade route with this
     has_trade_route_with(other_city){
-        // Check that there are no other merchants of this type
         for(var key in this.merchant_routes){
             var route = this.merchant_routes[key];
             if(route.destination == other_city){
@@ -225,6 +200,9 @@ class City {
 
     // Check if a worker can be sent
     can_send(worker_type, other_city){
+        if(this.free_workers() < 1){
+            return false;
+        }
         if(worker_type == 'merchant' && this.has_trade_route_with(other_city)){
             return false;
         }
@@ -295,18 +273,17 @@ class City {
         return fields;
     }
 
-    // The amount of food produced per turn
+    // The amount of food produced
     food_production(){
-        var workers = this.food_workers;
         var food_tiles = this.food_tiles();
         var fields = this.fields();
         var food = 1; // City always produces 1 food
 
-        // 2 food / worker on a tile
-        food += 2*Math.min(workers, food_tiles);
+        // 1 food per food tile
+        food += food_tiles;
 
         // +1 extra for fields
-        food += Math.min(workers, fields);
+        food += fields;
 
         // +1 for each trading route
         food += this.number_sent('merchant')
@@ -317,21 +294,20 @@ class City {
         return food;
     }
 
-    // The amount of wood produced per turn
+    // The amount of wood produced
     wood_production(){
-        var wood = Math.min(this.wood_workers, this.wood_tiles());
-        return wood;
+        return this.wood_tiles();
     }
 
-    // The amount of food consumed each turn
+    // The amount of food consumed
     // Food is consumed after it is gathered
     food_consumption() {
         return this.level;
     }
 
-    // city grows when it has this much food
-    food_limit() {
-        return 10*this.level;
+    // The balance of food produced and consumed
+    food_balance(){
+        return this.food_production() - this.food_consumption();
     }
 
     // Update the city. Run after each turn
@@ -339,53 +315,45 @@ class City {
         var x = this.x;
         var y = this.y;
 
-        // Check for newly unemployed workers. This can
-        // happen if a tile is lost to another player.
-        if(this.food_workers > this.max_food_workers()){
-          this.food_workers = this.max_food_workers();
-        }
-
-        if(this.wood_workers > this.max_wood_workers()){
-          this.wood_workers = this.max_wood_workers();
-        }
-
-
         // Gather food
-        var food = this.food_production();
+        var food = this.food_balance();
 
-        // Consume
-        food -= this.food_consumption();
+        if(food > 0){
+            // Increase population growth counter if there is food
+            this.population_counter += 1;
+        }
+        if(food < 0){
+            // Decrease population growth counter if the population is starving
+            this.population_counter += 1;
+        }
+
+        // Check if the city grows
+        var growth_limit = 10;
+        if(this.population_counter >= growth_limit){
+            this.population_counter = 0;
+            this.level += 1;
+            this._set_worker(this.new_worker_type, this[this.new_worker_type+'s']+1);
+            map_scene.update_city_sprite(x,y,this.level);
+        }
+        // Or if the city shrinks
+        var pop_after_shrink = 3;
+        if(this.population_counter < 0 && this.level > 0){
+            this.population_counter = pop_after_shrink;
+            this.level -= 1;
+            this.force_remove_worker();
+            map_scene.update_city_sprite(x,y,this.level);
+        }
 
         // Check buildings
         if(this.builders > 0){
             if(this.building == undefined){
                 this.queue_colony();
             }
-            // Free workers have no positive effect now
-            //var workers = this.free_workers();
             this.building.price -= Math.max(0, this.builders);
             if(this.building.price <= 0 ) {
                 this.building_done();
                 this.queue_colony();
             }
-        }
-
-        // Add the any remaining food to reserves (or consume from reserves)
-        this.food += food;
-
-        // Check if the city grows
-        if(this.food >= this.food_limit()){
-            this.food -= this.food_limit();
-            this.level += 1;
-            this._set_worker(this.new_worker_type, this[this.new_worker_type+'s']+1);
-            map_scene.update_city_sprite(x,y,this.level);
-        }
-        // Or if the city shrinks
-        if(this.food < 0 && this.level > 0){
-            this.level -= 1;
-            this.force_remove_worker();
-            this.food = this.food_limit()/4;
-            map_scene.update_city_sprite(x,y,this.level);
         }
 
         // Gather other resources (wood)
@@ -423,14 +391,8 @@ class City {
                 this.priests -= 1;
             } else if(this.builders > 0){
                 this.builders -= 1;
-            } else if(this.wood_workers > 0){
-                this.wood_workers -= 1;
-            } else if(this.food_workers > 0){
-                this.food_workers -= 1;
             } else {
                 //this should never happen
-                this.food_workers = 0;
-                this.wood_workers = 0;
                 this.builders = 0;
                 this.priests = 0;
                 this.tribute_routes = [];
@@ -506,6 +468,12 @@ class City {
         var div = $("<div></div>");
         // Name as an h4 tag
         div.append($("<h4></h4>").text(this.name));
+
+        if(this.owner() == 'white'){
+            // Show a growth bar and food balance rate, which it depends on
+            div.append(this.growth_div());
+        }
+
         // Print the amount of influence each player has here
         var influence_line = $("<div></div>").text("Influence on tile: ");
         if(this.owner() != undefined){
@@ -542,14 +510,9 @@ class City {
             }
         }
         div.append(influence_p);
-        // The city level
-        div.append($("<div></div>").html("<b>Population</b>: "+this.level));
 
         // For the human player show more details and controls
         if(this.owner() == 'white'){
-            // Show the amount of food and production rate
-            div.append(this.food_production_line());
-
             // And building projects (only colony exists for now)
             if(this.building){
                 div.append($("<span></span>").text("Building "+this.building.type
@@ -561,10 +524,8 @@ class City {
 
             var assign_div = $("<div></div>").html("New workers are ");
             var assign_workers_to =$("<select></select>");
-            assign_workers_to.append("<option value='food_worker'>Farmers / Fishers</option>");
-            assign_workers_to.append("<option value='wood_worker'>Wood gatherers</option>");
-            assign_workers_to.append("<option value='builder'>Builders</option>");
             assign_workers_to.append("<option value='priest'>Priests</option>");
+            assign_workers_to.append("<option value='builder'>Builders</option>");
             assign_workers_to.val(city.new_worker_type);
             assign_div.append(assign_workers_to);
             div.append(assign_div);
@@ -605,53 +566,42 @@ class City {
         return div;
     }
 
-    food_production_line(){
-        var food_text = $("<div></div>").html("<b>Food</b>: "+this.food+"/"+
-                                          this.food_limit()+" (");
-        var food_prod = this.food_production() - this.food_consumption();
-        if(food_prod >= 0){
-            food_text.append($("<span></span>").text("+"+food_prod.toFixed(0)).css('color', 'green'));
-        } else {
-            food_text.append($("<span></span>").text(""+food_prod.toFixed(0)).css('color', 'red'));
+    growth_div(){
+        var div = $("<div></div>");
+        // Growth bar
+        var progress = $('<div class="progress" style="height: 14px;"></div>"')
+        progress.append('<div class="progress-bar" role="progressbar" style="width: '+this.population_counter+'0%"></div>');
+        progress.append('<div class="justify-content-center d-flex position-absolute w-100"> Growth: '+this.population_counter+'/10 </div>').css('color', 'black');;
+        div.append(progress);
+        // The city level
+        div.append($("<div></div>").html("<b>Population</b>: "+this.level));
+        // Food balance
+        var food_balance = this.food_balance();
+        var food_text = $("<div></div>").html("<b>Food balance</b>: "+this.food_balance());
+        if(food_balance > 0){
+            food_text.css('color', 'green');
         }
-        food_text.append($("<span></span>").text(")"));
-        return food_text;
+        if(food_balance < 0){
+            food_text.css('color', 'red');
+        }
+        div.append(food_text);
+        return div;
     }
 
     // List local workers
     local_worker_div(){
         var div = $("<div></div>");
         var city = this;
-        // Builders first
-        var worker_div = this.make_worker_div(
-            city.builders, 0, "Builder:", false, false,
-            function(n){city.set_worker('builder', n)}
-        );
-        div.append(worker_div);
-
-        if(this.food_tiles() > 0){
-            // Food can be collected. Show food worker control
-            var max = this.food_tiles();
-            var worker_div = this.make_worker_div(
-                city.food_workers, max, "Farmers / Fishers:", false, false,
-                function(n){city.set_worker('food_worker', n)}
-            );
-            div.append(worker_div);
-        }
-
-        if(this.wood_tiles() > 0){
-            // Wood can be collected. Add a similar slider
-            var max = this.wood_tiles();
-            var worker_div = this.make_worker_div(
-                city.wood_workers, max, "Wood gatherers:", false, false,
-                function(n){city.set_worker('wood_worker', n)}
-            );
-            div.append(worker_div);
-        }
 
         var worker_div = this.make_worker_div(
             city.priests, 0, "Priests:", false, false,
             function(n){city.set_worker('priest', n)}
+        );
+        div.append(worker_div);
+
+        var worker_div = this.make_worker_div(
+            city.builders, 0, "Builder:", false, false,
+            function(n){city.set_worker('builder', n)}
         );
         div.append(worker_div);
         return div;
