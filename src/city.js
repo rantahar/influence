@@ -515,8 +515,14 @@ class City {
         if(this.owner() == 'white'){
             // And building projects (only colony exists for now)
             if(this.building){
+                var price = city_items[this.building.type].price;
+                var left = this.building.price;
                 div.append($("<span></span>").text("Building "+this.building.type
-                 + " ("+this.building.price+")"));
+                 + " ("+left+")"));
+                var percentage = 100*(price-left)/price;
+                var progress = $('<div class="progress" style="height: 14px;"></div>"')
+                progress.append('<div class="progress-bar bg-secondary" role="progressbar" style="width: '+percentage+'%"></div>');
+                div.append(progress);
             }
 
             // Worker controls
