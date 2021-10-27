@@ -226,6 +226,38 @@ function gameboard(map){
                     influence_p.append(text);
                 }
             }
+            if(!first){
+                for(var index in this.city_influence){
+                    var city = cities[index];
+                    var owner = this.owner;
+                    var city_p = $("<div></div>");
+                    var text = $("<span></span>").text(city.name+": ")
+                    .css('color', players[owner].text_color);
+                    city_p.append(text);
+
+                    var influence = this.city_influence[index][owner];
+                    var nonzero = false;
+                    if(influence > 0){
+                         var text = $("<span></span>").text(" "+format_number(influence))
+                         .css('color', players[owner].text_color);
+                         nonzero = true;
+                         city_p.append(text);
+                    }
+                    for(var player in this.city_influence[index]) if(player != owner){
+                        var influence = this.city_influence[index][player];
+                        if( influence > 0){
+                            var text = $("<span></span>").text(" "+format_number(influence))
+                            .css('color', players[player].text_color);
+                            nonzero = true;
+                            city_p.append(text);
+                        }
+                    }
+
+                    if(nonzero){
+                        influence_p.append(city_p);
+                    }
+                }
+            }
             div.append(influence_p);
             return div;
         }
