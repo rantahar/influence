@@ -51,7 +51,6 @@ class City {
         var city = this;
         // First zero this city's influence on all tiles
         game.forTiles(function(tile){
-            console.log(tile, city.index);
             tile.city_influence[city.index] = {};
         })
 
@@ -72,7 +71,10 @@ class City {
                     tile.neighbours().forEach(function(neighbour){
                         var nb_influence = neighbour.city_influence[city.index][player];
                         var new_influence = influence -1;
-                        if(new_influence > 0 && nb_influence < new_influence) {
+                        if(new_influence > 0 && (nb_influence == undefined || nb_influence < new_influence)) {
+                            var x = neighbour.x;
+                            var y = neighbour.y;
+                            var orig = game.tiles[x][y];
                             neighbour.city_influence[city.index][player] = new_influence;
                             updated.push(neighbour);
                         }
