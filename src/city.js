@@ -3,6 +3,7 @@
 // tile the city is on.
 class City {
     constructor(tile, level, food) {
+        this.index = game.cities.length;
         this.tile = tile;
         this.x = tile.x;
         this.y = tile.y;
@@ -43,6 +44,48 @@ class City {
         owner.cities += 1;
         return name;
     }
+
+    // Recalculates the city's
+    calculate_influence(){
+        var tiles = game.tiles;
+        var city = this;
+        // First zero this city's influence on all tiles
+        game.forTiles(function(tile){
+            console.log(tile, city.index);
+            tile.city_influence[city.index] = {};
+        })
+
+        // Run for each player. Should be fast if the player has not influence.
+        for(var player in players){
+            // Get influence at the city for each player
+            this.tile.city_influence[city.index][player] = this.influence(player);
+
+            // Now calculate influence. Track tiles that were changed and
+            // update the neighbours, untill done.
+            var updated = [this.tile];
+
+            while(updated.length > 0){
+                var to_do = updated;
+                updated = [];
+                to_do.forEach(function(tile){
+                    var influence = tile.city_influence[city.index][player];
+                    tile.neighbours().forEach(function(neighbour){
+                        var nb_influence = neighbour.city_influence[city.index][player];
+                        var new_influence = influence -1;
+                        if(new_influence > 0 && nb_influence < new_influence) {
+                            neighbour.city_influence[city.index][player] = new_influence;
+                            updated.push(neighbour);
+                        }
+                    });
+                });
+
+            }
+        }
+
+
+    }
+
+
 
     // Number of a given worker type sent
     number_sent(type) {

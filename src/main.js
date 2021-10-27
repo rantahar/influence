@@ -127,6 +127,7 @@ function gameboard(map){
             this.y = y;
             this.owner = undefined;
             this.influence = {};
+            this.city_influence = {};
             this.land = land;
 
             // A list of dynamic sprites on this tile
@@ -350,6 +351,15 @@ function gameboard(map){
         tiles[x] = [];
         for(var y = 0; y < tiles.map_size_y; y++) {
             tiles[x][y] = new Tile(x, y, map.map[y][x]);
+        }
+    }
+
+    // Convenience function for running something on all tiles
+    function forTiles(f){
+        for(var x = 0; x < tiles.map_size_x; x++) {
+            for(var y = 0; y < tiles.map_size_y; y++) {
+                f(tiles[x][y]);
+            }
         }
     }
 
@@ -1048,6 +1058,10 @@ function gameboard(map){
     // Update the game between turns
     function next_turn(map_scene){
 
+        cities.forEach(function(city){
+            city.calculate_influence();
+        });
+
         // AI players take their turns
         for(player in players){
             players[player].take_turn(tiles, cities, build);
@@ -1564,6 +1578,8 @@ function gameboard(map){
     // Build and return the interface
     return {
         phaser_game: phaser_game,
+        tiles: tiles,
+        forTiles: forTiles,
         update_panel: update_panel,
         update_city_page: update_city_page,
         update_home_page: update_home_page,
