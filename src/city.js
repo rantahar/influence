@@ -517,8 +517,8 @@ class City {
             if(this.building){
                 var price = city_items[this.building.type].price;
                 var left = this.building.price;
-                div.append($("<span></span>").text("Building "+this.building.type
-                 + " ("+left+")"));
+                div.append($("<span></span>").html("<b>Building "+this.building.type
+                 + "</b> ("+left+")"));
                 var percentage = 100*(price-left)/price;
                 var progress = $('<div class="progress" style="height: 14px;"></div>"')
                 progress.append('<div class="progress-bar bg-secondary" role="progressbar" style="width: '+percentage+'%"></div>');
@@ -526,8 +526,7 @@ class City {
             }
 
             // Worker controls
-            div.append($("<div></div>").html("<b>Free workers</b>: "+this.free_workers()));
-
+            div.append($("<div></div>").html("<b>Workers</b>"));
             var assign_div = $("<div></div>").html("New workers are ");
             var assign_workers_to =$("<select></select>");
             assign_workers_to.append("<option value='priest'>Priests</option>");
@@ -540,12 +539,13 @@ class City {
                 city.new_worker_type = value;
             });
 
+            div.append($("<div></div>").html("Free workers: "+this.free_workers()));
             div.append(this.local_worker_div());
 
             // Lists of each worker type sent to cities
-            div.append($("<div></div>").html("<b>Merchants Sent</b>:").append(this.create_send_button('merchant')));
+            div.append($("<div></div>").html("Merchants Sent:").append(this.create_send_button('merchant')));
             div.append(this.merchant_list(this.merchant_routes));
-            div.append($("<div></div>").html("<b>Tributes Sent</b>:").append(this.create_send_button('tribute')));
+            div.append($("<div></div>").html("Tributes Sent:").append(this.create_send_button('tribute')));
             div.append(this.worker_list(this.tribute_routes));
         }
         // List of workers from other cities
@@ -564,9 +564,9 @@ class City {
                 }
             });
         });
-        div.append($("<div></div>").html("<b>Foreign Merchants</b>:"));
+        div.append($("<div></div>").html("Foreign Merchants:"));
         div.append(this.foreign_merchant_list(merchant_list));
-        div.append($("<div></div>").html("<b>Tributes Received</b>:"));
+        div.append($("<div></div>").html("Tributes Received:"));
         div.append(this.foreign_worker_list(tribute_list));
 
         return div;
