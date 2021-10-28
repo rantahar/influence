@@ -70,7 +70,7 @@ class City {
                     var influence = tile.city_influence[city.index][player];
                     tile.neighbours().forEach(function(neighbour){
                         var nb_influence = neighbour.city_influence[city.index][player];
-                        var new_influence = influence -1;
+                        var new_influence = influence - neighbour.influence_friction();
                         if(new_influence > 0 && (nb_influence == undefined || nb_influence < new_influence)) {
                             var x = neighbour.x;
                             var y = neighbour.y;
