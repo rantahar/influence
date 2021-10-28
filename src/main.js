@@ -227,9 +227,9 @@ function gameboard(map){
                 }
             }
             if(!first){
-                for(var index in this.city_influence){
+                var owner = this.owner;
+                if(owner!=undefined) for(var index in this.city_influence){
                     var city = cities[index];
-                    var owner = this.owner;
                     var city_p = $("<div></div>");
                     var text = $("<span></span>").text(city.name+": ")
                     .css('color', players[owner].text_color);
@@ -1089,64 +1089,31 @@ function gameboard(map){
 
     // Update the game between turns
     function next_turn(map_scene){
-
-        cities.forEach(function(city){
-            city.calculate_influence();
-        });
-
         // AI players take their turns
         for(player in players){
             players[player].take_turn(tiles, cities, build);
         }
 
-        // Spread influence
-        // Influence is the maximum of neighbour tiles - friction,
-        // where friction depends on the tile type
-        var decay = 1; // no decay
-        var new_influence_array = [];
+        // Calculate the influence of each city
+        cities.forEach(function(city){
+            city.calculate_influence();
+        });
+
+        // Add up the influences on each tile
         for(var x = 0; x < tiles.map_size_x; x++) {
-            new_influence_array[x] = []
             for(var y = 0; y < tiles.map_size_y; y++) {
-                new_influence_array[x][y] = {}
-                for(player in players){
-                    // Influence on this tile is the maximum of neighbours - friction
-                    let c = 0; // max neighbour
-                    tiles[x][y].neighbours().forEach(function(tile){
-                        let x = tile.x; let y = tile.y;
-                        let cnb = tiles[x][y].get_player_influence(player);
-                        if(cnb > c){ // new max found
-                          c = cnb;
-                        }
-                    });
-
-                    // Subtract friction from the max found
-                    c -= tiles[x][y].influence_friction();
-
-                    if(tiles[x][y].city){
-                      // There is a city here. Check if it's culture dominates.
-                      let city_c = tiles[x][y].city.update_influence(player);
-                      if(city_c > c){
-                        // The city dominates and sets the influence level.
-                        c = city_c;
-                      }
-                    }
-                    if(c > 0){
-                      new_influence_array[x][y][player] = c;
-                    }
+                tiles[x][y].influence = {};
+                for(var player in players){
+                   tiles[x][y].influence[player] = 0;
+                   cities.forEach(function(city){
+                       var inf = tiles[x][y].city_influence[city.index][player];
+                       if(inf){
+                           tiles[x][y].influence[player] += inf;
+                       }
+                   });
                 }
             }
         }
-
-        // Write new influence into the array
-        for(var x = 0; x < tiles.map_size_x; x++) {
-           for(var y = 0; y < tiles.map_size_y; y++) {
-              tiles[x][y].influence = new_influence_array[x][y];
-           }
-        }
-
-        // Red influence does not mix with others. This will use up red
-        // influence to reduce the others
-        //persecute('red'); Disable this and try to differentiate red in a different way
 
         // Now decide the owners of each tile
         for(var x = 0; x < tiles.map_size_x; x++) {
