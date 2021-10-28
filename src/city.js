@@ -52,6 +52,9 @@ class City {
         // First zero this city's influence on all tiles
         game.forTiles(function(tile){
             tile.city_influence[city.index] = {};
+            for(var player in players){
+                tile.city_influence[city.index][player] = 0;
+            }
         })
 
         // Run for each player. Should be fast if the player has not influence.
@@ -71,7 +74,7 @@ class City {
                     tile.neighbours().forEach(function(neighbour){
                         var nb_influence = neighbour.city_influence[city.index][player];
                         var new_influence = influence - neighbour.influence_friction();
-                        if(new_influence > 0 && (nb_influence == undefined || nb_influence < new_influence)) {
+                        if(new_influence > 0 && nb_influence < new_influence) {
                             var x = neighbour.x;
                             var y = neighbour.y;
                             var orig = game.tiles[x][y];
