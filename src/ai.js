@@ -114,14 +114,15 @@ class AIPlayer {
             }
         }
         // Coordinated hostile takeover: reduce the influence level of a
-        // boarder city
+        // border city
         var hostile_takeover_destination;
         pref = 0;
         for(var key in cities){
             var city = cities[key];
             var my_inf = city.tile.influence[this.key];
             if(city.owner() != this.key && my_inf > 0){
-                if(city.tile.influence[city.owner()] <= city.current_influence[city.owner()]){
+                var tile = city.tile;
+                if(tile.influence[city.owner()] <= tile.city_influence[city.index][city.owner()]){
                    var p = my_inf - city.influence(city.owner()) + n_cities + 3;
                    if(p > pref){
                        hostile_takeover_destination = city;

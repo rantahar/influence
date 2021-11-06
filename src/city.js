@@ -86,7 +86,6 @@ class City {
         }
 
         // update total influence
-        console.log(city.name, "calling recalc");
         game.recalc_influence();
     }
 

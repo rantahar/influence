@@ -1102,7 +1102,6 @@ function gameboard(map){
                 }
             }
         }
-        console.log("done");
 
         // Now decide the owners of each tile
         for(var x = 0; x < tiles.map_size_x; x++) {
