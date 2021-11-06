@@ -798,8 +798,6 @@ function gameboard(map){
             var city = new City(tiles[x][y], level, food);
             // add it to the tile object
             tiles[x][y].city = city;
-            // and the list of cities
-            cities.push( city );
 
             // Redraw boundaries in case influence has changed
             this.draw_boundaries();
@@ -1086,6 +1084,34 @@ function gameboard(map){
         }
     }
 
+    // Update a players total influence on all tiles and
+    // check owners
+    function recalc_influence(){
+        // Add up the influences on each tile
+        for(var x = 0; x < tiles.map_size_x; x++) {
+            for(var y = 0; y < tiles.map_size_y; y++) {
+                tiles[x][y].influence = {};
+                for(var player in players){
+                    tiles[x][y].influence[player] = 0;
+                    cities.forEach(function(city){
+                        var inf = tiles[x][y].city_influence[city.index][player];
+                        if(inf){
+                            tiles[x][y].influence[player] += inf;
+                        }
+                    });
+                }
+            }
+        }
+        console.log("done");
+
+        // Now decide the owners of each tile
+        for(var x = 0; x < tiles.map_size_x; x++) {
+            for(var y = 0; y < tiles.map_size_y; y++) {
+                tiles[x][y].decide_tile_owner();
+            }
+        }
+    }
+
 
     // Update the game between turns
     function next_turn(map_scene){
@@ -1098,29 +1124,6 @@ function gameboard(map){
         cities.forEach(function(city){
             city.calculate_influence();
         });
-
-        // Add up the influences on each tile
-        for(var x = 0; x < tiles.map_size_x; x++) {
-            for(var y = 0; y < tiles.map_size_y; y++) {
-                tiles[x][y].influence = {};
-                for(var player in players){
-                   tiles[x][y].influence[player] = 0;
-                   cities.forEach(function(city){
-                       var inf = tiles[x][y].city_influence[city.index][player];
-                       if(inf){
-                           tiles[x][y].influence[player] += inf;
-                       }
-                   });
-                }
-            }
-        }
-
-        // Now decide the owners of each tile
-        for(var x = 0; x < tiles.map_size_x; x++) {
-            for(var y = 0; y < tiles.map_size_y; y++) {
-                tiles[x][y].decide_tile_owner();
-            }
-        }
 
         // Update the cities
         for(city_key in cities){
@@ -1588,6 +1591,7 @@ function gameboard(map){
         advisor: advisor_list,
         destroy: destroy,
         popup: popup,
+        recalc_influence: recalc_influence,
         player: players['white'],
         get turn() { return turn_counter; },
     };

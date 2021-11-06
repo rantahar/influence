@@ -3,7 +3,11 @@
 // tile the city is on.
 class City {
     constructor(tile, level, food) {
+        // Add this to the list of cities
         this.index = game.cities.length;
+        game.cities.push( this );
+
+        // Set base city properties
         this.tile = tile;
         this.x = tile.x;
         this.y = tile.y;
@@ -22,16 +26,10 @@ class City {
         // Assing new workers to
         this.new_worker_type = 'priest';
 
-        // Set current influence to start with
-        this.current_influence = {};
-        for(var key in players){
-            this.current_influence[key] = 0;
-        }
-        this.current_influence[this.owner()] = this.influence(this.owner());
-
         // Change tile properties
-        tile.influence[this.owner()] = this.influence(this.owner());
         tile.road = true;
+
+        this.calculate_influence();
     }
 
     // Draw a new name from the owners list of names
@@ -45,7 +43,7 @@ class City {
         return name;
     }
 
-    // Recalculates the city's
+    // Recalculates the city's influence
     calculate_influence(){
         var tiles = game.tiles;
         var city = this;
@@ -55,7 +53,7 @@ class City {
             for(var player in players){
                 tile.city_influence[city.index][player] = 0;
             }
-        })
+        });
 
         // Run for each player. Should be fast if the player has not influence.
         for(var player in players){
@@ -87,7 +85,9 @@ class City {
             }
         }
 
-
+        // update total influence
+        console.log(city.name, "calling recalc");
+        game.recalc_influence();
     }
 
 
@@ -408,18 +408,6 @@ class City {
         if(this.owner() != undefined){
             players[this.owner()].wood += this.wood_production();
         }
-    }
-
-    // Update current city influence by one turn and return it.
-    // Current influence either increases or decreases by 1 untill
-    // it reaches the city influence value
-    update_influence(player){
-        if(this.current_influence[player] > this.influence(player)){
-            this.current_influence[player] = Math.max(this.current_influence[player]-1, this.influence(player));
-        } else {
-            this.current_influence[player] = Math.min(this.current_influence[player]+1, this.influence(player));
-        }
-        return this.current_influence[player];
     }
 
     // Remove a worker
