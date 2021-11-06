@@ -183,8 +183,10 @@ class City {
     // Assign, clear the highlighting and update the city page
     set_worker(type, n){
        this._set_worker(type,n);
+       this.calculate_influence();
        game.update_city_page();
        game.remove_highlight();
+       game.draw_boundaries();
     }
 
 
@@ -205,6 +207,8 @@ class City {
            }
        });
         // Remove any active highlight or onclick action and update page
+        this.calculate_influence();
+        route.destination.calculate_influence();
         game.remove_highlight();
         game.update_city_page();
     }

@@ -1190,6 +1190,10 @@ function gameboard(map){
     }
 
 
+    function draw_boundaries(){
+        mapscene = phaser_game.scene.scenes[0];
+        mapscene.draw_boundaries();
+    }
 
 
     //////////////////////////////////
@@ -1584,6 +1588,7 @@ function gameboard(map){
         update_panel: update_panel,
         update_city_page: update_city_page,
         update_home_page: update_home_page,
+        draw_boundaries: draw_boundaries,
         send_worker: send_worker,
         remove_highlight: remove_highlight,
         cities: cities,
